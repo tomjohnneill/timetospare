@@ -9,5 +9,8 @@ export default ({ pathname }) => (
     <Link href="/about">
       <a className={pathname === "/about" ? "is-active" : ""}>About</a>
     </Link>
+    <Link href="/reviews">
+      <a className={pathname === "/reviews" ? "is-active" : ""}>Reviews</a>
+    </Link>
   </header>
 )

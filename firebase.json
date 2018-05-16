@@ -7,6 +7,11 @@
         "function": "app-next"
       }
     ],
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
     "predeploy": "yarn build-public"
   },
   "functions": {
