@@ -9,7 +9,7 @@ const nextApp = functions.https.onRequest((request, response) => {
   console.log("File: " + request.originalUrl)
   console.log("dev:", dev)
   // log the page.js file or resource being requested
-
+  response.set('Cache-Control', 'public, max-age=300, s-maxage=600');
   return app.prepare().then(() => handle(request, response))
 })
 

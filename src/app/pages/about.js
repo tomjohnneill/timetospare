@@ -10,8 +10,8 @@ export default class About extends React.Component {
     this.state = {}
   }
 
-  static getInitialProps() {
-  /*  const res = await db.collection("Project")
+  static async getInitialProps() {
+  const res = await db.collection("Project")
       .get().then((querySnapshot) => {
         var data = []
         querySnapshot.forEach((doc) => {
@@ -21,8 +21,8 @@ export default class About extends React.Component {
           data.push(elem)
         });
         return data
-      })*/
-    return {projects: [{Name: 'hardcoded'}]}
+      })
+    return {projects: res}
   }
 
   render() {
