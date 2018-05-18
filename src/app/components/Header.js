@@ -1,5 +1,6 @@
 import React from "react"
 import Link from "next/link"
+import Router from 'next/router'
 import Menu from 'material-ui/Menu';
 import MenuIcon from 'material-ui/svg-icons/navigation/menu';
 import MenuItem from 'material-ui/MenuItem';
@@ -9,6 +10,16 @@ import RaisedButton from 'material-ui/RaisedButton';
 import Popover from 'material-ui/Popover';
 import Avatar from 'material-ui/Avatar';
 import IconButton from 'material-ui/IconButton';
+import MediaQuery from 'react-responsive';
+import Settings from 'material-ui/svg-icons/action/settings';
+import Drawer from 'material-ui/Drawer';
+import {Ass} from './icons.jsx'
+import InfoOutline from 'material-ui/svg-icons/action/info';
+import SignupModal from './signupmodal.jsx';
+//import MessagingButton from '/imports/ui/components/messagingbutton.jsx';
+import fire from '../fire';
+
+let db = fire.firestore()
 
 const style = {
   display: 'inline-block',
@@ -82,17 +93,342 @@ const style = {
 };
 
 
-export default ({ pathname }) => (
-  <header>
-    <AppBar/>
-    <Link href="/">
-      <a className={pathname === "/" ? "is-active" : ""}>Home</a>
-    </Link>{" "}
-    <Link href="/about">
-      <a className={pathname === "/about" ? "is-active" : ""}>About</a>
-    </Link>
-    <Link href="/reviews">
-      <a className={pathname === "/reviews" ? "is-active" : ""}>Reviews</a>
-    </Link>
-  </header>
-)
+export default class Header extends React.Component {
+
+  constructor(props){
+    super(props);
+    console.log(props)
+
+
+    this.state = {drawerOpen: false, open: false, changePasswordOpen: false, modalOpen: false, loading: true};
+
+  }
+
+
+  componentDidMount(props) {
+    fire.auth().onAuthStateChanged((user) => {
+      if (user === null) {
+
+      } else {
+        db.collection("User").doc(fire.auth().currentUser.uid).get().then((data) => {
+          this.setState({user: data.data(), userPicture: data.data().Picture, loading: false})
+        })
+        .catch(error => console.log('Error', error))
+      }
+    })
+
+    if (fire.auth().currentUser) {
+      db.collection("User").doc(fire.auth().currentUser.uid).get().then((data) => {
+        this.setState({user: data.data(), userPicture: data.data().Picture, loading: false})
+      })
+      .catch(error => console.log('Error', error))
+    }
+  }
+
+
+  handleOpen() {
+  this.setState({changePasswordOpen: true});
+  };
+
+  handleClose() {
+    this.setState({changePasswordOpen: false});
+  };
+
+
+  handleRequestClose() {
+    this.setState({
+      open: false
+    });
+  };
+
+  handleChange(textField, event) {
+        this.setState({
+            [textField]: event.target.value
+        });
+    }
+
+  handleTitleTap(event) {
+    event.preventDefault();
+
+    browserHistory.push('/')
+  }
+
+  handleYourListings(event) {
+    browserHistory.push('/yourdetails')
+  }
+
+  handleDashboard(event) {
+    browserHistory.push('/dashboard')
+  }
+
+  handleBlog(event) {
+    event.preventDefault()
+    browserHistory.push('/blog')
+  }
+
+  handleChangePassword(e) {
+
+  }
+
+  handleSettingsClick = (e) => {
+    e.preventDefault()
+    this.setState({
+      open: true,
+      anchorEl: e.currentTarget
+    })
+  }
+
+  handleAboutClick = (e) => {
+    e.preventDefault()
+    browserHistory.push('/messages')
+  }
+
+  handleSignOut = (e) => {
+    e.preventDefault()
+    fire.auth().signOut()
+    .then(() => {browserHistory.push('/'); this.setState({drawerOpen: false})})
+
+    fire.auth().onAuthStateChanged((user) => {
+      if (user === null) {
+        this.setState({user: null, userPicture: null})
+      }
+    })
+  }
+
+  handleModal = (e) => {
+    this.setState({open: false})
+    this.setState({modalOpen: !this.state.modalOpen})
+
+  }
+
+  setModal = () => {
+    let modal = this.state.modalOpen
+    this.setState({modalOpen: !modal})
+  }
+
+  handleModalChangeOpen = (e) => {
+    this.setState({modalOpen: false})
+  }
+
+  handleSignIn = (e) => {
+    e.preventDefault()
+
+  }
+
+  handleTerms = (e) => {
+    e.preventDefault()
+    browserHistory.push('/terms')
+  }
+
+  handlePrivacyPolicy = (e) => {
+    e.preventDefault()
+    browserHistory.push('/privacypolicy')
+  }
+
+
+  handleNewPledge = (e) => {
+    console.log('handleNewPledge fired')
+
+  }
+
+  handleCreateProject = (e) => {
+    e.preventDefault()
+    if (fire.auth().currentUser) {
+      browserHistory.push('/create-project/0')
+    } else {
+      this.setState({modalOpen: true})
+    }
+
+  }
+
+  handleComplete = () => {
+    this.setState({modalOpen: false})
+  }
+
+  goToAndClose = (url) => {
+    this.setState({drawerOpen: false})
+
+  }
+
+  render() {
+    console.log(this.state)
+
+  return(
+
+      <div >
+
+        <AppBar
+
+          style={typeof window !== 'undefined' && Router.pathname.includes('/embed/') ? style.embedAppBar :
+            typeof window !== 'undefined' && Router.pathname === '/why' ? style.whyAppBar : style.appBar}
+          iconClassNameLeft='mobile-nav-bar'
+          iconElementLeft={
+            <div>
+              <MediaQuery minDeviceWidth={700}>
+                <div style={{width: 16}}/>
+              </MediaQuery>
+              <MediaQuery maxDeviceWidth={700}>
+                <IconButton onClick={() => this.setState({drawerOpen: true})} tooltip='Menu'>
+                  <MenuIcon/>
+                </IconButton>
+              </MediaQuery>
+            </div>
+          }
+          className={'appbar'}
+          iconElementRight={
+                            <div style={{display: 'flex', alignItems: 'center'}}>
+
+                            <MediaQuery minDeviceWidth = {700}>
+                              {typeof window !== 'undefined' && !Router.pathname.includes('create-project') ?
+                                <div style={{display: 'flex', alignItems: 'center'}}>
+                                  <Link style={{height: '100%'}} href='/why'>
+                                    <div style={{
+                                      cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
+
+                                      >
+                                      Why start a project?
+                                    </div>
+                                  </Link>
+                                  <Link href='/about'>
+                                    <div style={{
+                                      cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
+
+                                      >
+                                      About
+                                    </div>
+                                  </Link>
+                                  <Link href='/groups'>
+                                    <div style={{
+                                      cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
+
+                                      >
+                                      Groups
+                                    </div>
+                                  </Link>
+                                  <Link href='/project'>
+                                    <div style={{
+                                      cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
+
+                                      >
+                                      Projects
+                                    </div>
+                                  </Link>
+
+                                    <RaisedButton
+                                      style={{height: '36px', marginRight: '16px', boxShadow: ''}} primary={true} overlayStyle={{height: '36px'}}
+                                      buttonStyle={{height: '36px'}}
+                                       labelStyle={{height: '36px', display: 'inline-flex', alignItems: 'center',
+                                            letterSpacing: '0.6px', fontWeight: 'bold'}}
+                                      labelClassName
+                                       label={<span className='flexthis'>Start a Project</span>} onTouchTap={this.handleCreateProject}/>
+
+                               </div>
+                               :
+                               null}
+                            </MediaQuery>
+                            {this.state.loading ? null :
+                              this.state.user ?
+                              <div style={{
+                                  height: '100%',
+                                  alignItems: 'center',
+                                  display: 'flex'
+                                }}>
+                                <IconButton onTouchTap={() => browserHistory.push('/profile')}
+                                style={{padding: 0, height: 40, width: 40, marginRight: 16}}>
+                                {this.state.userPicture ?
+                                <Avatar src={this.state.userPicture}/>
+                                :
+                                <Avatar> {this.state.user.Name.substring(0,1)}</Avatar>
+                                }
+                              </IconButton>
+                              <MediaQuery minDeviceWidth={700}>
+                              <div
+                                onTouchTap={this.handleSignOut}
+                                style={{cursor: 'pointer',
+                                  fontWeight: 700,
+                                  height: '100%', alignItems: 'center',
+                                  display: 'flex',
+                                  color: 'inherit',
+                                  paddingLeft: 10, paddingRight: 10}}>Sign Out
+                                </div>
+                                </MediaQuery>
+                              </div> :
+                            null}
+                            {!this.state.user ?
+                              <div
+                                onTouchTap={this.setModal}
+                                style={{cursor: 'pointer',
+                                  fontWeight: 700,
+                                  color: 'inherit',
+                                  paddingLeft: 10, paddingRight: 10}}>Log In
+                                </div>
+                            : null}
+                            </div>}
+          title={
+            <div className='flexthis' style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+            <Link href={'/'}>
+            <span onTouchTap ={this.handleTitleTap.bind(this)}  className = 'whosin' style={style.title}>
+              who's in?
+            </span>
+            </Link>
+
+            </div>
+          }
+          titleStyle = {{display: 'flex', alignItems: 'center', justifyContent: 'flex-start'}}
+          />
+
+        <div>
+          {/*<SignupModal
+
+            open={this.state.modalOpen}
+            changeOpen={this.handleModalChangeOpen}
+          />
+          */}
+       </div>
+       <SignupModal
+         open={this.state.modalOpen}
+         type='login'
+         changeOpen={this.handleModalChangeOpen}
+         onComplete = {this.handleComplete}
+         />
+       <Drawer
+         style={{textAlign: 'left'}}
+          onRequestChange={(drawerOpen) => {
+            this.setState({drawerOpen: drawerOpen})
+            console.log('request changed')
+          }}
+          docked={false}
+          open={this.state.drawerOpen}>
+            <div style={{height: 51, display: 'flex', alignItems: 'center'}}>
+              <IconButton style={{marginRight: 8}}
+                onClick={() => this.setState({drawerOpen: false})} tooltip='Menu'>
+                <MenuIcon/>
+              </IconButton>
+              <span onTouchTap ={this.handleTitleTap.bind(this)}  className = 'whosin' style={style.title}>
+                who's in?
+              </span>
+            </div>
+            <Link href='/about'>
+              <MenuItem onClick={() => this.goToAndClose('/about')}>About</MenuItem>
+            </Link>
+            <Link href='/why'>
+              <MenuItem onClick={() => this.goToAndClose('/why')}>Why start a project?</MenuItem>
+            </Link>
+            <Link href='/projects'>
+              <MenuItem onClick={() => this.goToAndClose('/projects')}>Projects</MenuItem>
+            </Link>
+            <Link href='/groups'>
+              <MenuItem onClick={() => this.goToAndClose('/groups')}>Groups</MenuItem>
+            </Link>
+            <Link href='/create-project/0' >
+              <MenuItem onClick={this.handleCreateProject}>Start a project</MenuItem>
+            </Link>
+            <MenuItem onClick={this.handleSignOut}>
+              Sign out</MenuItem>
+          </Drawer>
+
+      </div>
+    );
+  }
+
+}

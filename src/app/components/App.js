@@ -3,6 +3,14 @@ import Header from "./Header"
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
+var injectTapEventPlugin = require("react-tap-event-plugin");
+try {
+  injectTapEventPlugin();
+}
+catch (err) {
+
+}
+
 const muiTheme = getMuiTheme({
   palette: {
     primary1Color: '#E55749',

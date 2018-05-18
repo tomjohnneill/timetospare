@@ -1,16 +1,24 @@
 import * as functions from "firebase-functions"
 import next from "next"
+import express from 'express';
 
 const dev = process.env.NODE_ENV !== "production"
 const app = next({ dev, conf: { distDir: "next" } })
 const handle = app.getRequestHandler()
 
-const nextApp = functions.https.onRequest((request, response) => {
-  console.log("File: " + request.originalUrl)
-  console.log("dev:", dev)
-  // log the page.js file or resource being requested
-  response.set('Cache-Control', 'public, max-age=300, s-maxage=600');
-  return app.prepare().then(() => handle(request, response))
-})
+const server = express();
 
-export { nextApp }
+server.get('/projects/*', (request, response) => {
+      console.log('should be project')
+      const actualPage = '/project'
+      const queryParams = { project: request.params.project }
+      app.render(request, response, actualPage, queryParams)
+    })
+
+server.get('*', (req, res) => handle(req, res));
+
+
+export let nextApp = functions.https.onRequest(async (req, res) => {
+  await app.prepare();
+  server(req, res);
+});
