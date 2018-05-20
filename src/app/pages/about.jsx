@@ -6,6 +6,9 @@ import {grey200, grey500, red500, red100, orange500, orange100, yellow500,
 import RaisedButton from 'material-ui/RaisedButton';
 import DocumentTitle from 'react-document-title';
 import {changeImageAddress} from '../components/desktopproject.jsx';
+import Link from "next/link"
+import App from "../components/App"
+import Router from 'next/router'
 
 const styles = {
   title: {
@@ -137,6 +140,7 @@ export default class About extends React.Component {
 
   render() {
     return (
+      <App>
       <div className='aboutContainer' style={{width: '100%', display: 'flex', flexDirection: 'column',
         justifyContent: 'center', alignItems: 'center', textAlign: 'left', backgroundColor: '#E55749',
       overflowX: 'hidden'}}>
@@ -286,12 +290,13 @@ export default class About extends React.Component {
               </div>
               <div style={{marginTop: 25}}>
                 <RaisedButton primary={true}
+                  onClick={() => Router.push('/projects')}
                   style={{height: '36px', marginTop: '16px', boxShadow: ''}} primary={true} overlayStyle={{height: '36px'}}
                   buttonStyle={{height: '36px'}}
                    labelStyle={{height: '36px', display: 'flex', alignItems: 'center',
                         letterSpacing: '0.6px', fontWeight: 'bold'}}
                   label='Find a project'
-                  containerElement={<Link href='/projects'/>}
+
                   />
               </div>
             </div>
@@ -450,7 +455,8 @@ export default class About extends React.Component {
               </div>
               <div style={{marginTop: 25}}>
                 <RaisedButton
-                  label='Find a project' containerElement={<Link href='/projects'/>}
+                  onClick={() => Router.push('/projects')}
+                  label='Find a project'
                   style={{height: '36px', marginTop: '16px', boxShadow: ''}} primary={true} overlayStyle={{height: '36px'}}
                   buttonStyle={{height: '36px'}}
                    labelStyle={{height: '36px', display: 'flex', alignItems: 'center',
@@ -466,6 +472,7 @@ export default class About extends React.Component {
 
 
       </div>
+      </App>
     )
   }
 }

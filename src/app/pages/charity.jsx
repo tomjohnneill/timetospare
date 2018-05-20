@@ -6,7 +6,7 @@ import Avatar from 'material-ui/Avatar';
 import {List, ListItem} from 'material-ui/List';
 import {Tabs, Tab} from 'material-ui/Tabs';
 import FlatButton from 'material-ui/FlatButton';
-import {Spiral, World} from './icons.jsx';
+import {Spiral, World} from '../components/icons.jsx';
 import Social from 'material-ui/svg-icons/social/notifications';
 import RaisedButton from 'material-ui/RaisedButton';
 import DocumentTitle from 'react-document-title';

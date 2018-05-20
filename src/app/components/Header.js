@@ -18,6 +18,7 @@ import InfoOutline from 'material-ui/svg-icons/action/info';
 import SignupModal from './signupmodal.jsx';
 //import MessagingButton from '/imports/ui/components/messagingbutton.jsx';
 import fire from '../fire';
+import Head from 'next/head'
 
 let db = fire.firestore()
 
@@ -150,20 +151,7 @@ export default class Header extends React.Component {
   handleTitleTap(event) {
     event.preventDefault();
 
-    browserHistory.push('/')
-  }
-
-  handleYourListings(event) {
-    browserHistory.push('/yourdetails')
-  }
-
-  handleDashboard(event) {
-    browserHistory.push('/dashboard')
-  }
-
-  handleBlog(event) {
-    event.preventDefault()
-    browserHistory.push('/blog')
+    Router.push('/')
   }
 
   handleChangePassword(e) {
@@ -178,15 +166,10 @@ export default class Header extends React.Component {
     })
   }
 
-  handleAboutClick = (e) => {
-    e.preventDefault()
-    browserHistory.push('/messages')
-  }
-
   handleSignOut = (e) => {
     e.preventDefault()
     fire.auth().signOut()
-    .then(() => {browserHistory.push('/'); this.setState({drawerOpen: false})})
+    .then(() => {Router.push('/'); this.setState({drawerOpen: false})})
 
     fire.auth().onAuthStateChanged((user) => {
       if (user === null) {
@@ -217,12 +200,12 @@ export default class Header extends React.Component {
 
   handleTerms = (e) => {
     e.preventDefault()
-    browserHistory.push('/terms')
+    Router.push('/terms')
   }
 
   handlePrivacyPolicy = (e) => {
     e.preventDefault()
-    browserHistory.push('/privacypolicy')
+    Router.push('/privacypolicy')
   }
 
 
@@ -234,7 +217,7 @@ export default class Header extends React.Component {
   handleCreateProject = (e) => {
     e.preventDefault()
     if (fire.auth().currentUser) {
-      browserHistory.push('/create-project/0')
+      Router.push('/create-project/?stage=0')
     } else {
       this.setState({modalOpen: true})
     }
@@ -256,7 +239,10 @@ export default class Header extends React.Component {
   return(
 
       <div >
-
+        <Head>
+          <title>Who's In?</title>
+          <meta name="viewport" content="initial-scale=1.0, width=device-width" key="viewport" />
+        </Head>
         <AppBar
 
           style={typeof window !== 'undefined' && Router.pathname.includes('/embed/') ? style.embedAppBar :
@@ -281,7 +267,7 @@ export default class Header extends React.Component {
                             <MediaQuery minDeviceWidth = {700}>
                               {typeof window !== 'undefined' && !Router.pathname.includes('create-project') ?
                                 <div style={{display: 'flex', alignItems: 'center'}}>
-                                  <Link style={{height: '100%'}} href='/why'>
+                                  <Link prefetch style={{height: '100%'}} href='/why'>
                                     <div style={{
                                       cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
 
@@ -289,7 +275,7 @@ export default class Header extends React.Component {
                                       Why start a project?
                                     </div>
                                   </Link>
-                                  <Link href='/about'>
+                                  <Link prefetch href='/about'>
                                     <div style={{
                                       cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
 
@@ -305,7 +291,7 @@ export default class Header extends React.Component {
                                       Groups
                                     </div>
                                   </Link>
-                                  <Link href='/project'>
+                                  <Link prefetch href='/projects'>
                                     <div style={{
                                       cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
 
@@ -333,7 +319,7 @@ export default class Header extends React.Component {
                                   alignItems: 'center',
                                   display: 'flex'
                                 }}>
-                                <IconButton onTouchTap={() => browserHistory.push('/profile')}
+                                <IconButton onTouchTap={() => Router.push('/profile')}
                                 style={{padding: 0, height: 40, width: 40, marginRight: 16}}>
                                 {this.state.userPicture ?
                                 <Avatar src={this.state.userPicture}/>

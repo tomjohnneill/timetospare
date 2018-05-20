@@ -5,7 +5,6 @@ import Router from 'next/router'
 import {changeImageAddress} from './desktopproject.jsx';
 import {Spiral, CalendarIcon, Place, Clock, World, Tick} from './icons.jsx';
 import {yellow500, grey200, grey500} from 'material-ui/styles/colors';
-import App from "../components/App";
 import fire from '../fire';
 
 let db = fire.firestore()
@@ -184,7 +183,7 @@ export default class EmbeddedProject extends React.Component {
       average = count === 0 ? null : Math.round(total/count,1)
     }
     return (
-      <App>
+      <div>
         <div>
           {this.state.loading ?
             <div/>
@@ -332,7 +331,7 @@ export default class EmbeddedProject extends React.Component {
 
             }
         </div>
-      </App>
+      </div>
     )
   }
 }

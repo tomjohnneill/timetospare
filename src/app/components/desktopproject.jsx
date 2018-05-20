@@ -309,7 +309,7 @@ import fire from '../fire';
         <div>
           {this.state.engagements ?
             this.state.engagements.map((eng) => (
-              <Link to={'/profile/' + eng.User}>
+              <Link href={'/profile?user=' + eng.User} as={'/profile/' + eng.User}>
               <ul style={{textAlign: 'left', alignItems: 'center', borderBottom: '1px solid #DDDDDD', height: '60px', fontSize: '10px', display: 'flex'}}>
                 {eng['Volunteer Picture'] ?
 
@@ -723,7 +723,8 @@ import fire from '../fire';
                         </div>
                       </Link>
                       :
-                      <Link  className='charity-link' to={`/profile/${this.state.project.Creator}`}>
+                      <Link  className='charity-link' href={`/profile?user=${this.state.project.Creator}`}
+                        as={`/profile/${this.state.project.Creator}`}>
                         <div className='charity-link-content'
                            style={{display: 'flex', marginTop: 6, alignItems: 'center', color: '#65A1e7'}}>
                           <div style={{marginRight: 10}} className='charity-icon'>

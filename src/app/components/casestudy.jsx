@@ -422,7 +422,8 @@ export default class CaseStudy extends React.Component {
                         </div>
                       </Link>
                       :
-                      <Link  className='charity-link' to={`/profile/${this.state.project.Creator}`}>
+                      <Link  className='charity-link' href={`/profile?user=${this.state.project.Creator}`}
+                        as={`/profile/${this.state.project.Creator}`}>
                         <div className='charity-link-content'
                            style={{display: 'flex', marginTop: 6, alignItems: 'center', color: '#65A1e7'}}>
                           <div style={{marginRight: 10}} className='charity-icon'>
@@ -513,7 +514,8 @@ export default class CaseStudy extends React.Component {
                       </div>
                     </Link>
                     :
-                    <Link  className='charity-link' to={`/profile/${this.state.project.Creator}`}>
+                    <Link  className='charity-link' href={`/profile?user=${this.state.project.Creator}`}
+                      as={`/profile/${this.state.project.Creator}`}>
                       <div className='charity-link-content'
                          style={{display: 'flex', textAlign: 'left',
                             marginTop: 6, alignItems: 'center', color: '#65A1e7'}}>

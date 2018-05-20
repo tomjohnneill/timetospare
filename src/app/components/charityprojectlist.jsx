@@ -4,7 +4,6 @@ import Link from "next/link"
 import Router from 'next/router'
 import {changeImageAddress} from './desktopproject.jsx';
 import LinearProgress from 'material-ui/LinearProgress';
-import App from "../components/App"
 import fire from '../fire';
 import {grey500} from 'material-ui/styles/colors'
 
@@ -36,7 +35,7 @@ export default class CharityProjectList extends React.Component {
 
   render() {
     return (
-      <App>
+      <div>
         {this.state.loading ?
           <div>
             Loading...
@@ -89,7 +88,7 @@ export default class CharityProjectList extends React.Component {
             ))}
           </div>
         }
-      </App>
+      </div>
     )
   }
 }
