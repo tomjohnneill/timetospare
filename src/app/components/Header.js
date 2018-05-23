@@ -242,6 +242,8 @@ export default class Header extends React.Component {
         <Head>
           <title>Who's In?</title>
           <meta name="viewport" content="initial-scale=1.0, width=device-width" key="viewport" />
+          <link rel="stylesheet" href="/_next/static/style.css" />
+          <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script>
         </Head>
         <AppBar
 
@@ -262,11 +264,13 @@ export default class Header extends React.Component {
           }
           className={'appbar'}
           iconElementRight={
-                            <div style={{display: 'flex', alignItems: 'center'}}>
+                            <div style={{display: 'flex', alignItems: 'center', height: '100%'}}>
 
                             <MediaQuery minDeviceWidth = {700}>
                               {typeof window !== 'undefined' && !Router.pathname.includes('create-project') ?
-                                <div style={{display: 'flex', alignItems: 'center'}}>
+                                <div
+                                  className='link-container'
+                                   style={{display: 'flex', height: '100%', alignItems: 'center'}}>
                                   <Link prefetch style={{height: '100%'}} href='/why'>
                                     <div style={{
                                       cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
@@ -306,7 +310,7 @@ export default class Header extends React.Component {
                                        labelStyle={{height: '36px', display: 'inline-flex', alignItems: 'center',
                                             letterSpacing: '0.6px', fontWeight: 'bold'}}
                                       labelClassName
-                                       label={<span className='flexthis'>Start a Project</span>} onTouchTap={this.handleCreateProject}/>
+                                       label={<span className='flexthis' style={{display: 'flex'}}>Start a Project</span>} onTouchTap={this.handleCreateProject}/>
 
                                </div>
                                :
@@ -319,7 +323,9 @@ export default class Header extends React.Component {
                                   alignItems: 'center',
                                   display: 'flex'
                                 }}>
+                                <Link href='/profile' prefetch>
                                 <IconButton onTouchTap={() => Router.push('/profile')}
+
                                 style={{padding: 0, height: 40, width: 40, marginRight: 16}}>
                                 {this.state.userPicture ?
                                 <Avatar src={this.state.userPicture}/>
@@ -327,6 +333,7 @@ export default class Header extends React.Component {
                                 <Avatar> {this.state.user.Name.substring(0,1)}</Avatar>
                                 }
                               </IconButton>
+                              </Link>
                               <MediaQuery minDeviceWidth={700}>
                               <div
                                 onTouchTap={this.handleSignOut}
@@ -335,6 +342,7 @@ export default class Header extends React.Component {
                                   height: '100%', alignItems: 'center',
                                   display: 'flex',
                                   color: 'inherit',
+                                  display: 'flex',
                                   paddingLeft: 10, paddingRight: 10}}>Sign Out
                                 </div>
                                 </MediaQuery>
@@ -346,6 +354,7 @@ export default class Header extends React.Component {
                                 style={{cursor: 'pointer',
                                   fontWeight: 700,
                                   color: 'inherit',
+                                  display: 'flex',
                                   paddingLeft: 10, paddingRight: 10}}>Log In
                                 </div>
                             : null}

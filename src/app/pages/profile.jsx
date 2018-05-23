@@ -463,9 +463,6 @@ export default class Profile extends React.Component {
     });
   };
 
-  handleListClick(engagement, e) {
-    Router.push('/projects/' + 'eng' + '/' + engagement.Project)
-  }
 
   changeImage = (imageUrl) => {
     var user = this.state.user

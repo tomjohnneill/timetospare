@@ -10,8 +10,22 @@ export default class Loading extends React.Component {
   render() {
     return (
       <div>
-        Loading...
+        <MediaQuery minDeviceWidth={700}>
+          <div className='loading-container'
+            style={{display: 'flex', justifyContent: 'center', alignItems: 'center',
+                      minHeight: '600px'}}>
+            <CircularProgress color={'#E55749'}/>
+          </div>
+        </MediaQuery>
+        <MediaQuery maxDeviceWidth={700}>
+          <div className='mobile-loading-container'
+            style={{display: 'flex', justifyContent: 'center', alignItems: 'center',
+                      minHeight: '600px'}}>
+            <CircularProgress color={'#E55749'}/>
+          </div>
+        </MediaQuery>
       </div>
+
     )
   }
 }

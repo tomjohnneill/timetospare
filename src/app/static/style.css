@@ -1,0 +1,117 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Nunito';
+    color: #484848;
+  text-align: center;
+}
+
+.my-masonry-grid {
+  display: flex;
+  margin-left: -30px;
+}
+.my-masonry-grid_column {
+  border-left: 10px solid transparent;
+  background-clip: padding-box;
+}
+
+.my-masonry-grid_column > div {
+  margin-bottom: 10px;
+  width: 100%
+}
+
+.ql-editor {
+  font-family: Nunito !important;
+  font-size: 16px !important
+}
+
+.story-text li {
+  list-style-type: disc;
+  padding-left: 16px;
+  margin-left: 16px
+}
+
+.story-text ul {
+  margin: 0px
+}
+
+.story-text p {
+  margin: 0px
+}
+
+.story-text h2 {
+  margin: 0px
+}
+
+.react-add-to-calendar__button {
+  background-color: #65A1e7;
+  color: white;
+  padding: 8px;
+  border-radius: 2px;
+  cursor: pointer;
+  box-shadow: 0px 2px 4px rgba(0,0,0,0.5)
+}
+
+.react-add-to-calendar__dropdown {
+
+    width: 181.25px;
+    box-shadow: 0px 2px 4px rgba(0,0,0,0.5) ;
+    box-sizing: border-box;
+    padding-left: 6px;
+    padding-top: 1px;
+
+}
+
+.desktop-header {
+  font-weight: 700;
+  font-size: 36px;
+  text-align: left;
+  margin: 0;
+  padding-bottom: 16px
+}
+
+.normal-button {
+  height: 36px;
+  display: flex;
+   align-items: center;
+  letter-spacing: 0.6px;
+  fontWeight: bold;
+}
+
+li {
+  list-style-type: none;
+}
+
+ul {
+  padding: 0
+}
+
+a {
+  text-decoration: none;
+  color:inherit;
+  cursor:pointer;
+}
+
+.flexthis {
+  display: flex
+}
+
+.appbar {
+  display: flex
+}
+
+div.appbar div{
+  display: flex;
+}
+
+div.appbar span{
+  display: flex;
+}
+
+div.tab > div:first-child{
+  display: flex;
+  }
+
+#block {
+  display: block
+}

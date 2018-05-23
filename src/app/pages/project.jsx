@@ -166,6 +166,9 @@ export default class Project extends React.Component {
 
 
   componentDidMount(props) {
+    Router.prefetch(`/joined?project=${this.state.project._id}`)
+    Router.prefetch(`/declined?project=${this.state.project._id}`)
+
     if (Router.query.project) {
           window.history.replaceState({}, 'Title', '/projects/p/' + Router.query.project)
     }
@@ -272,7 +275,7 @@ export default class Project extends React.Component {
 
   handleLetsGo = (e) => {
     e.preventDefault()
-    browserHistory.push('/create-project/0')
+    Router.push('/create-project?stage=0')
   }
 
 
@@ -307,9 +310,9 @@ export default class Project extends React.Component {
             this.addChallengeMember()
           }
           if (window.location.pathname.includes('/joined')) {
-            browserHistory.push(window.location.pathname)
+            Router.push(window.location.pathname)
           } else {
-            browserHistory.push(window.location.pathname + '/joined')
+            Router.push(`/joined?project=${this.state.project._id}`, window.location.pathname + '/joined')
           }
         }
       } else {
@@ -344,7 +347,7 @@ export default class Project extends React.Component {
       this.addToWaitingList()
     } else {
       this.createEngagement()
-      browserHistory.push(window.location.href + '/joined')
+      Router.push(`/joined?project=${this.state.project._id}`, window.location.pathname + '/joined')
     }
   }
 
@@ -406,7 +409,7 @@ export default class Project extends React.Component {
   handleUnJoin = (e) => {
     e.preventDefault()
     this.deleteEngagement()
-    browserHistory.push(window.location.pathname + '/declined')
+    Router.push(`/declined?project=${this.state.project._id}`, window.location.pathname + '/declined')
   }
 
   changeAttendees = (attendees) => {

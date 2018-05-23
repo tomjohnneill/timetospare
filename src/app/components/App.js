@@ -30,10 +30,20 @@ const muiTheme = getMuiTheme({
 });
 
 const App = ({ children }) => (
-  <main>
+  <main
+    style={{
+      margin: 0,
+      padding: 0,
+      fontFamily: 'Nunito',
+      color: '#484848',
+      textDecoration: 'none',
+      color: 'inherit',
+      listStyleType: 'none'
+    }}>
     <MuiThemeProvider muiTheme={muiTheme}>
       <div>
         <Header />
+        <div style={{height: 50}}/>
         {children}
       </div>
     </MuiThemeProvider>

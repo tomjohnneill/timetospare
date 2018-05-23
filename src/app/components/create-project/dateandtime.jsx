@@ -330,7 +330,7 @@ class Form extends React.Component {
             />
         </MediaQuery>
       <RaisedButton label='Skip' secondary={true}
-          onClick={() => browserHistory.push('/create-project/3')}
+          onClick={() => Router.push('/create-project?stage=3')}
           style={{marginRight: 16, height: '36px', boxShadow: ''}} overlayStyle={{height: '36px'}}
           buttonStyle={{height: '36px'}}
             labelStyle={{height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',

@@ -762,21 +762,21 @@ export class GroupMembers extends React.Component {
     return (
       <div style={{display: 'flex', flexWrap: 'wrap'}}>
         {this.state.members ? this.state.members.map((eng) => (
-          <Link to={'/profile/' + eng._id}>
-          <ul style={{textAlign: 'left', alignItems: 'center',
-            borderBottom: '1px solid #DDDDDD', height: '60px',
-            width: 150,
-             fontSize: '10px', display: 'flex'}}>
-            {eng['Volunteer Picture'] ?
+          <Link href={`/profile?user=${eng._id}`} as={'/profile/' + eng._id}>
+            <ul style={{textAlign: 'left', alignItems: 'center',
+              borderBottom: '1px solid #DDDDDD', height: '60px',
+              width: 150,
+               fontSize: '10px', display: 'flex'}}>
+              {eng['Volunteer Picture'] ?
 
-            <Avatar src={changeImageAddress(eng['Volunteer Picture'], '40xauto')}/>:
-              <Avatar>{eng['Name'] ? eng['Name'].substring(0,1) : null}</Avatar>}
-            <div style={{flex: 2, paddingLeft: '24px',display: 'flex', alignItems: 'center'}}>
-              <div>
-                <b>{eng['Name']}</b>
-            </div>
-            </div>
-          </ul>
+              <Avatar src={changeImageAddress(eng['Volunteer Picture'], '40xauto')}/>:
+                <Avatar>{eng['Name'] ? eng['Name'].substring(0,1) : null}</Avatar>}
+              <div style={{flex: 2, paddingLeft: '24px',display: 'flex', alignItems: 'center'}}>
+                <div>
+                  <b>{eng['Name']}</b>
+              </div>
+              </div>
+            </ul>
           </Link>
         )) : null}
       </div>
@@ -908,10 +908,10 @@ export default class GroupPage extends React.Component {
        imageUrl = this.state.imageUrl
      } else if (this.props.imageUrl) {
        imageUrl = this.props.imageUrl
-     } else if (localStorage.getItem('coverPhoto') === 'undefined') {
+     } else if (typeof window !== 'undefined' && localStorage.getItem('coverPhoto') === 'undefined') {
        imageUrl = null
      } else {
-       imageUrl = localStorage.getItem('coverPhoto')
+       imageUrl = typeof window !== 'undefined' ? localStorage.getItem('coverPhoto') : null
      }
      console.log(imageUrl)
 

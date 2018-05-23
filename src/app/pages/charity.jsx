@@ -395,9 +395,6 @@ export default class CharityProfile extends React.Component {
     });
   };
 
-  handleListClick(engagement, e) {
-    browserHistory.push('/pages/projects/' + 'eng' + '/' + engagement.Project)
-  }
 
   handleTwoTabClick = (value) => {
     var lookup = ['projects','supporters']

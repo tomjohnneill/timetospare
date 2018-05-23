@@ -99,7 +99,7 @@ export class YouMightLike extends React.Component {
           <div/> :
           this.state.potentialProjects.map((project) => (
             <div style={{width: '60%', minWidth: '300px'}}>
-                  <Link to={`/projects/${project.Name}/${project._id}`}>
+                  <Link href={`/project?project=${project._id}`} as={`/projects/p/${project._id}`}>
                 <div style={{marginTop: 16}}>
                 <p style={{fontSize: '18px', fontWeight: 'bold', textAlign: 'left', margin: 0, marginBottom: '24px'}}>
                   {project.Name}
@@ -185,7 +185,7 @@ export default class CantCome extends React.Component{
   }
 
   componentDidMount(props) {
-    db.collection("Project").doc(this.props.params._id).get().then((doc) => {
+    db.collection("Project").doc(Router.query.project).get().then((doc) => {
       var project = doc.data()
       project._id = doc.id
       this.setState({project: project, loading: false, charity: {}})

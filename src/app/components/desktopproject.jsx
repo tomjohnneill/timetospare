@@ -478,7 +478,7 @@ import fire from '../fire';
       if (fire.auth().currentUser) {
         if (fire.auth().currentUser.phoneNumber || 1 === 1) {
           if (this.props.questions) {
-            browserHistory.push(window.location.href + '/questions')
+            Router.push(window.location.href + '/questions')
           }
           else if (this.props.project['People Pledged'] >= this.props.project['Maximum People']) {
             this.addToWaitingList()
@@ -489,9 +489,9 @@ import fire from '../fire';
               this.addChallengeMember()
             }
             if (window.location.pathname.includes('/joined')) {
-              browserHistory.push(window.location.pathname)
+              Router.push(window.location.pathname)
             } else {
-              browserHistory.push(window.location.pathname + '/joined')
+              Router.push(`/joined?project=${this.props.project._id}`, window.location.pathname + '/joined')
             }
           }
         } else {
@@ -533,12 +533,12 @@ import fire from '../fire';
         this.setState({conditionalOpen: true, conditionalStatus: false, modalOpen: false})
       }
       else if (this.props.questions) {
-        browserHistory.push(window.location.href + '/questions')
+        Router.push(window.location.href + '/questions')
       } else if (this.props.project['People Pledged'] >= this.props.project['Maximum People']) {
         this.addToWaitingList()
       } else {
         this.createEngagement()
-        browserHistory.push(window.location.href + '/joined')
+        Router.push(`/joined?project=${this.props.project._id}`, window.location.pathname + '/joined')
       }
     }
 
@@ -568,7 +568,7 @@ import fire from '../fire';
     handleUnJoin = (e) => {
       e.preventDefault()
       this.deleteEngagement()
-      browserHistory.push(window.location.pathname + '/declined')
+      Router.push(`/declined?project=${this.props.project._id}`, window.location.pathname + '/declined')
     }
 
     handleChangeTab = (value) => {
