@@ -400,7 +400,7 @@ export default class NewWhy extends React.Component {
                   buttonStyle={{height: '36px'}}
                    labelStyle={{height: '36px', display: 'flex', alignItems: 'center',
                         letterSpacing: '0.6px', fontWeight: 'bold'}}
-                  label='Start a project' onClick={() => Router.push('/create-project/0')}
+                  label='Start a project' onClick={() => Router.push('/create-project?stage=0')}
                   />
               </div>
             </div>
@@ -649,7 +649,7 @@ export default class NewWhy extends React.Component {
               </div>
               <div style={{marginTop: 25}}>
                 <RaisedButton
-                  label='Start a project' onClick={() => Router.push('/create-project/0')}
+                  label='Start a project' onClick={() => Router.push('/create-project?stage=0')}
                   style={{height: '36px', marginTop: '16px', boxShadow: ''}} primary={true} overlayStyle={{height: '36px'}}
                   buttonStyle={{height: '36px'}}
                    labelStyle={{height: '36px', display: 'flex', alignItems: 'center',

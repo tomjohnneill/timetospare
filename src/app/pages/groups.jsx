@@ -492,10 +492,11 @@ export default class GroupList extends React.Component {
                 <MediaQuery minDeviceWidth={700}>
                   <div style={{display: 'flex', flexWrap: 'wrap'}}>
                     {this.state.groups.map((group) => (
-                      <Link style={{display: 'inline-block', height: 150, width: 460,
-                        margin: 20, boxSizing: 'border-box'}}
+                      <Link
                         href={`/groups?groupId=${group._id}`}
                         as={`/groups/${group._id}`}>
+                        <div style={{display: 'inline-block', height: 150, width: 460,
+                          margin: 20, boxSizing: 'border-box'}}>
                         <div style={{width: '100%', height: 150, border: 'solid 1px #979797', borderRadius: 4,
                             cursor: 'pointer', boxSizing: 'border-box'}}>
                           {group['Featured Image'] ?
@@ -514,16 +515,18 @@ export default class GroupList extends React.Component {
                             <b style={{paddingLeft: 16}}>{group.Name}</b>
                           </div>
                         </div>
+                        </div>
                       </Link>
                     ))}
                   </div>
                 </MediaQuery>
                 <MediaQuery maxDeviceWidth={700}>
                   {this.state.groups.map((group) => (
-                    <Link style={{height: 150, display: 'block', width: '100%',
-                       margin: '20px', boxSizing: 'border-box'}}
+                    <Link
                        href={`/groups?groupId=${group._id}`}
                        as={`/groups/${group._id}`}>
+                       <div style={{height: 150, display: 'block', width: '100%',
+                          margin: '20px', boxSizing: 'border-box'}}>
                       <div style={{width: '100%', height: 150,
                         border: 'solid 1px #979797', borderRadius: 4,
                           cursor: 'pointer', boxSizing: 'border-box'}}>
@@ -542,6 +545,7 @@ export default class GroupList extends React.Component {
                             backgroundColor: 'rgb(248,248,248)', borderRadius: 4}}>
                           <b style={{paddingLeft: 16}}>{group.Name}</b>
                         </div>
+                      </div>
                       </div>
                     </Link>
                   ))}

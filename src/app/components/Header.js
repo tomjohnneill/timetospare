@@ -217,7 +217,7 @@ export default class Header extends React.Component {
   handleCreateProject = (e) => {
     e.preventDefault()
     if (fire.auth().currentUser) {
-      Router.push('/create-project/?stage=0')
+      Router.push('/create-project?stage=0')
     } else {
       this.setState({modalOpen: true})
     }
@@ -415,7 +415,7 @@ export default class Header extends React.Component {
             <Link href='/groups'>
               <MenuItem onClick={() => this.goToAndClose('/groups')}>Groups</MenuItem>
             </Link>
-            <Link href='/create-project/0' >
+            <Link href='/create-project?stage=0' >
               <MenuItem onClick={this.handleCreateProject}>Start a project</MenuItem>
             </Link>
             <MenuItem onClick={this.handleSignOut}>

@@ -88,7 +88,7 @@ export class RegisterInterest extends React.Component {
 
   handleStartProject = () => {
     if (fire.auth().currentUser) {
-      Router.push('/create-project/0')
+      Router.push('/create-project?stage=0')
     } else {
       this.setState({modalOpen: true})
     }

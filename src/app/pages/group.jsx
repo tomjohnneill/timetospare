@@ -100,7 +100,7 @@ export class GroupReviews extends React.Component {
       <div>
         {this.state.reviews ? this.state.reviews.map((project) => (
           <div>
-            <Link to={'/projects/' + project['Project Name'] +'/' + project.Project}>
+            <Link as={`/projects/p/${project.Project}`} href={`/project?project=${project.Project}`}>
               <div style={{display: 'flex', padding: 20, textAlign: 'left', borderBottom: '1px solid #DDDDDD'}}>
                 <div>
                   {project['Charity Picture'] ?
@@ -189,14 +189,14 @@ class InterestedAvatars extends React.Component {
             {
               interested.map((eng) => (
                 eng['Volunteer Picture'] ?
-                <Link to={`/profile/${eng._id}`}>
+                <Link href={`/profile?user=${eng._id}`} as={`/profile/${eng._id}`}>
                   <IconButton tooltip={eng.Name} style={{padding: 0}}>
                     <Avatar src={changeImageAddress(eng['Volunteer Picture'], '40xauto')}
                       />
                   </IconButton>
                 </Link>
                 :
-                <Link to={`/profile/${eng._id}`}>
+                <Link href={`/profile?user=${eng._id}`} as={`/profile/${eng._id}`}>
                   <IconButton tooltip={eng.Name} style={{padding: 0}}>
                     <Avatar>{eng['Name'] ? eng['Name'].substring(0,1) : null}</Avatar>
                   </IconButton>
@@ -215,14 +215,14 @@ class InterestedAvatars extends React.Component {
             {
               notInterested.map((eng) => (
                 eng['Volunteer Picture'] ?
-                <Link to={`/profile/${eng._id}`}>
+                <Link href={`/profile?user=${eng._id}`} as={`/profile/${eng._id}`}>
                   <IconButton tooltip={eng.Name} style={{padding: 0}}>
                     <Avatar src={changeImageAddress(eng['Volunteer Picture'], '40xauto')}
                       />
                   </IconButton>
                 </Link>
                 :
-                <Link to={`/profile/${eng._id}`}>
+                <Link href={`/profile?user=${eng._id}`} as={`/profile/${eng._id}`}>
                   <IconButton tooltip={eng.Name} style={{padding: 0}}>
                     <Avatar>{eng['Name'] ? eng['Name'].substring(0,1) : null}</Avatar>
                   </IconButton>
@@ -240,14 +240,14 @@ class InterestedAvatars extends React.Component {
             {
               notReplied.map((eng) => (
                 eng['Volunteer Picture'] ?
-                <Link to={`/profile/${eng._id}`}>
+                <Link href={`/profile?user=${eng._id}`} as={`/profile/${eng._id}`}>
                   <IconButton tooltip={eng.Name} style={{padding: 0}}>
                     <Avatar src={changeImageAddress(eng['Volunteer Picture'], '40xauto')}
                       />
                   </IconButton>
                 </Link>
                 :
-                <Link to={`/profile/${eng._id}`}>
+                <Link href={`/profile?user=${eng._id}`} as={`/profile/${eng._id}`}>
                   <IconButton tooltip={eng.Name} style={{padding: 0}}>
                     <Avatar>{eng['Name'] ? eng['Name'].substring(0,1) : null}</Avatar>
                   </IconButton>
@@ -389,7 +389,7 @@ export class UpcomingProjects extends React.Component {
                     <div>
                       <div style={{border: '1px solid rgb(221, 221, 221)', borderRadius: 6}}>
                         <div style={{display: 'flex'}}>
-                          <Link to={`/projects/p/${project.project._id}`}>
+                          <Link as={`/projects/p/${project.project._id}`} href={`/project?project=${project.project._id}`}>
                             <img src={changeImageAddress(project.project['Featured Image'], '500xauto')}
                               style={{flex: 1, height: 180, width: 250, objectFit: 'cover'}}/>
                           </Link>
@@ -434,7 +434,7 @@ export class UpcomingProjects extends React.Component {
                           </div>
 
                         </div>
-                        <Link to={`/projects/p/${project.project._id}`}>
+                        <Link as={`/projects/p/${project.project._id}`} href={`/project?project=${project.project._id}`}>
                           <div style={{
                             backgroundColor: 'rgba(250,250,250,0.8)', display: 'flex', padding: 16,
                             textAlign: 'left'}}
@@ -526,7 +526,7 @@ export class UpcomingProjects extends React.Component {
                   {project.project ?
                     <div>
                       <div style={{border: '1px solid rgb(221, 221, 221)', borderRadius: 6}}>
-                        <Link to={`/projects/p/${project.project._id}`}>
+                        <Link as={`/projects/p/${project.project._id}`} href={`/project?project=${project.project._id}`}>
                           <img src={changeImageAddress(project.project['Featured Image'], '500xauto')}
                             style={{width: '100%', height: 180, objectFit: 'cover'}}/>
                         </Link>
@@ -575,7 +575,7 @@ export class UpcomingProjects extends React.Component {
                           </div>
 
                         </div>
-                        <Link to={`/projects/p/${project.project._id}`}>
+                        <Link as={`/projects/p/${project.project._id}`} href={`/project?project=${project.project._id}`}>
                           <div style={{
                             backgroundColor: 'rgba(250,250,250,0.8)',  paddingLeft: 10,
                             paddingTop: 20, paddingBottom: 20,

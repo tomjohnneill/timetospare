@@ -511,7 +511,7 @@ import fire from '../fire';
 
     handleCompletedModalChangeOpen = () => {
       this.setState({completedOpen: false})
-      browserHistory.push(window.location.pathname.replace('/completed', ''))
+      Router.push(window.location.pathname.replace('/completed', ''))
     }
 
     handleDecline(e) {
@@ -545,7 +545,7 @@ import fire from '../fire';
     handleLetsGo = (e) => {
       e.preventDefault()
       if (fire.auth().currentUser) {
-        browserHistory.push('/create-project/0')
+        Router.push('/create-project?stage=0')
       } else {
         this.setModal()
       }
@@ -574,38 +574,6 @@ import fire from '../fire';
     handleChangeTab = (value) => {
       this.setState({selected: value})
     }
-
-    handleEditProject = (e) => {
-      e.preventDefault()
-      localStorage.removeItem('basics')
-      localStorage.removeItem('times')
-      localStorage.removeItem('story')
-      localStorage.removeItem('coverPhoto')
-      var basics = {
-        min: this.state.project['Target People'],
-        max: this.state.project['Maximum People'],
-        deadline: this.state.project['Deadline'],
-        tags: this.state.project.Tags
-      }
-      var times = {
-        'Start Time': this.state.project['Start Time'],
-        'End Time': this.state.project['End Time'],
-        address: this.state.project.Location
-      }
-      var story = {
-        title: this.state.project.Name,
-        story: this.state.project.Description,
-        summary: this.state.project.Summary
-      }
-      var coverPhoto = this.state.project['Featured Image']
-      localStorage.setItem('basics', JSON.stringify(basics))
-      localStorage.setItem('times', JSON.stringify(times))
-      localStorage.setItem('story', JSON.stringify(story))
-      localStorage.setItem('coverPhoto', coverPhoto)
-      localStorage.setItem('editProject', this.state.project._id)
-      browserHistory.push('/create-project/1')
-    }
-
 
     handleDropzoneEnter = () => {
       this.setState({dropzoneHover: true})
@@ -673,7 +641,7 @@ import fire from '../fire';
                       style={{padding: 0, position: 'absolute', top: 'calc(50% - 20px)', right: 'calc(50% - 98px)', height: 40, zIndex: 10}}
                       labelStyle={{fontWeight: 700}}
                       onClick={() => {localStorage.setItem('project-image', this.state.project['Featured Image'])
-                        browserHistory.push(window.location.pathname + '/crop-edit')}}
+                        Router.push(`/crop-edit?project=${this.state.project._id}`, `${Router.pathname}/crop-edit`)}}
                       secondary={true}
                       />
                     :
@@ -689,12 +657,14 @@ import fire from '../fire';
                           secondary={true}
                           style={{marginRight: 20}}
                           label='Admin View' labelStyle={{textTransform: 'none', fontWeight: 700, padding: '10px', fontSize: '16px'}}
-                            onTouchTap={() => browserHistory.push(window.location.pathname + '/admin/admin')}
+                            onTouchTap={() => Router.push(`/admin?project=${this.state.project._id}&tab=admin`
+                              , Router.pathname + '/admin')}
                              />
                        <FlatButton
                          secondary={true}
                          label='Edit Project' labelStyle={{textTransform: 'none', padding: '10px', fontWeight: 700,  fontSize: '16px'}}
-                           onTouchTap={() => browserHistory.push(window.location.pathname + '/admin/editproject')}
+                           onTouchTap={() => Router.push(`/admin?project=${this.state.project._id}&tab=edit-project`
+                             , Router.pathname + '/admin')}
                             />
                      </div>
                        : null
@@ -706,7 +676,8 @@ import fire from '../fire';
                     </p>
 
                     {this.state.project.Charity ?
-                      <Link  className='charity-link' to={`/charity/${this.state.charity._id}`}>
+                      <Link  className='charity-link' as={`/charity/${this.state.charity._id}`}
+                        href={`/charity?charityId=${this.state.charity._id}`}>
                         <div className='charity-link-content'
                            style={{display: 'flex', marginTop: 6, alignItems: 'center', color: '#65A1e7'}}>
                           <div style={{marginRight: 10}} className='charity-icon'>

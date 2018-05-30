@@ -223,7 +223,9 @@ class RecentlySupported extends React.Component {
         {
           this.state.projects ?
           this.state.projects.map((project) => (
-            <Link href={'/projects/' + project['Project Name'] +'/' + project.Project}>
+            <Link as={'/projects/p/' + project.Project}
+              href={`/project?project=${project.Project}`}
+              >
               <div style={{display: 'flex', paddingLeft: '18px', textAlign: 'left',
                 paddingBottom: '20px', borderBottom: '1px solid #DDDDDD', paddingTop: '20px'}}>
 
@@ -293,7 +295,9 @@ class RecentReviews extends React.Component {
               Reviews ({this.state.projects.length})
             </div>
             {this.state.projects.map((project) => (
-              <Link href={'/projects/' + project['Project Name'] +'/' + project.Project}>
+              <Link as={'/projects/' + project['Project Name'] +'/' + project.Project}
+                href={`/project?project=${project.Project}`}
+                >
                 <div style={{display: 'flex', padding: 30, textAlign: 'left', borderBottom: '1px solid #DDDDDD'}}>
                   <div>
                     {project['Charity Picture'] ?
@@ -387,7 +391,7 @@ class ProjectsOrganised extends React.Component {
                     <EmbeddedProject noLogo={true} project={project}/>
                       {project.Approved ? null :
                       <div
-                        onClick={() => {Router.push(`/projects/p/${project._id}`)}}
+                        onClick={() => {Router.push(`/project?project=${project._id}`, `/projects/p/${project._id}`)}}
                         style={{cursor: 'pointer',height: '100%', width: '100%', zIndex: 4, boxSizing: 'border-box',
                                   position: 'absolute', paddingTop: 20, paddingRight: 40, paddingBottom: 20, borderRadius: 8, top: 0}}>
                           <div style={{height: '100%', width: '100%', backgroundColor: 'rgba(216, 216, 216, 0.35)'}}/>

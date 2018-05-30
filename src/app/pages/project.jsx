@@ -487,7 +487,8 @@ export default class Project extends React.Component {
               </p>
 
               {this.state.project.Charity ?
-                <Link  className='charity-link' to={`/charity/${this.state.charity._id}`}>
+                <Link  className='charity-link' as={`/charity/${this.state.charity._id}`}
+                  href={`/charity?charityId=${this.state.charity._id}`}>
                   <div className='charity-link-content'
                      style={{display: 'flex', marginTop: 6, alignItems: 'center', color: '#65A1e7'}}>
                     <div style={{marginRight: 10}} className='charity-icon'>
@@ -504,7 +505,9 @@ export default class Project extends React.Component {
                   </div>
                 </Link>
                 :
-                <Link  className='charity-link' to={`/profile/${this.state.project.Creator}`}>
+                <Link  className='charity-link' as={`/profile/${this.state.project.Creator}`}
+                  href={`/profile?user=${this.state.project.Creator}`}
+                  >
                   <div className='charity-link-content'
                      style={{display: 'flex', marginTop: 6, alignItems: 'center', color: '#65A1e7'}}>
                     <div style={{marginRight: 10}} className='charity-icon'>

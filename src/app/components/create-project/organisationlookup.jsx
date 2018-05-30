@@ -245,14 +245,14 @@ export default class OrganisationLookup extends React.Component{
     if (this.state.loadedFromDatabase) {
       charityBody._id = charityBody['Charity Number']
       localStorage.setItem('charity', JSON.stringify(charityBody))
-      Router.push('/create-project/1')
+      Router.push('/create-project?stage=1')
     }
     else if (this.state.charityNumber) {
       db.collection("Charity").doc(this.state.charityNumber.toString()).set(charityBody, {merge: true})
       .then(docRef => {
         charityBody._id = this.state.charityNumber.toString()
         localStorage.setItem('charity', JSON.stringify(charityBody))
-        Router.push('/create-project/1')
+        Router.push('/create-project?stage=1')
       })
       .catch(error => {this.setState({error: error}); alert(error); console.log(error)})
 
@@ -261,7 +261,7 @@ export default class OrganisationLookup extends React.Component{
       .then(docRef => {
         charityBody._id = docRef.id
         localStorage.setItem('charity', JSON.stringify(charityBody))
-        Router.push('/create-project/1')
+        Router.push('/create-project?stage=1')
           })
       .catch(error => {this.setState({error: error}); alert(error); console.log(error)})
     }

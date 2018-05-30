@@ -30,7 +30,7 @@ export default class CharityProjectList extends React.Component {
 
   handleClick (project, e) {
     e.preventDefault()
-  //  browserHistory.push('/pages/projects/en/' + project.id)
+
   }
 
   render() {
@@ -43,7 +43,9 @@ export default class CharityProjectList extends React.Component {
         :
           <div>
             {this.state.projects.map((project) => (
-              <Link to={`/projects/${project.Name}/${project._id}`} style={{padding: '12px'}}>
+              <Link as={`/projects/p/${project._id}`}
+                href={`/project?project=${project._id}`}
+                style={{padding: '12px'}}>
                   <Card onTouchTap={this.handleClick.bind(this, project)}>
                     <div>
                       <h2 style={{margin:0, padding: 16}}>{project.Name}</h2>

@@ -153,7 +153,7 @@ class Supporters extends React.Component {
           </div>
           :
           this.state.supporters.map((supporter) => (
-          <Link to={`/profile/${supporter.User}`}>
+          <Link as={`/profile/${supporter.User}`} href={`/profile?user=${supporter.User}`}>
             <div style={{height: '200px', width: '150px', display: 'flex', alignItems: 'center', flexDirection: 'column',
             textAlign: 'center'}}>
               <img src={changeImageAddress(supporter['Volunteer Picture'], '250xauto')} style={{borderRadius: '50%',

@@ -376,7 +376,7 @@ export default class CaseStudy extends React.Component {
     times['Start Time'] = this.state.project['Start Time']
     times['End Time'] = this.state.project['End Time']
     localStorage.setItem('times', JSON.stringify(times))
-    Router.push('/create-project/choose-type')
+    Router.push('/create-project?stage=choose-type')
   }
 
   render() {
@@ -405,7 +405,8 @@ export default class CaseStudy extends React.Component {
                     </p>
 
                     {this.state.project.Charity ?
-                      <Link  className='charity-link' to={`/charity/${this.state.charity._id}`}>
+                      <Link  className='charity-link' as={`/charity/${this.state.charity._id}`}
+                        href={`/charity?charityId=${this.state.charity._id}`}>
                         <div className='charity-link-content'
                            style={{display: 'flex', marginTop: 6, alignItems: 'center', color: '#65A1e7'}}>
                           <div style={{marginRight: 10}} className='charity-icon'>
@@ -497,7 +498,8 @@ export default class CaseStudy extends React.Component {
                   </p>
 
                   {this.state.project.Charity ?
-                    <Link  className='charity-link' to={`/charity/${this.state.charity._id}`}>
+                    <Link  className='charity-link' as={`/charity/${this.state.charity._id}`}
+                      href={`/charity?charityId=${this.state.charity._id}`}>
                       <div className='charity-link-content'
                          style={{display: 'flex', marginTop: 6, alignItems: 'center', color: '#65A1e7'}}>
                         <div style={{marginRight: 10}} className='charity-icon'>
