@@ -16,6 +16,7 @@ import FlatButton from 'material-ui/FlatButton';
 import CircularProgress from 'material-ui/CircularProgress';
 import FontIcon from 'material-ui/FontIcon';
 import ShowChart from 'material-ui/svg-icons/editor/show-chart';
+import Email from 'material-ui/svg-icons/communication/email';
 import SignupModal from './signupmodal.jsx';
 import Loading from './loading.jsx';
 import Snackbar from 'material-ui/Snackbar';
@@ -590,6 +591,14 @@ import fire from '../fire';
       this.setState({project: project})
     }
 
+    handleEmailOrganiser = () => {
+      fetch('')
+      .then(response => response.json())
+      .then(data => {
+        window.location.href = `mailto:${data.email}`
+      })
+    }
+
     render () {
 
       console.log(this.props)
@@ -641,7 +650,7 @@ import fire from '../fire';
                       style={{padding: 0, position: 'absolute', top: 'calc(50% - 20px)', right: 'calc(50% - 98px)', height: 40, zIndex: 10}}
                       labelStyle={{fontWeight: 700}}
                       onClick={() => {localStorage.setItem('project-image', this.state.project['Featured Image'])
-                        Router.push(`/crop-edit?project=${this.state.project._id}`, `${Router.pathname}/crop-edit`)}}
+                        Router.push(`/crop-edit?project=${this.state.project._id}`, `${Router.asPath}/crop-edit`)}}
                       secondary={true}
                       />
                     :
@@ -658,13 +667,13 @@ import fire from '../fire';
                           style={{marginRight: 20}}
                           label='Admin View' labelStyle={{textTransform: 'none', fontWeight: 700, padding: '10px', fontSize: '16px'}}
                             onTouchTap={() => Router.push(`/admin?project=${this.state.project._id}&tab=admin`
-                              , Router.pathname + '/admin')}
+                              , Router.asPath + '/admin')}
                              />
                        <FlatButton
                          secondary={true}
                          label='Edit Project' labelStyle={{textTransform: 'none', padding: '10px', fontWeight: 700,  fontSize: '16px'}}
                            onTouchTap={() => Router.push(`/admin?project=${this.state.project._id}&tab=edit-project`
-                             , Router.pathname + '/admin')}
+                             , Router.asPath + '/admin')}
                             />
                      </div>
                        : null
@@ -785,7 +794,12 @@ import fire from '../fire';
                         className='story-text'
                          dangerouslySetInnerHTML={this.descriptionMarkup()}/>
 
-
+                       <RaisedButton
+                         secondary={true}
+                         label='Email Organiser'
+                         icon={<Email/>}
+                         onClick={this.handleEmailOrganiser}
+                         />
                             </div>
                           }>
 

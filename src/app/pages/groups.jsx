@@ -493,7 +493,7 @@ export default class GroupList extends React.Component {
                   <div style={{display: 'flex', flexWrap: 'wrap'}}>
                     {this.state.groups.map((group) => (
                       <Link
-                        href={`/groups?groupId=${group._id}`}
+                        href={`/group?groupId=${group._id}`}
                         as={`/groups/${group._id}`}>
                         <div style={{display: 'inline-block', height: 150, width: 460,
                           margin: 20, boxSizing: 'border-box'}}>
@@ -523,7 +523,7 @@ export default class GroupList extends React.Component {
                 <MediaQuery maxDeviceWidth={700}>
                   {this.state.groups.map((group) => (
                     <Link
-                       href={`/groups?groupId=${group._id}`}
+                       href={`/group?groupId=${group._id}`}
                        as={`/groups/${group._id}`}>
                        <div style={{height: 150, display: 'block', width: '100%',
                           margin: '20px', boxSizing: 'border-box'}}>
@@ -576,6 +576,7 @@ export default class GroupList extends React.Component {
         open={this.state.createOpen}
         contentStyle={{maxWidth: 500}}
         onRequestClose={this.handleClose}
+        style={{textAlign: 'left'}}
         >
         <h2 style={{marginTop: 0}}>Create a group</h2>
         <div style={styles.miniHeading}>

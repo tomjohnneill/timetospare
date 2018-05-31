@@ -923,7 +923,7 @@ export default class AdminView extends React.Component {
       , inkBarLeft: 15}
   }
 
-  changeAnchorEl (tab, e)  {
+  changeAnchorEl  = (tab, e) =>  {
     console.log('handleMultipleChoiceClick')
     e.preventDefault()
     console.log(e)
@@ -943,12 +943,12 @@ export default class AdminView extends React.Component {
 
   handleTwoTabClick = (value) => {
     Router.push(`/admin?project=${Router.query.project}&tab=${value}`
-      , `/projects/p/${this.props.params._id}/admin/${value}`)
+      , `/projects/p/${Router.query.project}/admin/${value}`)
     this.setState({selected: value})
   }
 
   componentDidMount(props) {
-    db.collection("Engagement").where("Project", "==", this.props.params._id).get().then((querySnapshot) => {
+    db.collection("Engagement").where("Project", "==", Router.query.project).get().then((querySnapshot) => {
       var data = []
       var csvData = []
       querySnapshot.forEach((doc) => {
@@ -958,7 +958,7 @@ export default class AdminView extends React.Component {
         elem['_id'] = doc.id
         console.log('Engagement Id', doc.id)
         db.collection("Engagement").doc(doc.id).collection("Private")
-          .doc(this.props.params._id).get().then((privateData) => {
+          .doc(Router.query.project).get().then((privateData) => {
           console.log(privateData.data())
           if (privateData.data()) {
               csvItem.Location = privateData.data().Location
@@ -1027,6 +1027,7 @@ export default class AdminView extends React.Component {
   render() {
     console.log(this.state.engagements)
     return (
+      <App>
       <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
         <div style={{padding: 16, width: '100%', maxWidth: '900px', position: 'relative'}}>
           <MediaQuery maxDeviceWidth={700}>
@@ -1054,7 +1055,7 @@ export default class AdminView extends React.Component {
               >
         <Tab label="Admin"
           style={{width: 'auto', fontSize: '16px'}}
-            onTouchTap={this.changeAnchorEl.bind(this, 'admin')}
+            onTouchTap={(e) => this.changeAnchorEl('admin', e)}
               buttonStyle={this.state.selected === 'admin' ? styles.selectedTab : styles.tab}
            value="admin">
 
@@ -1137,11 +1138,11 @@ export default class AdminView extends React.Component {
 
           <Tab label="Leave Reviews"
             style={{width: 'auto', fontSize: '16px'}}
-              onTouchTap={this.changeAnchorEl.bind(this, 'leave-reviews')}
+              onTouchTap={(e) => this.changeAnchorEl('leave-reviews', e)}
                 buttonStyle={this.state.selected === 'leave-reviews' ? styles.selectedTab : styles.tab}
              value="leave-reviews">
              <UserReviewPage
-               projectId={this.props.params._id}
+               projectId={Router.query.project}
 
                 engagements={this.state.engagements}/>
 
@@ -1149,18 +1150,18 @@ export default class AdminView extends React.Component {
 
           <Tab label="Edit Project"
             style={{width: 'auto', fontSize: '16px'}}
-              onTouchTap={this.changeAnchorEl.bind(this, 'editproject')}
+              onTouchTap={(e) => this.changeAnchorEl('editproject', e)}
                 buttonStyle={this.state.selected === 'editproject' ? styles.selectedTab : styles.tab}
              value="editproject">
-             <EditProjectForm projectId={this.props.params._id}/>
+             <EditProjectForm projectId={Router.query.project}/>
           </Tab>
 
           <Tab label="Private Feedback"
             style={{width: 'auto', fontSize: '16px'}}
-              onTouchTap={this.changeAnchorEl.bind(this, 'privatefeedback')}
+              onTouchTap={(e) => this.changeAnchorEl('privatefeedback', e)}
                 buttonStyle={this.state.selected === 'privatefeedback' ? styles.selectedTab : styles.tab}
              value="privatefeedback">
-             <PrivateFeedback projectId={this.props.params._id}/>
+             <PrivateFeedback projectId={Router.query.project}/>
           </Tab>
 
         </Tabs>
@@ -1174,6 +1175,7 @@ export default class AdminView extends React.Component {
           </div>
         </div>
       </div>
+      </App>
     )
   }
 }

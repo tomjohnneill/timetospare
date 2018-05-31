@@ -140,7 +140,8 @@ export default class NewWhy extends React.Component {
 
   render() {
     return (
-      <App className='aboutContainer' style={{width: '100%', display: 'flex', flexDirection: 'column',
+      <App className='aboutContainer' >
+      <div style={{width: '100%', display: 'flex', flexDirection: 'column',
         justifyContent: 'center', alignItems: 'center', textAlign: 'left', backgroundColor: '#E55749',
       overflowX: 'hidden'}}>
       <DocumentTitle title='About'/>
@@ -663,7 +664,7 @@ export default class NewWhy extends React.Component {
 
         </MediaQuery>
 
-
+        </div>
       </App>
     )
   }

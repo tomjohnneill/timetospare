@@ -247,8 +247,8 @@ export default class Header extends React.Component {
         </Head>
         <AppBar
 
-          style={typeof window !== 'undefined' && Router.pathname.includes('/embed/') ? style.embedAppBar :
-            typeof window !== 'undefined' && Router.pathname === '/why' ? style.whyAppBar : style.appBar}
+          style={typeof window !== 'undefined' && Router.asPath.includes('/embed/') ? style.embedAppBar :
+            typeof window !== 'undefined' && Router.asPath === '/why' ? style.whyAppBar : style.appBar}
           iconClassNameLeft='mobile-nav-bar'
           iconElementLeft={
             <div>
@@ -267,7 +267,7 @@ export default class Header extends React.Component {
                             <div style={{display: 'flex', alignItems: 'center', height: '100%'}}>
 
                             <MediaQuery minDeviceWidth = {700}>
-                              {typeof window !== 'undefined' && !Router.pathname.includes('create-project') ?
+                              {typeof window !== 'undefined' && !Router.asPath.includes('create-project') ?
                                 <div
                                   className='link-container'
                                    style={{display: 'flex', height: '100%', alignItems: 'center'}}>

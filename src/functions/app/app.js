@@ -14,6 +14,18 @@ server.get('/projects/p/:project', (request, response) => {
       app.render(request, response, actualPage, queryParams)
     })
 
+server.get('/projects/p/:project/admin', (request, response) => {
+      const actualPage = '/admin'
+      const queryParams = { project: request.params.project}
+      app.render(request, response, actualPage, queryParams)
+    })
+
+server.get('/projects/p/:project/admin/:tab', (request, response) => {
+      const actualPage = '/admin'
+      const queryParams = { project: request.params.project, tab: request.params.tab}
+      app.render(request, response, actualPage, queryParams)
+    })/
+
 server.get('/projects/p/:project/joined', (request, response) => {
       const actualPage = '/joined'
       const queryParams = { project: request.params.project}
@@ -32,13 +44,25 @@ server.get('/projects/p/:project/completed', (request, response) => {
       app.render(request, response, actualPage, queryParams)
     })
 
+server.get('/projects/p/:project/review', (request, response) => {
+      const actualPage = '/project-review'
+      const queryParams = { project: request.params.project }
+      app.render(request, response, actualPage, queryParams)
+    })
+
+server.get('/projects/p/:project/review/:status', (request, response) => {
+      const actualPage = '/review-status'
+      const queryParams = { project: request.params.project, status: request.params.status }
+      app.render(request, response, actualPage, queryParams)
+    })
+
 server.get('/profile/:user', (request, response) => {
       const actualPage = '/profile'
       const queryParams = { user: request.params.user }
       app.render(request, response, actualPage, queryParams)
     })
 
-server.get('/group/:groupId', (request, response) => {
+server.get('/groups/:groupId', (request, response) => {
       const actualPage = '/group'
       const queryParams = { groupId: request.params.groupId }
       app.render(request, response, actualPage, queryParams)
