@@ -243,6 +243,7 @@ export default class Header extends React.Component {
           <title>Who's In?</title>
           <meta name="viewport" content="initial-scale=1.0, width=device-width" key="viewport" />
           <link rel="stylesheet" href="/_next/static/style.css" />
+          <link rel="stylesheet" href="/_next/static/react-datasheet.css" />
           <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script>
         </Head>
         <AppBar

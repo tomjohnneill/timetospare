@@ -1,5 +1,6 @@
 import React from "react"
 import Header from "./Header"
+import Footer from "./footer.jsx"
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
@@ -45,6 +46,7 @@ const App = ({ children }) => (
         <Header />
         <div style={{height: 50}}/>
         {children}
+        <Footer/>
       </div>
     </MuiThemeProvider>
   </main>

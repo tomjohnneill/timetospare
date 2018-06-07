@@ -1,6 +1,7 @@
 import { nextApp as next } from "./app/app"
 import { mars } from "./worlds/mars"
 import { jupiter } from "./worlds/jupiter"
+import { mailchimpAuth } from "./mailchimp/auth"
 
 /*
 Namespace application services with function groups.
@@ -19,6 +20,7 @@ const app = {
 const greetings = {
   mars,
   jupiter,
+  mailchimpAuth
   // other funcs
 }
 

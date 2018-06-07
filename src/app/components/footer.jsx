@@ -96,7 +96,7 @@ export default class Footer extends React.Component {
   render() {
     return (
       <div className='footer-parent' style={{
-            display: window.location.pathname.includes('/embed/') ? 'none' : 'inherit',
+            display: typeof window !== 'undefined' && window.location.pathname.includes('/embed/') ? 'none' : 'inherit',
             textAlign: 'left'}}>
             <Snackbar
               open={this.state.signedUp}
@@ -145,9 +145,9 @@ export default class Footer extends React.Component {
                 <div style={{width: '100%'}}>
                   hello@whosin.io
                   <div style={{display: 'block'}}>
-                    <Link style={{width: '100%', display: 'block'}} href='/about'>About</Link>
-                    <Link style={{width: '100%', display: 'block'}} href='/why'>Why Start a Project?</Link>
-                    <Link style={{width: '100%', display: 'block'}} href='/terms'>Terms</Link>
+                    <Link style={{width: '100%', display: 'block'}} href='/about'><div>About</div></Link>
+                    <Link style={{width: '100%', display: 'block'}} href='/why'><div>Why Start a Project?</div></Link>
+                    <Link style={{width: '100%', display: 'block'}} href='/terms'><div>Terms</div></Link>
                     <div style={{display: 'flex'}}>
                         <a style={{padding: 10}} href={`https://www.facebook.com/whosin.io/`}>
                           <span style={styles.contactIcon}>

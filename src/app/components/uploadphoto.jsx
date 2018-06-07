@@ -35,19 +35,6 @@ export default class UploadPhoto extends React.Component{
     this.state = {uploadComplete: false, uploading: false, dropzoneHover: false}
   }
 
-  handleNext = (e) => {
-    e.preventDefault()
-    if (this.state.imageUrl) {
-      localStorage.setItem('coverPhoto', this.state.imageUrl)
-    }
-
-    Router.push('/create-project/summary/1')
-  }
-
-  handlePrevious = (e) => {
-    e.preventDefault()
-    Router.push('/create-project/2')
-  }
 
   upload(file, rej) {
     console.log(this.state)

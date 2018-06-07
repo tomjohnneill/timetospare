@@ -59,10 +59,39 @@ export function changeImageAddress(file, size) {
 export default class Index extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {}
+    this.state = {projects: this.props.projects, upcoming: this.props.upcoming,
+      successful: this.props.successful}
   }
 
   static async getInitialProps() {
+    const res = await db.collection("Project").get()
+    .then((querySnapshot) => {
+      let upcoming = []
+      let successful = []
+      let projects = []
+      querySnapshot.forEach((doc) => {
+        var hit = doc.data()
+        hit._id = doc.id
+        projects.push(hit)
+        if (hit['End Time'] && new Date(hit['End Time']) > new Date()) {
+          upcoming.push(hit)
+        } else if
+          (hit['Deadline'] && new Date(hit['Deadline']) > new Date()) {
+            upcoming.push(hit)
+          }
+          else {
+          successful.push(hit)
+        }
+
+
+      })
+      return({projects: projects,
+        upcoming: upcoming, successful: successful,
+        loading: false});
+    })
+    return res
+
+/*
     const client = algoliasearch('52RYQZ0NQK', 'b10f7cdebfc189fc6f889dbd0d3ffec2');
     const index = client.initIndex('projects');
     var query = ''
@@ -93,6 +122,7 @@ export default class Index extends React.Component {
               loading: false});
         });
       return {data: res}
+      */
   }
 
   handleSearch = (e, input) => {
@@ -130,7 +160,6 @@ export default class Index extends React.Component {
     console.log(this.props)
     return (
       <App>
-        <p>Index Page</p>
           <img
                   style={{height: '90vh', width: '100%', objectFit: 'cover', position: 'relative', marginTop: '-51px'}}
                   src={changeImageAddress('https://d3kkowhate9mma.cloudfront.net/important/jeremy-bishop-170994-unsplash.jpg', '750xauto')}/>
@@ -188,13 +217,13 @@ export default class Index extends React.Component {
               <MediaQuery minDeviceWidth={700}>
                 <h1 className='desktop-header' style={{paddingLeft: '100px', marginTop: 16}}>
                   Upcoming Projects</h1>
-                {this.props.data.loading ?
+                {this.props.loading ?
                   <Loading/>
                   :
-                  this.props.data.projects ?
+                  this.state.upcoming ?
 
                   <div style={{display: 'flex', flexWrap: 'wrap', paddingLeft: 100, paddingRight:100}}>
-                    {this.props.data.upcoming.map((project) => (
+                    {this.state.upcoming.map((project) => (
                       <div style={{padding: 20, minWidth: 280, boxSizing: 'border-box', width: '33%', position: 'relative'}}>
                         <EmbeddedProject style={{position: 'relative'}} noLogo={true} project={project}/>
                       </div>
@@ -208,9 +237,9 @@ export default class Index extends React.Component {
                   <h1 className='desktop-header' style={{paddingLeft: '100px', marginTop: 30}}>
                     Successful Projects</h1>
               {
-                  this.props.data.successful ?
+                  this.state.successful ?
                   <div style={{display: 'flex', flexWrap: 'wrap', paddingLeft: 100, paddingRight:100}}>
-                    {this.props.data.successful.map((project) => (
+                    {this.state.successful.map((project) => (
                       <div style={{padding: 20, minWidth: 280, boxSizing: 'border-box', width: '33%', position: 'relative'}}>
                         <EmbeddedProject style={{position: 'relative'}} noLogo={true} project={project}/>
                       </div>
@@ -227,13 +256,13 @@ export default class Index extends React.Component {
                           fontWeight: 700, marginTop: '48px', marginBottom: '24px', paddingLeft: '0px'}}>
                             Upcoming Projects
                           </Subheader>
-                          {this.props.data.loading ?
+                          {this.props.loading ?
                             <Loading/>
                             :
-                            this.props.data.projects ?
+                            this.state.upcoming ?
                             <div style={{display: 'flex', flexWrap: 'wrap',
                             textAlign: 'left'}}>
-                              {this.props.data.upcoming.map((project) => (
+                              {this.state.upcoming.map((project) => (
                                 <div style={{paddingTop: 10, paddingBottom: 10, width: '100%', boxSizing: 'border-box'}}>
                                   <EmbeddedProject noLogo={true}
                                     project={project}
@@ -248,13 +277,13 @@ export default class Index extends React.Component {
                         fontWeight: 700, marginTop: '48px', marginBottom: '24px', paddingLeft: '0px'}}>
                           Successful Projects
                         </Subheader>
-                        {this.props.data.loading ?
+                        {this.props.loading ?
                           <Loading/>
                           :
-                          this.props.data.projects ?
+                          this.state.successful ?
                           <div style={{display: 'flex', flexWrap: 'wrap',
                           textAlign: 'left'}}>
-                            {this.props.data.successful.map((project) => (
+                            {this.state.successful.map((project) => (
                               <div style={{paddingTop: 10, paddingBottom: 10, width: '100%', boxSizing: 'border-box'}}>
                                 <EmbeddedProject noLogo={true}
                                   project={project}

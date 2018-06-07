@@ -34,6 +34,7 @@ import Suggest from '../components/groups/suggest.jsx';
 import BottomNavigationExampleSimple from '../components/bottomnav.jsx'
 import CaseStudy from '../components/casestudy.jsx';
 import fire from '../fire';
+import Head from 'next/head'
 import App from "../components/App"
 
 let db = fire.firestore()
@@ -159,9 +160,25 @@ export default class Project extends React.Component {
     super(props);
     console.log(this.props)
 
-    this.state = {open: false, adminDrawerOpen: false, selectedIndex: 0, loading:true,
+    this.state = {open: false, adminDrawerOpen: false, selectedIndex: 0,
+      loading: this.props.project ? false : true,
       project: this.props.project ? this.props.project : {},
       charity: {}, inkBarLeft: '20px', selected: 'story', challengeExists: false}
+  }
+
+  static async getInitialProps({req, pathname, query}) {
+    console.log(req)
+    console.log(pathname)
+    console.log(query)
+    const res =  await db.collection("Project").doc(query.project).get()
+    .then((doc) => {
+          var project = doc.data()
+          project._id = doc.id
+          console.log(project)
+          return({loading: false, project: project, charity: {}})
+        })
+    return res
+
   }
 
 
@@ -184,8 +201,7 @@ export default class Project extends React.Component {
       localStorage.removeItem('project')
     }
 
-    db.collection("Project").doc(Router.query.project ?
-      Router.query.project : this.props.params._id).get().then((doc) => {
+    db.collection("Project").doc(Router.query.project).get().then((doc) => {
       var project = doc.data()
       project._id = doc.id
       this.setState({loading: false, project: project, charity: {}})
@@ -443,6 +459,16 @@ export default class Project extends React.Component {
       return (
 
       <App>
+        <Head>
+          <title>{this.state.project.Name}</title>
+          <meta name="viewport" content="initial-scale=1.0, width=device-width" key="viewport" />
+            <meta property="og:title" content={this.state.project.Name}/>
+            <meta property="twitter:title" content={this.state.project.Name}/>
+            <meta property="og:type" content="article" />
+            <meta property="og:description" content={this.state.project.Summary} />
+            <meta property="og:image" content={changeImageAddress(this.state.project['Featured Image'], '750xauto')} />
+            <meta name="twitter:card" content="summary" />
+        </Head>
         <Snackbar
           open={this.state.waitingListAdded}
           message="We've added you to the waiting list"
@@ -457,7 +483,7 @@ export default class Project extends React.Component {
           <DocumentTitle title={this.state.project.Name}>
             <div>
           <MediaQuery minDeviceWidth={700}>
-            <DesktopProject params={Router.query} project={this.state.project}
+            <DesktopProject project={this.state.project}
               joined={this.state.joined}
               creator={this.state.creator}
               projectReviews={this.state.projectReviews}

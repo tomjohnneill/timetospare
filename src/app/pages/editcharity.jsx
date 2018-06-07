@@ -14,6 +14,7 @@ import {changeImageAddress} from '../components/desktopproject.jsx';
 import Snackbar from 'material-ui/Snackbar';
 import App from "../components/App"
 import fire from '../fire';
+import CloudUpload from 'material-ui/svg-icons/file/cloud-upload';
 
 let db = fire.firestore()
 
@@ -72,14 +73,22 @@ const styles = {
 export class CharityPhotoUpload extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {}
+    this.state = {uploading: false}
+  }
+
+  handleDropzoneEnter = () => {
+    this.setState({dropzoneHover: true})
+  }
+
+  handleDropzoneLeave = () => {
+    this.setState({dropzoneHover: false})
   }
 
   upload(file, rej) {
     console.log(this.state)
     console.log(file)
     console.log(rej)
-
+    this.setState({uploading: true, uploadComplete: false})
     fetch('https://3ymyhum5sh.execute-api.eu-west-2.amazonaws.com/prod/getS3Url')
       .then(response => response.json())
       .then(function(data) {
@@ -100,6 +109,7 @@ export class CharityPhotoUpload extends React.Component {
                   db.collection("Charity").doc(this.props.charityId).update(body)
                 }
                 this.props.changeImage(imageUrl)
+                this.setState({uploadComplete: true, uploading: false})
             }
         }.bind(this)
 
@@ -122,12 +132,13 @@ export class CharityPhotoUpload extends React.Component {
               {({ isDragActive, isDragReject }) => {
                 let styles = {
                   width: 'auto',
-                  height: 100,
+                  height: 200,
                   textAlign: 'center',
                   justifyContent: 'center',
                   display: 'flex',
                   alignItems: 'center',
                   border: '1px solid #aaa',
+                  backgroundColor: 'white',
                   borderRadius: 2,
                   color: grey500,
                   padding: 16,
@@ -168,10 +179,59 @@ export class CharityPhotoUpload extends React.Component {
                 // Default case
                 return (
                   <div style={styles}>
-                    Drag and drop (or click) to upload
+                  {this.state.uploading ?
+                  <div style={{height: '70vh', width: '100%', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center'}}>
+                    <CircularProgress size={80} thickness={5} />
                   </div>
-                )
-              }}
+                  :
+                    !this.state.uploadComplete && this.props.imageUrl ?
+                    <div style={{position: 'relative', height: '100%', width: '100%'}}>
+                      <img src={this.props.imageUrl}
+                      style={{padding: 16, boxSizing: 'border-box', position: 'relative', width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px'}}/>
+                    {this.state.dropzoneHover ?
+                      <RaisedButton label='Change Photo'
+                        style={{padding: 0, position: 'absolute', top: 'calc(50% - 20px)', right: 'calc(50% - 98px)', height: 40, zIndex: 10}}
+                        icon={<CloudUpload />}
+                        labelStyle={{textTransform: 'none', fontFamily: 'Permanent Marker', fontSize: '20px'}}
+                        primary={true}
+                        />
+                      :
+                      null}
+
+                    </div>
+                    :
+                    this.state.uploadComplete  ?
+                    <div style={{position: 'relative', height: '100%', width: '100%'}}>
+                      <img src={imageUrl}
+                style={{padding: 16, boxSizing: 'border-box', position: 'relative', width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px'}}/>
+                {this.state.dropzoneHover ?
+                  <RaisedButton label='Change Photo'
+                    style={{padding: 0, position: 'absolute', top: 'calc(50% - 20px)', right: 'calc(50% - 98px)', height: 40, zIndex: 10}}
+                    icon={<CloudUpload />}
+                    labelStyle={{textTransform: 'none', fontFamily: 'Permanent Marker', fontSize: '20px'}}
+                    primary={true}
+                    />
+                  :
+                  null}
+                    </div>
+                    :
+                    <div>
+                      <RaisedButton label='Upload Logo'
+                        icon={<CloudUpload />}
+                        labelStyle={{textTransform: 'none', fontWeight: 700}}
+                        primary={true}
+                        />
+                      <div style={{marginTop: '20px', fontWeight: 700}}>or drag one in</div>
+                    </div>
+                }
+
+
+
+                </div>
+              )
+
+            }}
             </Dropzone>
       </div>
     )

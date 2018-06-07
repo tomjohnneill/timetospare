@@ -223,45 +223,30 @@ export default class AllProjects extends React.Component {
   }
 
   componentDidMount(props) {
-    const client = algoliasearch('52RYQZ0NQK', 'b10f7cdebfc189fc6f889dbd0d3ffec2');
-    console.log('Process.env.react_app_environment:', process.env)
-    if (process.env.REACT_APP_ENVIRONMENT === "staging" || process.env.NODE_ENV === 'development') {
-      var index = client.initIndex('staging_projects');
-    } else {
-      var index = client.initIndex('projects');
-    }
-    console.log(index)
-    var query = ''
-    index
-        .search({
-            query: query,
-            filters: 'Approved:true'
-        })
-        .then(responses => {
-            // Response from Algolia:
-            // https://www.algolia.com/doc/api-reference/api-methods/search/#response-format
-            let upcoming = []
-            let successful = []
-            responses.hits.forEach((hit) => {
-              if (hit['End Time'] && new Date(hit['End Time']) > new Date()) {
-                upcoming.push(hit)
-              } else if
-                (hit['Deadline'] && new Date(hit['Deadline']) > new Date()) {
-                  upcoming.push(hit)
-                }
-                else {
-                successful.push(hit)
-              }
-            })
-            console.log(responses.hits)
-            this.setState({projects: responses.hits,
-              upcoming: upcoming, successful: successful,
-              loading: false});
-        });
+    db.collection("Project").where("Approved", "==", true).get().then((querySnapshot) => {
+      let upcoming = []
+      let successful = []
+      let projects = []
+      querySnapshot.forEach((doc) => {
+        var hit = doc.data()
+        hit._id = doc.id
+        projects.push(hit)
+        if (hit['End Time'] && new Date(hit['End Time']) > new Date()) {
+          upcoming.push(hit)
+        } else if
+          (hit['Deadline'] && new Date(hit['Deadline']) > new Date()) {
+            upcoming.push(hit)
+          }
+          else {
+          successful.push(hit)
+        }
 
 
-
-
+      })
+      this.setState({projects: projects,
+        upcoming: upcoming, successful: successful,
+        loading: false});
+      })
   }
 
   handleSearch = (e, input) => {

@@ -58,7 +58,7 @@ export default class Suggest extends React.Component{
         [fire.auth().currentUser.uid] : true,
       }
     }).then(() => {
-      Router.push(`/groups/${group}`)
+      Router.push(`/group?groupId=${group}`,`/groups/${group}`)
     })
   }
 

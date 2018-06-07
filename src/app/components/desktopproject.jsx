@@ -666,13 +666,13 @@ import fire from '../fire';
                           secondary={true}
                           style={{marginRight: 20}}
                           label='Admin View' labelStyle={{textTransform: 'none', fontWeight: 700, padding: '10px', fontSize: '16px'}}
-                            onTouchTap={() => Router.push(`/admin?project=${this.state.project._id}&tab=admin`
+                            onClick={() => Router.push(`/admin?project=${this.state.project._id}&tab=admin`
                               , Router.asPath + '/admin')}
                              />
                        <FlatButton
                          secondary={true}
                          label='Edit Project' labelStyle={{textTransform: 'none', padding: '10px', fontWeight: 700,  fontSize: '16px'}}
-                           onTouchTap={() => Router.push(`/admin?project=${this.state.project._id}&tab=edit-project`
+                           onClick={() => Router.push(`/admin?project=${this.state.project._id}&tab=edit-project`
                              , Router.asPath + '/admin')}
                             />
                      </div>
@@ -890,9 +890,7 @@ import fire from '../fire';
                   </div>
                   <div className='join-container' style={{width: 350, paddingLeft: 150}}>
                     <div style={{paddingTop: 60}}>
-                      {this.props.params.groupId ?
-                        <div style={{height: 50}}/>
-                        :
+                      {
                         !this.props.joined && this.props.project['People Pledged'] >= this.props.project['Maximum People'] ?
                         <div>
                           <RaisedButton
@@ -962,7 +960,7 @@ import fire from '../fire';
 
                 <div style={{height: 60}}/>
                   <SignupModal
-                    _id={this.props.params.project}
+                    _id={this.props.project._id}
                     type={this.state.modalType}
 
                     open={this.state.modalOpen}

@@ -10,7 +10,7 @@ import Search from 'material-ui/svg-icons/action/search';
 import FlatButton from 'material-ui/FlatButton';
 import MediaQuery from 'react-responsive';
 import DocumentTitle from 'react-document-title';
-//import {CharityPhotoUpload} from '../editcharity.jsx';
+import {CharityPhotoUpload} from '../../pages/editcharity.jsx';
 import Dialog from 'material-ui/Dialog';
 
 
@@ -297,7 +297,7 @@ export default class OrganisationLookup extends React.Component{
               <div className='form' style={{textAlign: 'center', paddingLeft: '50px', paddingRight: '50px'}}>
                 <p className='desktop-header'>
                   Add your details</p>
-                <div style={{width: '100%', paddingBottom: '16px', boxSizing: 'border-box'}}>
+                <div style={{width: '100%', paddingBottom: '16px', boxSizing: 'border-box', textAlign: 'left'}}>
                   <p style={{margin: '0px', paddingRight: '24px', paddingBottom: '16px', textAlign: 'left'}}>
                   First, type your organisation's name, then we'll see if we can find your details for you.
                   </p>
@@ -381,9 +381,9 @@ export default class OrganisationLookup extends React.Component{
                     :
                     null
                   }
-                  /*
+
                   <CharityPhotoUpload changeImage={(imageUrl) => this.setState({picture: imageUrl})}/>
-                  */
+
                   <div style={{padding: '6px'}}>
                     <p style={styles.header}>
                     Organisation Name*
@@ -662,9 +662,9 @@ export default class OrganisationLookup extends React.Component{
                     :
                     null
                   }
-                  /*
+
                   <CharityPhotoUpload changeImage={(imageUrl) => this.setState({picture: imageUrl})}/>
-                  */
+
                   <div style={{padding: '6px'}}>
                     <p style={styles.header}>
                     Organisation Name*

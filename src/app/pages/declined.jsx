@@ -198,7 +198,8 @@ export default class CantCome extends React.Component{
     console.log(this.state)
 
     return(
-      <App style={{width: '100%', display: 'flex', justifyContent: 'center'}}>
+      <App >
+        <div style={{width: '100%', display: 'flex', justifyContent: 'center'}}>
         {this.state.loading ?
           <div/> :
         <div style={{maxWidth: '1000px', width: '100%', marginTop: 30, marginLeft: 16, marginRight: 16}}>
@@ -243,6 +244,7 @@ export default class CantCome extends React.Component{
           </div>
         </div>
       }
+      </div>
     </App>
     )
   }
