@@ -36,6 +36,7 @@ import CaseStudy from '../components/casestudy.jsx';
 import fire from '../fire';
 import Head from 'next/head'
 import App from "../components/App"
+import ChooseDates from "../components/choose-dates.jsx";
 
 let db = fire.firestore()
 
@@ -167,9 +168,6 @@ export default class Project extends React.Component {
   }
 
   static async getInitialProps({req, pathname, query}) {
-    console.log(req)
-    console.log(pathname)
-    console.log(query)
     const res =  await db.collection("Project").doc(query.project).get()
     .then((doc) => {
           var project = doc.data()
@@ -200,6 +198,19 @@ export default class Project extends React.Component {
       this.setState({loading: false, project: project})
       localStorage.removeItem('project')
     }
+
+    db.collection("Project").doc(Router.query.project).collection("SubProject").get()
+    .then((sub) => {
+      if (sub.docs.length > 0) {
+        var data = []
+        sub.forEach((subDoc) => {
+          var elem = subDoc.data()
+          elem._id = subDoc.id
+          data.push(elem)
+        })
+        this.setState({subProjects: data})
+      }
+    })
 
     db.collection("Project").doc(Router.query.project).get().then((doc) => {
       var project = doc.data()
@@ -257,10 +268,6 @@ export default class Project extends React.Component {
 
 
 
-  }
-
-  handleLinkedInAuthorize = () => {
-    browserHistory.push(`https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=77x7m5rz1zpal8&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Flinkedin%2F%3Fid%3D${this.state.project.id}&state=987654321&scope=r_basicprofile`)
   }
 
 
@@ -481,7 +488,21 @@ export default class Project extends React.Component {
           <Loading/>
             :
           <DocumentTitle title={this.state.project.Name}>
+
+
+
             <div>
+              {this.state.chooseDates ?
+              <div style={{zIndex: 5, height: '100vh',
+                boxSizing: 'border-box', width: '100vw', padding: 32,
+                position: 'fixed',backgroundColor: 'white'}}>
+                <ChooseDates
+                  subProjects={this.state.subProjects}
+                  closeModal={() => this.setState({chooseDates: false})}
+                  />
+              </div>
+              :
+              null}
           <MediaQuery minDeviceWidth={700}>
             <DesktopProject project={this.state.project}
               joined={this.state.joined}
@@ -549,7 +570,7 @@ export default class Project extends React.Component {
               <LinearProgress  style={{height: '5px', borderRadius: '1.5px', marginTop: 20}} color={'#00ABE8'} mode="determinate"
                 min={0} max={this.state.project['Target People']}
                 value={this.state.project['People Pledged'] === null ? 0 : this.state.project['People Pledged']} />
-              <div style={{textAlign: 'right', paddingTop: 6}} className='to-go-text'>
+              <div style={{textAlign: 'right', paddingTop: 6, fontWeight: 'lighter'}} className='to-go-text'>
                 {required} more {required === 1 ? 'person' : 'people'} needed
               </div>
             </div>
@@ -605,41 +626,40 @@ export default class Project extends React.Component {
             </div>
 
 
-            <div style={{display: 'flex', justifyContent: 'center', padding: '20px 35px 20px 35px'}}>
-              {!this.state.joined && this.state.project['People Pledged'] >= this.state.project['Maximum People']?
+            <div style={{display: 'flex',
+              bottom: 0,position: 'fixed', zIndex: 4, boxSizing: 'border-box',
+              backgroundColor: 'white', width: '100%', borderTop: '1px solid rgb(216, 216, 216)',
+              justifyContent: 'center', padding: '20px 15px 20px 15px'}}>
+              {this.state.subProjects ?
+                <div style={{display: 'flex', width: '100%', alignItems: 'center'}}>
+                  <div style={{flex: 1, textAlign: 'left', fontSize: '14px',
+                  color: '#65A1e7'}}>
+                    265 reviews
+                  </div>
+                  <div style={{width: 140}}>
+                     <RaisedButton
+                      primary={true} fullWidth={true}
+                       labelStyle={{letterSpacing: '0.6px', fontWeight: 'bold',fontSize: '18px'}}
+                      label='See Dates' onClick={() => this.setState({chooseDates: true})} />
+                   </div>
+               </div>
+                 :
+
+                !this.state.joined && this.state.project['People Pledged'] >= this.state.project['Maximum People']?
                 <div>
                   <RaisedButton
                      primary={true} fullWidth={true}
                       labelStyle={{letterSpacing: '0.6px', fontWeight: 'bold'}}
                      label="Join Waiting List" onTouchTap={this.handleModal} />
                  </div>
-                 :
-                !this.state.joined && this.state.challenge ?
-                <div>
-                  <div style={{marginBottom: 10}}>
-                  <span style={{fontWeight: 700, fontSize: '18px', display: 'inline-block', width: '100%'}}>
-                    {`Accept ${this.state.challengeUser.Name}'s challenge:`}
-                </span>
-                <span style={{fontWeight: 'lighter', color: 'grey', fontSize: '14px'}}>(They're not coming unless you are)</span>
-                </div>
-                <RaisedButton
-                   primary={true} fullWidth={true}
-                    labelStyle={{letterSpacing: '0.6px', fontWeight: 'bold', fontSize: '18px'}}
-                   label='Join Now' onTouchTap={this.handleModal} />
-                 </div>
+
                  :
                  !this.state.joined ?
                 <div>
-                    {!this.state.challengeExists && !this.state.challengeExists && !this.state.challenge ?
-                      <div>
-                  <RaisedButton
-                     primary={true} fullWidth={true}
-                      labelStyle={{letterSpacing: '0.6px', fontWeight: 'bold',  fontSize: '18px'}}
-                     label="Join Now" onTouchTap={this.handleModal} />
-                 </div> : <RaisedButton
+                   <RaisedButton
                     primary={true} fullWidth={true}
                      labelStyle={{letterSpacing: '0.6px', fontWeight: 'bold',fontSize: '18px'}}
-                    label='Join Now' onTouchTap={this.handleModal} />}
+                    label='Join Now' onTouchTap={this.handleModal} />
                    </div>
              :
              <RaisedButton
@@ -651,7 +671,7 @@ export default class Project extends React.Component {
 
                   </div>
 
-                  <div style={{paddingLeft: 16, paddingRight: 16}}>
+                  <div style={{paddingLeft: 10, paddingRight: 10}}>
                     <Suggest projectId={this.state.project._id}/>
                   </div>
                   <div style={{position: 'sticky'}}>
@@ -664,49 +684,88 @@ export default class Project extends React.Component {
                     onComplete={this.onComplete}/>
                 </div>
 
-                <h2 style={{paddingLeft: 16, textAlign: 'left'}}> What's going on?</h2>
-            <div style={{padding: '20px 35px 20px 35px', textAlign: 'left'}}>
+                <h2 style={{paddingLeft: 10, paddingTop: 16,textAlign: 'left', fontSize: '16px'}}>
+                   What's going on?</h2>
+            <div style={{padding: '0px 10px 20px 10px', textAlign: 'left'}}>
 
                  <div dangerouslySetInnerHTML={this.descriptionMarkup()}/>
 
 
             </div>
-            {this.state.projectReviews ?
 
-                <div style={{padding: 16, textAlign: 'left'}}>
-                  <h2>Previous reviews</h2>
 
-                  {this.state.projectReviews.map((review) => (
-                    <ProjectReviewComponent review={review}/>
-                  ))}
+                        <p style={{fontSize: '16px', fontWeight: 700, margin:0, paddingBottom : 20,
+                          paddingLeft: 10, textAlign: 'left'}}>
+                          Where this will be
+                        </p>
+                          {this.state.project.Geopoint ?
+                            <div style={{marginBottom: 16}}>
+                              <MyMapComponent
+                                Geopoint={this.state.project.Geopoint}
+                                address={this.state.project.Location}
+                                isMarkerShown
+                                googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyBnLdq8kJzE87Ba_Q5NEph7nD6vkcXmzhA&v=3.exp&libraries=geometry,drawing,places"
+                                loadingElement={<div style={{ height: `100%` , borderRadius: 6}} />}
+                                containerElement={<div style={{ height: `350px`}} />}
+                                mapElement={<div style={{ height: `100%`, borderRadius: 6 }} />} />
+                            </div>
+                          : null}
+
+            {this.state.subProjects ?
+              <div>
+              <p style={{fontSize: '16px', fontWeight: 700, margin:0,
+                paddingLeft: 10, textAlign: 'left'}}>
+                Upcoming Dates
+              </p>
+              <div style={{paddingLeft: 10, paddingRight: 10, paddingBottom: 20}}>
+                <ChooseDates
+                  limit={3}
+                  subProjects={this.state.subProjects}/>
+                <div
+                  style={{color: '#65A1e7', paddingTop: 24, paddingBottom: 24,
+                    textAlign: 'left',
+                  borderBottom: '1px solid rgb(219, 219, 219)'}}
+                  onClick={() => this.setState({chooseDates: true})}>
+                  See all available dates
                 </div>
-
-              :
-              null
-            }
-
-
-
-              {this.state.project.Geopoint ?
-                <div style={{marginBottom: 16}}>
-                  <MyMapComponent
-                    Geopoint={this.state.project.Geopoint}
-                    address={this.state.project.Location}
-                    isMarkerShown
-                    googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyBnLdq8kJzE87Ba_Q5NEph7nD6vkcXmzhA&v=3.exp&libraries=geometry,drawing,places"
-                    loadingElement={<div style={{ height: `100%` , borderRadius: 6}} />}
-                    containerElement={<div style={{ height: `100px`}} />}
-                    mapElement={<div style={{ height: `100%`, borderRadius: 6 }} />} />
+                <div
+                  style={{color: '#65A1e7', paddingTop: 24, paddingBottom: 24,
+                    textAlign: 'left',
+                  borderBottom: '1px solid rgb(219, 219, 219)'}}
+                  onClick={() => this.setState({chooseDates: true})}>
+                  Contact organiser
                 </div>
-              : null}
+              </div>
+            </div>
+            :
+            null}
 
 
 
 
 
 
+              {this.state.projectReviews ?
 
-            <div style={{boxSizing: 'border-box', padding: 24}}>
+                  <div style={{padding: 16, textAlign: 'left'}}>
+                    <p style={{fontSize: '16px', fontWeight: 700, margin:0,
+                      paddingLeft: 10, textAlign: 'left'}}>
+                      Reviews
+                    </p>
+
+                    {this.state.projectReviews.map((review) => (
+                      <ProjectReviewComponent review={review}/>
+                    ))}
+                  </div>
+
+                :
+                null
+              }
+
+
+
+
+            <div style={{boxSizing: 'border-box', padding: 10}}>
               <div style={{height: '36px', borderBottom: 'solid 1px #DDDDDD'}}/>
               <h1 style={{fontFamily: 'Permanent Marker', textAlign: 'left'}}>Who's In?</h1>
               <li>

@@ -3,6 +3,7 @@ import Header from "./Header"
 import Footer from "./footer.jsx"
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
+import "../style.css"
 
 var injectTapEventPlugin = require("react-tap-event-plugin");
 try {

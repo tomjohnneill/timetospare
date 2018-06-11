@@ -2,6 +2,7 @@ import { nextApp as next } from "./app/app"
 import { mars } from "./worlds/mars"
 import { jupiter } from "./worlds/jupiter"
 import { mailchimpAuth } from "./mailchimp/auth"
+import {getListOfLists, getContacts} from './mailchimp/import.js';
 
 /*
 Namespace application services with function groups.
@@ -24,4 +25,9 @@ const greetings = {
   // other funcs
 }
 
-export { app, greetings }
+const mailchimp = {
+  getListOfLists,
+  getContacts
+}
+
+export { app, greetings, mailchimp }

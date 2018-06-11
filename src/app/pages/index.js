@@ -14,7 +14,6 @@ import fire from '../fire';
 import TextField from 'material-ui/TextField';
 import RegisterInterest from '../components/registerinterest.jsx';
 import Subheader from 'material-ui/Subheader';
-import "../static/style.css"
 
 let db = fire.firestore()
 

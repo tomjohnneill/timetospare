@@ -19,7 +19,6 @@ export default class MyDocument extends Document {
             fontFamily: 'Nunito',
             color: '#484848',
             textDecoration: 'none',
-            color: 'inherit',
             listStyleType: 'none'
           }}
         className='body'>

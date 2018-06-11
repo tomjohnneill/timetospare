@@ -19,6 +19,8 @@ import SignupModal from './signupmodal.jsx';
 //import MessagingButton from '/imports/ui/components/messagingbutton.jsx';
 import fire from '../fire';
 import Head from 'next/head'
+import "../style.css"
+import 'react-datasheet/lib/react-datasheet.css';
 
 let db = fire.firestore()
 
@@ -38,6 +40,7 @@ const style = {
     paddingLeft: '16px',
     position: 'fixed',
     color: 'inherit',
+    fontWeight: 'normal',
     marginBottom: 56,
     top: 0,
     backgroundColor: 'white',
@@ -242,8 +245,6 @@ export default class Header extends React.Component {
         <Head>
           <title>Who's In?</title>
           <meta name="viewport" content="initial-scale=1.0, width=device-width" key="viewport" />
-          <link rel="stylesheet" href="/_next/static/style.css" />
-          <link rel="stylesheet" href="/_next/static/react-datasheet.css" />
           <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script>
         </Head>
         <AppBar
@@ -339,7 +340,6 @@ export default class Header extends React.Component {
                               <div
                                 onTouchTap={this.handleSignOut}
                                 style={{cursor: 'pointer',
-                                  fontWeight: 700,
                                   height: '100%', alignItems: 'center',
                                   display: 'flex',
                                   color: 'inherit',

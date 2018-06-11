@@ -12,6 +12,9 @@ import MediaQuery from 'react-responsive';
 import DocumentTitle from 'react-document-title';
 import {CharityPhotoUpload} from '../pages/editcharity.jsx';
 import Dialog from 'material-ui/Dialog';
+import fire from '../fire';
+
+let db = fire.firestore()
 
 const styles = {
   textfield: {
@@ -47,6 +50,31 @@ export default class OrganisationDetails extends React.Component {
 
   changeCharityInfo (id, e, nv) {
     this.setState({[id]: nv})
+  }
+
+  handleSubmit = () => {
+    this.setState({submitting: true})
+    var data = {
+      'Name': this.state.name ? this.state.name : this.state.searchText,
+      'Summary': this.state.activities ? this.state.activities : null,
+      'Description': this.state.activities ? this.state.activities : null ,
+      'Website': this.state.website ? this.state.website : null ,
+      'Email': this.state.email ? this.state.email : null,
+      'Address': this.state.address ? this.state.address: null,
+      'Logo': this.state.logo ? this.state.logo : null,
+      'Phone': this.state.phone ? this.state.phone : null,
+      'Postcode': this.state.postcode ? this.state.postcode : null,
+      'Facebook': this.state.facebook ? this.state.facebook : null,
+      'Instagram': this.state.instagram ? this.state.instagram : null,
+      'Twitter': this.state.twitter ? this.state.twitter: null,
+      "Owner": fire.auth().currentUser.uid,
+      'Featured Image': this.state.picture ? this.state.picture : null
+    }
+    var docRef = db.collection("Charity").doc()
+    docRef.set(data)
+    .then(() => {
+      Router.push(`/onboarding?organisation=${docRef.id}`, `/onboarding/${docRef.id}`)
+    })
   }
 
   render() {
@@ -202,7 +230,8 @@ export default class OrganisationDetails extends React.Component {
           </div>
           <div style={{height: 20}}/>
           <RaisedButton label='Save and Continue'
-            onTouchTap={this.handleNext}
+            disabled={this.state.submitting}
+            onTouchTap={this.handleSubmit}
             fullWidth={true}
             style={{height: '36px', marginTop: '16px', boxShadow: ''}} primary={true} overlayStyle={{height: '36px'}}
             buttonStyle={{height: '36px'}}
