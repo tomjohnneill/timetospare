@@ -272,11 +272,22 @@ export default class Header extends React.Component {
           iconElementRight={
                             <div style={{display: 'flex', alignItems: 'center', height: '100%'}}>
 
-                            <MediaQuery minDeviceWidth = {700}>
-                              {typeof window !== 'undefined' && !Router.asPath.includes('create-project') ?
+                            <MediaQuery minDeviceWidth={700}>
+                              {this.state.loading ||
+                                (typeof window !== 'undefined' && Router.asPath.includes('create-project')) ?
+                                null
+                                :
                                 <div
                                   className='link-container'
                                    style={{display: 'flex', height: '100%', alignItems: 'center'}}>
+                                   <Link prefetch style={{height: '100%'}} href='/create-organisation'>
+                                     <div style={{
+                                       cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
+
+                                       >
+                                       Organisations
+                                     </div>
+                                   </Link>
                                   <Link prefetch style={{height: '100%'}} href='/why'>
                                     <div style={{
                                       cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
@@ -293,14 +304,7 @@ export default class Header extends React.Component {
                                       About
                                     </div>
                                   </Link>
-                                  <Link href='/groups'>
-                                    <div style={{
-                                      cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
 
-                                      >
-                                      Groups
-                                    </div>
-                                  </Link>
                                   <Link prefetch href='/projects'>
                                     <div style={{
                                       cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
@@ -319,8 +323,7 @@ export default class Header extends React.Component {
                                        label={<span className='flexthis' style={{display: 'flex'}}>Start a Project</span>} onTouchTap={this.handleCreateProject}/>
 
                                </div>
-                               :
-                               null}
+                             }
 
                             </MediaQuery>
                             <Popover
@@ -335,6 +338,9 @@ export default class Header extends React.Component {
                                   </Link>
                                   <Link href='/edit-profile' prefetch>
                                     <MenuItem primaryText="Edit Profile" />
+                                  </Link>
+                                  <Link href='/your-calendar'>
+                                    <MenuItem primaryText="Calendar"/>
                                   </Link>
                                   <Link prefetch href='/groups'>
                                     <MenuItem primaryText="Groups" />

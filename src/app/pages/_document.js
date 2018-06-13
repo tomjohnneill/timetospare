@@ -24,7 +24,6 @@ export default class MyDocument extends Document {
         className='body'>
           <Main />
           <NextScript />
-          <script src="js/md5.min.js"></script>
         </body>
       </html>
     )

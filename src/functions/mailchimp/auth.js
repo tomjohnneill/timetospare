@@ -16,6 +16,7 @@ const mailchimpAuth = functions.https.onRequest((req, res) => {
     redirect_uri: encoded_url,
     code: code
   }
+  var access_token
   var body = querystring.stringify(data)
   console.log(body)
   fetch('https://login.mailchimp.com/oauth2/token', {
@@ -25,9 +26,23 @@ const mailchimpAuth = functions.https.onRequest((req, res) => {
     body: querystring.stringify(data)
   })
   .then(response => response.json())
+  .then(data =>
+    {
+      access_token = data.access_token
+      return fetch('https://login.mailchimp.com/oauth2/metadata', {
+          method: 'GET',
+          headers:
+          {
+            'Accept': 'application/json',
+            'Authorization': `OAuth ${data.access_token}`,
+         }
+        })
+    }
+    )
+  .then(response => response.json())
   .then(data => {
     console.log(data)
-    return res.redirect(SITE + '/mailchimp?access_token=' + data.access_token)
+    return res.redirect(SITE + `/mailchimp?access_token=${access_token}&api_endpoint=${data.api_endpoint}`)
   })
 })
 

@@ -34,6 +34,9 @@ export default class Onboarding extends React.Component {
           <p>Add your organisation details</p>
           <p onClick={() => Router.push(`/import-volunteers?organisation=${Router.query.organisation}`,
             `/import-volunteers/${Router.query.organisation}`)}>Import your volunteers</p>
+          <Link href={`/invite?organisation=${Router.query.organisation}`} prefetch>
+            <p>Send invites</p>
+          </Link>
           <p>Set admin accounts</p>
           <p>Quick create projects</p>
 

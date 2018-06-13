@@ -12,7 +12,9 @@ export default class Mailchimp extends React.Component {
 
   componentDidMount(props) {
     if (Router.query.access_token) {
-      this.setState({access_token: Router.query.access_token})
+      this.setState({access_token: Router.query.access_token,
+        api_endpoint: Router.query.api_endpoint
+      })
     }
   }
 
@@ -21,7 +23,9 @@ export default class Mailchimp extends React.Component {
       <div>
         <App>
           {this.state.access_token ?
-            <MailchimpSuccess access_token={this.state.access_token} />
+            <MailchimpSuccess access_token={this.state.access_token}
+              api_endpoint = {this.state.api_endpoint}
+               />
             :
             <MailchimpIntegrate/>
           }

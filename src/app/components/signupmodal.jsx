@@ -156,6 +156,8 @@ export default  class SignupModal extends React.Component {
       var phoneRaw = phoneTextRef.getValue()
       if (phoneRaw.substring(0,1) === '0') {
         var phoneNumber = "+44" + phoneRaw.substring(1)
+      } else if (phoneRaw.substring(0,2) === "44"){
+        var phoneNumber = "+" + phoneRaw
       } else {
         var phoneNumber = phoneRaw
       }

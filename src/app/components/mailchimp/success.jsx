@@ -47,7 +47,8 @@ export default class MailchimpSuccess extends React.Component {
       } else {
         this.setState({loading: true})
         db.collection("User").doc(fire.auth().currentUser.uid).update({
-          mailchimp_access_token : this.props.access_token
+          mailchimp_access_token : this.props.access_token,
+          mailchimp_api_endpoint: this.props.api_endpoint
         })
         .then(() => fire.auth().currentUser.getIdToken())
         .then((token) =>

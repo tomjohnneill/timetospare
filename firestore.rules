@@ -22,6 +22,11 @@ service cloud.firestore {
         allow read: if true;
         allow write: if request.resource.data.user == request.auth.uid;
       }
+
+    	match /SubProject/{id} {
+        allow read: if true;
+        allow write: if true;
+      }
      }
 
     match /User/{user} {
