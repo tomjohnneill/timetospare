@@ -8,7 +8,7 @@ import Router from 'next/router'
 import {orange500} from 'material-ui/styles/colors';
 import UploadPhoto from '../uploadphoto.jsx';
 import fire from '../../fire';
-//import 'react-quill/dist/quill.snow.css';
+import 'react-quill/dist/quill.snow.css';
 
 let db = fire.firestore()
 

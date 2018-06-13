@@ -10,7 +10,10 @@ export default class QuickCreate extends React.Component {
   render() {
     return (
       <div>
-        
+        <h2>Recurring events</h2>
+        <div>
+          Create an event
+        </div>
       </div>
     )
   }

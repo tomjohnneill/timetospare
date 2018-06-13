@@ -200,29 +200,30 @@ export default class EmbeddedProject extends React.Component {
                 style={{width: '100%', height: '170px', objectFit: 'cover'}}
                 />
               <div style={{paddingLeft: 24, paddingRight: 24}}>
-                    <div style={{fontSize: '32px', fontWeight: 'bold', textAlign: 'left',
+                {this.state.charity ?
+                <div className='charity-link-content'
+                   style={{display: 'flex', marginTop: 6, alignItems: 'center'}}>
+                  <div style={{marginRight: 10}} className='charity-icon'>
+                    {this.state.charity['Featured Image'] ?
+                      <img src={changeImageAddress(this.state.charity['Featured Image'], '50xauto')}
+                        style={{height: 25, width: 25, borderRadius: '50%', objectFit: 'cover'}}/>
+                      :
+                      <World style={{height: 25, width: 25}} color={'#484848'}/>
+                      }
+                  </div>
+                  <p className='charity-name' style={{margin: 0, fontSize: '14px'}}>
+                      {this.state.charity.Name}
+                  </p>
+                </div>
+                :
+                null}
+                    <div style={{fontSize: '24px', fontWeight: 'bold', textAlign: 'left',
                        margin: 0, marginTop: 10}}>
                       {this.state.project.Name}
                     </div>
-                    {this.state.charity ?
-                    <div className='charity-link-content'
-                       style={{display: 'flex', marginTop: 6, alignItems: 'center'}}>
-                      <div style={{marginRight: 10}} className='charity-icon'>
-                        {this.state.charity['Featured Image'] ?
-                          <img src={changeImageAddress(this.state.charity['Featured Image'], '50xauto')}
-                            style={{height: 25, width: 25, borderRadius: '50%', objectFit: 'cover'}}/>
-                          :
-                          <World style={{height: 25, width: 25}} color={'#484848'}/>
-                          }
-                      </div>
-                      <p className='charity-name' style={{margin: 0, fontSize: '14px'}}>
-                          {this.state.charity.Name}
-                      </p>
-                    </div>
-                    :
-                    null}
 
-                  <p style={{fontSize: '18px', fontWeight: 'light', textAlign: 'left'}}>
+
+                  <p style={{fontSize: '16px', fontWeight: 'light', textAlign: 'left'}}>
                     {this.state.project.Summary}
                   </p>
 

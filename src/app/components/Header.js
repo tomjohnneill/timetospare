@@ -145,6 +145,10 @@ export default class Header extends React.Component {
     });
   };
 
+  handlePopoverClose = () => {
+    this.setState({popoverOpen: false})
+  }
+
   handleChange(textField, event) {
         this.setState({
             [textField]: event.target.value
@@ -317,7 +321,31 @@ export default class Header extends React.Component {
                                </div>
                                :
                                null}
+
                             </MediaQuery>
+                            <Popover
+                              open={this.state.popoverOpen}
+                               anchorEl={this.state.anchorEl}
+                               anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+                               targetOrigin={{horizontal: 'left', vertical: 'top'}}
+                               onRequestClose={this.handlePopoverClose}>
+                               <Menu style={{width: 150}}>
+                                 <Link href='/profile' prefetch>
+                                   <MenuItem primaryText="Profile" />
+                                  </Link>
+                                  <Link href='/edit-profile' prefetch>
+                                    <MenuItem primaryText="Edit Profile" />
+                                  </Link>
+                                  <Link prefetch href='/groups'>
+                                    <MenuItem primaryText="Groups" />
+                                  </Link>
+
+                                    <MenuItem onClick={this.handleSignOut}
+                                      primaryText="Sign out" />
+
+
+                              </Menu>
+                            </Popover>
                             {this.state.loading ? null :
                               this.state.user ?
                               <div style={{
@@ -325,28 +353,24 @@ export default class Header extends React.Component {
                                   alignItems: 'center',
                                   display: 'flex'
                                 }}>
-                                <Link href='/profile' prefetch>
-                                <IconButton onTouchTap={() => Router.push('/profile')}
 
-                                style={{padding: 0, height: 40, width: 40, marginRight: 16}}>
+                                <IconButton onTouchTap={(event) => {
+                                     event.preventDefault();
+                                      this.setState({
+                                    popoverOpen: true,
+                                    anchorEl: event.currentTarget,
+                                  })}}
+
+                                style={{padding: 0, height: 40, width: 40}}>
                                 {this.state.userPicture ?
                                 <Avatar src={this.state.userPicture}/>
                                 :
                                 <Avatar> {this.state.user.Name.substring(0,1)}</Avatar>
                                 }
                               </IconButton>
-                              </Link>
-                              <MediaQuery minDeviceWidth={700}>
-                              <div
-                                onTouchTap={this.handleSignOut}
-                                style={{cursor: 'pointer',
-                                  height: '100%', alignItems: 'center',
-                                  display: 'flex',
-                                  color: 'inherit',
-                                  display: 'flex',
-                                  paddingLeft: 10, paddingRight: 10}}>Sign Out
-                                </div>
-                                </MediaQuery>
+
+
+
                               </div> :
                             null}
                             {!this.state.user ?

@@ -23,7 +23,6 @@ import UploadPhoto from '../components/uploadphoto.jsx';
 import Snackbar from 'material-ui/Snackbar';
 import Loading from '../components/loading.jsx';
 import PrivateFeedback from '../components/feedback.jsx';
-import ReactQuill from 'react-quill';
 import {CleanTick, Cross} from '../components/icons.jsx';
 import FileDownload from 'material-ui/svg-icons/file/file-download';
 import {CSVLink} from 'react-csv';
@@ -70,7 +69,7 @@ const defaultStyles = {
 
 
 const options = {
-  location: window.google ?
+  location: typeof window !== 'undefined' && window.google ?
     new window.google.maps.LatLng(51.5, 0.12)
   :null,
   radius: 10000,
@@ -531,6 +530,9 @@ export class EditProjectForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {loading: true,allTags: categories, snackbar: false, deleteOpen: false}
+    if (typeof window !== 'undefined') {
+      this.ReactQuill = require('react-quill')
+    }
   }
 
   handleSet = (id, e, data) => {
@@ -637,6 +639,7 @@ export class EditProjectForm extends React.Component {
   }
 
   render() {
+    const ReactQuill = this.ReactQuill
     console.log(this.state)
     const inputProps = {
         value: this.state.address,
@@ -888,11 +891,14 @@ export class EditProjectForm extends React.Component {
               <p style={styles.header}>
                 Project Description
               </p>
+              {typeof window !== 'undefined' && ReactQuill ?
               <ReactQuill
                 style={{fontFamily: 'Nunito'}}
                 modules={modules}
                 value={this.state.project.Description}
                   onChange={this.handleChangeDescription} />
+                :
+                null}
 
             </div>
 
@@ -919,7 +925,8 @@ export class EditProjectForm extends React.Component {
 export default class AdminView extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {loading: true, selected: Router.query.tab ? Router.query.tab  : 'admin'
+    this.state = {loading: true, selected: typeof window !== 'undefined' && Router.query.tab ?
+      Router.query.tab  : 'admin'
       , inkBarLeft: 15}
   }
 
@@ -929,9 +936,9 @@ export default class AdminView extends React.Component {
     console.log(e)
     var rect = e.target.getBoundingClientRect()
     console.log(rect)
-    if (window.document.body.clientWidth > 700) {
+    if (typeof window !== 'undefined' && window.document.body.clientWidth > 700) {
       this.setState({selected: tab,
-        inkBarLeft: (rect.width-60)/2  + rect.x - (window.document.body.clientWidth - 900) /2,
+        inkBarLeft: (rect.width-60)/2  + rect.x - ( typeof window !== 'undefined' && window.document.body.clientWidth - 900) /2,
       })
     } else {
       this.setState({selected: tab,
@@ -1141,11 +1148,13 @@ export default class AdminView extends React.Component {
               onTouchTap={(e) => this.changeAnchorEl('leave-reviews', e)}
                 buttonStyle={this.state.selected === 'leave-reviews' ? styles.selectedTab : styles.tab}
              value="leave-reviews">
+             {typeof window !== 'undefined' ?
              <UserReviewPage
                projectId={Router.query.project}
 
                 engagements={this.state.engagements}/>
-
+              :
+              null}
           </Tab>
 
           <Tab label="Edit Project"
@@ -1153,7 +1162,12 @@ export default class AdminView extends React.Component {
               onTouchTap={(e) => this.changeAnchorEl('editproject', e)}
                 buttonStyle={this.state.selected === 'editproject' ? styles.selectedTab : styles.tab}
              value="editproject">
-             <EditProjectForm projectId={Router.query.project}/>
+             {typeof window !== 'undefined' ?
+               <EditProjectForm projectId={Router.query.project}/>
+               :
+               null
+             }
+
           </Tab>
 
           <Tab label="Private Feedback"
@@ -1161,7 +1175,10 @@ export default class AdminView extends React.Component {
               onTouchTap={(e) => this.changeAnchorEl('privatefeedback', e)}
                 buttonStyle={this.state.selected === 'privatefeedback' ? styles.selectedTab : styles.tab}
              value="privatefeedback">
+             {typeof window !== 'undefined' ?
              <PrivateFeedback projectId={Router.query.project}/>
+             :
+             null}
           </Tab>
 
         </Tabs>
