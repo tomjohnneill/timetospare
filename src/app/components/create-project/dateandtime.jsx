@@ -8,6 +8,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import Checkbox from 'material-ui/Checkbox';
 import Link from "next/link"
 import Router from 'next/router'
+import TypeOfDate from './type-of-date.jsx';
 import {PlacesWithStandaloneSearchBox} from '../placesearch.jsx';
 
 const styles = {
@@ -184,6 +185,10 @@ class Form extends React.Component {
     this.setState({remote: checked})
   }
 
+  pushData = (key, value) => {
+    this.setState({[key]: value})
+  }
+
   render() {
     console.log(this.state)
     return (
@@ -196,7 +201,7 @@ class Form extends React.Component {
             <div style={{display: 'flex'}}>
               <div style={{flex: 1}}>
                 <p style={styles.header}>
-                  Where is this happenning?
+                  Where is this happening?
                 </p>
                 <PlacesWithStandaloneSearchBox
                   bounds={null}
@@ -228,82 +233,11 @@ class Form extends React.Component {
             </div>
 
           </div>
-        <div style={{width: '100%', paddingBottom: '16px', boxSizing: 'border-box'}}>
-          <div style={{width: '100%',  paddingBottom: '32px',
-             boxSizing: 'border-box'}}>
-             <div style={{width: '70%', display: 'inline-block'}}>
-            <p style={styles.header}>
-              When does your project start?
-            </p>
-
-            <DatePicker
-               style={styles.inputStyle}
-                   autoOk={true}
-                 underlineShow={false}
-                 value={this.state.startDate}
-                 onChange={this.handleSetStartDate}
-                 hintStyle={{  bottom: '8px'}}
-                 shouldDisableDate={disableDates}
-                 hintText="Date" textFieldStyle={styles.textfield}/>
-            </div>
+          <TypeOfDate
+            pushData = {this.pushData}
+            />
 
 
-              <div style={{width: '25%', display: 'inline-block', marginLeft: '5%'}}>
-                <p style={styles.header}>
-                  Start time?
-                </p>
-
-               <TimePicker
-                style={styles.inputStyle}
-                  underlineShow={false}
-                  value={this.state.startTime}
-                  minutesStep={5}
-                  format='24hr'
-                  onChange={this.handleSetStartTime}
-                  hintStyle={{  bottom: '8px'}}
-                  hintText="Time" textFieldStyle={styles.textfield}/>
-              </div>
-          </div>
-
-          <div style={{width: '100%',  paddingBottom: '32px',
-             boxSizing: 'border-box'}}>
-             <div style={{width: '70%', display: 'inline-block'}}>
-            <p style={styles.header}>
-              When does your project finish?
-            </p>
-
-            <DatePicker
-               style={styles.inputStyle}
-                 underlineShow={false}
-                 autoOk={true}
-                 shouldDisableDate={disableDates}
-                 value={this.state.endDate}
-                 onChange={this.handleSetEndDate}
-                 hintStyle={{  bottom: '8px'}}
-                 hintText="Date" textFieldStyle={styles.textfield}/>
-            </div>
-
-
-              <div style={{width: '25%', display: 'inline-block', marginLeft: '5%'}}>
-                <p style={styles.header}>
-                  End time?
-                </p>
-
-               <TimePicker
-                style={styles.inputStyle}
-                  underlineShow={false}
-                  minutesStep={5}
-                  value={this.state.endTime}
-                  format='24hr'
-                  onChange={this.handleSetEndTime}
-                  hintStyle={{  bottom: '8px'}}
-                  hintText="Time" textFieldStyle={styles.textfield}/>
-              </div>
-          </div>
-
-
-
-        </div>
         <RaisedButton label='Previous' backgroundColor='#C5C8C7'
             onTouchTap={this.handlePrevious}
             style={{marginRight: 16, height: '36px', boxShadow: ''}} overlayStyle={{height: '36px'}}

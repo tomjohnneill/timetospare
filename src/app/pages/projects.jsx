@@ -19,6 +19,7 @@ import Masonry from 'react-masonry-css';
 import Loading from '../components/loading.jsx';
 import SignupModal from '../components/signupmodal.jsx';
 import App from "../components/App"
+import withMui from '../components/hocs/withMui';
 
 import fire from '../fire';
 
@@ -215,7 +216,7 @@ export class RegisterInterest extends React.Component {
   }
 }
 
-export default class AllProjects extends React.Component {
+class AllProjects extends React.Component {
   constructor(props) {
     super(props)
     console.log(this.props)
@@ -418,3 +419,5 @@ export default class AllProjects extends React.Component {
     )
   }
 }
+
+export default withMui(AllProjects)

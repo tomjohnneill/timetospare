@@ -21,6 +21,7 @@ import SignupModal from '../components/signupmodal.jsx';
 import Dropzone from 'react-dropzone';
 import fire from '../fire';
 import App from "../components/App"
+import withMui from '../components/hocs/withMui';
 
 let db = fire.firestore()
 
@@ -784,7 +785,7 @@ export class GroupMembers extends React.Component {
   }
 }
 
-export default class GroupPage extends React.Component {
+class GroupPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {userIsMember: false, selected: 'projects', inkBarLeft: 20.2,
@@ -1236,3 +1237,5 @@ export default class GroupPage extends React.Component {
     )
   }
 }
+
+export default withMui(GroupPage)

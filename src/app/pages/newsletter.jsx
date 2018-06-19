@@ -5,6 +5,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import Chip from 'material-ui/Chip';
 import fire from '../fire';
 import App from "../components/App"
+import withMui from '../components/hocs/withMui';
 
 let db = fire.firestore()
 
@@ -46,7 +47,7 @@ const styles = {
   },
 }
 
-export default class NewsletterData extends React.Component {
+class NewsletterData extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -196,3 +197,5 @@ export default class NewsletterData extends React.Component {
 
   }
 }
+
+export default withMui(NewsletterData)

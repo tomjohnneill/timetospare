@@ -9,6 +9,7 @@ import {changeImageAddress} from '../components/desktopproject.jsx';
 import Link from "next/link"
 import Router from 'next/router'
 import App from "../components/App"
+import withMui from '../components/hocs/withMui';
 
 const styles = {
   title: {
@@ -132,7 +133,7 @@ const styles = {
   }
 }
 
-export default class NewWhy extends React.Component {
+class NewWhy extends React.Component {
   constructor(props) {
     super(props);
     this.state = {}
@@ -669,3 +670,5 @@ export default class NewWhy extends React.Component {
     )
   }
 }
+
+export default withMui(NewWhy)

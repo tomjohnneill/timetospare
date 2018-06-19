@@ -3,11 +3,12 @@ import Calendar from '../components/calendar.jsx';
 import App from '../components/App';
 import fire from '../fire';
 import Loading from '../components/loading.jsx';
-
+import "react-big-calendar/lib/css/react-big-calendar.css"
+import withMui from '../components/hocs/withMui';
 
 let db = fire.firestore()
 
-export default class YourCalendar extends React.Component {
+class YourCalendar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {}
@@ -28,6 +29,7 @@ export default class YourCalendar extends React.Component {
               .doc(eng.data().SubProject).get()
               .then((subDoc) => {
                     var subElem = subDoc.data()
+                    console.log(subElem)
                     subElem._id = subDoc.id
                     subElem.Name = elem.Name
                     subElem.Location = elem.Location
@@ -88,3 +90,5 @@ export default class YourCalendar extends React.Component {
     )
   }
 }
+
+export default withMui(YourCalendar)

@@ -15,6 +15,7 @@ import MediaQuery from 'react-responsive';
 import Loading from '../components/loading.jsx';
 import App from "../components/App"
 import fire from '../fire';
+import withMui from '../components/hocs/withMui';
 
 let db = fire.firestore()
 
@@ -425,7 +426,7 @@ class ProjectsOrganised extends React.Component {
   }
 }
 
-export default class Profile extends React.Component {
+class Profile extends React.Component {
   constructor(props) {
     super(props);
     this.state = {user: {}, loading: true, slideIndex: 0}
@@ -698,3 +699,5 @@ export default class Profile extends React.Component {
     )
   }
 }
+
+export default withMui(Profile)

@@ -93,6 +93,16 @@ service cloud.firestore {
        allow read: if exists(/databases/$(database)/documents/Admins/$(request.auth.uid))
      }
 
+   match /Lists/{listId} {
+      allow read;
+      allow write;
+
+      match /Members/{memberId} {
+        allow read;
+        allow write;
+      }
+    }
+
     match /emailTemplates/{email} {
      allow read;
      allow write: if exists(/databases/$(database)/documents/Admins/$(request.auth.uid))

@@ -16,6 +16,7 @@ import {PhotoUpload} from './profile.jsx';
 import Snackbar from 'material-ui/Snackbar';
 import App from "../components/App"
 import fire from '../fire';
+import withMui from '../components/hocs/withMui';
 
 let db = fire.firestore()
 
@@ -53,7 +54,7 @@ const styles = {
   }
 }
 
-export default class EditProfile extends React.Component {
+class EditProfile extends React.Component {
   constructor(props) {
     super(props);
     this.state = {loading: true, selected: 'projects'}
@@ -306,3 +307,5 @@ export default class EditProfile extends React.Component {
     )
   }
 }
+
+export default withMui(EditProfile)

@@ -7,11 +7,16 @@ import OrgLookup from '../components/create-project/organisationlookup.jsx'
 import OrgType from '../components/create-project/organisationtype.jsx'
 import Basics from '../components/create-project/basics.jsx'
 import Story from '../components/create-project/story.jsx'
+import withMui from '../components/hocs/withMui';
 
-export default class CreateProject extends React.Component {
+class CreateProject extends React.Component {
   constructor(props) {
     super(props)
     this.state = {}
+  }
+
+  componentDidMount(props) {
+    this.setState({stage: Router.query.stage})
   }
 
   getCreatePage = (query) => {
@@ -46,11 +51,13 @@ export default class CreateProject extends React.Component {
   render() {
     return (
       <App>
-        {typeof window !== 'undefined' ?
-          this.getCreatePage(Router.query.stage)
+        {this.state.stage ?
+          this.getCreatePage(this.state.stage)
           :
           null}
       </App>
     )
   }
 }
+
+export default withMui(CreateProject)

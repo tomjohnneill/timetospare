@@ -5,11 +5,12 @@ import RaisedButton from 'material-ui/RaisedButton';
 import Router from 'next/router'
 import fire from '../fire';
 import App from "../components/App"
+import withMui from '../components/hocs/withMui';
 
 let db = fire.firestore()
 
 
-export default class EmailTemplateFrontPage extends React.Component {
+class EmailTemplateFrontPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {loading: true}
@@ -71,3 +72,5 @@ export default class EmailTemplateFrontPage extends React.Component {
     )
   }
 }
+
+export default withMui(EmailTemplateFrontPage)

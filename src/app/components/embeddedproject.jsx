@@ -66,7 +66,17 @@ const styles = {
 export default class EmbeddedProject extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {loading: true}
+    let project = this.props.project
+    if (typeof project['Start Time'] === 'string') {
+      project['Start Time'] = new Date(project['Start Time'])
+      project['End Time'] = new Date(project['End Time'])
+    }
+    if (project) {
+      this.state = {loading: false, project: project}
+    } else {
+      this.state = {loading: true}
+    }
+
   }
 
   componentDidMount(props) {

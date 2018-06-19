@@ -11,6 +11,7 @@ let db = fire.firestore()
 import {changeImageAddress} from '../components/desktopproject.jsx';
 import Head from 'next/head'
 import CustomInvite from '../components/custom-invite.jsx';
+import withMui from '../components/hocs/withMui';
 
 const styles = {
   number: {
@@ -29,7 +30,7 @@ const styles = {
 }
 
 
-export default class Invitation extends React.Component {
+class Invitation extends React.Component {
   constructor(props) {
     super(props);
     this.state = {type: this.props.type ? this.props.type : 'signup', loading: false, pwned: null,
@@ -71,3 +72,5 @@ export default class Invitation extends React.Component {
     )
   }
 }
+
+export default withMui(Invitation)

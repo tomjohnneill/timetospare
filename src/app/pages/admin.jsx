@@ -28,6 +28,7 @@ import FileDownload from 'material-ui/svg-icons/file/file-download';
 import {CSVLink} from 'react-csv';
 import SignupModal from '../components/signupmodal.jsx';
 import 'react-quill/dist/quill.snow.css';
+import withMui from '../components/hocs/withMui';
 import fire from '../fire';
 
 let db = fire.firestore()
@@ -922,7 +923,7 @@ export class EditProjectForm extends React.Component {
   }
 }
 
-export default class AdminView extends React.Component {
+class AdminView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {loading: true, selected: typeof window !== 'undefined' && Router.query.tab ?
@@ -1196,3 +1197,5 @@ export default class AdminView extends React.Component {
     )
   }
 }
+
+export default withMui(Admin)

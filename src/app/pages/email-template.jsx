@@ -6,10 +6,11 @@ import Link from "next/link"
 import Router from 'next/router'
 import TextField from 'material-ui/TextField';
 import App from "../components/App"
+import withMui from '../components/hocs/withMui';
 
 let db = fire.firestore()
 
-export default class EmailTemplateBuilder extends React.Component {
+class EmailTemplateBuilder extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -151,3 +152,5 @@ export default class EmailTemplateBuilder extends React.Component {
     )
   }
 }
+
+export default withMui(EmailTemplateBuilder)

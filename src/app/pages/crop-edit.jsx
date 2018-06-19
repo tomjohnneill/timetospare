@@ -6,10 +6,11 @@ import Router from 'next/router'
 import RaisedButton from 'material-ui/RaisedButton';
 import App from "../components/App"
 import fire from '../fire';
+import withMui from '../components/hocs/withMui';
 
 let db = fire.firestore()
 
-export default class ImageCrop extends React.Component {
+class ImageCrop extends React.Component {
   constructor(props) {
     super(props);
     this.state = {}
@@ -65,3 +66,5 @@ export default class ImageCrop extends React.Component {
     )
   }
 }
+
+export default withMui(ImageCrop)

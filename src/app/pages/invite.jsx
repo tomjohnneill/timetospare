@@ -6,8 +6,12 @@ import fire from '../fire';
 import TextField from 'material-ui/TextField';
 import FontIcon from 'material-ui/FontIcon';
 import IconButton from 'material-ui/IconButton';
+import FlatButton from 'material-ui/FlatButton';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import Share from '../components/share.jsx';
+import Checkbox from 'material-ui/Checkbox';
+import RaisedButton from 'material-ui/RaisedButton';
+import withMui from '../components/hocs/withMui';
 
 let db = fire.firestore()
 
@@ -20,7 +24,8 @@ const styles = {
     boxSizing: 'border-box',
     textAlign: 'left',
     display: 'flex',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    alignItems: 'center'
   },
   icon: {
     marginRight: '16px',
@@ -38,10 +43,18 @@ const styles = {
     },
 }
 
-export default class Invite extends React.Component {
+class Invite extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {}
+    this.state = {allow: true}
+  }
+
+  handleBack = () => {
+    Router.back()
+  }
+
+  handleSave = () => {
+    Router.back()
   }
 
   componentDidMount(props) {
@@ -61,13 +74,29 @@ export default class Invite extends React.Component {
   render() {
     console.log(this.state.link)
     return (
-      <div style={{paddingTop: 20}}>
+      <div>
         <App>
           <div style={{display: 'flex', flexWrap: 'wrap' ,justifyContent: 'center'
-            ,textAlign: 'left',}}>
-              <div style={{ maxWidth: 700, width: '100%', padding: 20, boxSizing: 'border-box'}}>
+            ,textAlign: 'left',backgroundColor: '#F5F5F5', paddingBottom: 200}}>
+            <div style={{width: 500, maxWidth: '100vw', boxSizing: 'border-box'
+              ,backgroundColor: 'white', padding: 20, marginTop: 20}}>
+              {
+                this.state.organisation ?
+                <div>
+                  <h2>Customise your signup form</h2>
+                  <div style={{borderRadius: 2, border: '1px solid #DBDBDB', maxWidth: 400}}>
+                    <CustomInvite demo={true} organisation={this.state.organisation}/>
+                  </div>
+                </div>
+                :
+                null
+              }
+            </div>
+
+              <div style={{ maxWidth: 600, width: '100%', padding: 20, backgroundColor: 'white',
+                 boxSizing: 'border-box', marginTop: 20}}>
                 <h2 style={{width: '100%'}}>Send invites to your volunteers</h2>
-                <p style={{fontWeight: 'lighter'}}>
+                <p style={{fontWeight: 'lighter', maxWidth: 500}}>
                   Once your volunteers are signed up, they will be able to look
                   through all your projects and choose what they would most like to do.
                 </p>
@@ -96,23 +125,28 @@ export default class Invite extends React.Component {
                     emailBody={this.state.link}
                     smsbody={this.state.link}
                     url={this.state.link}/>
+                    <li style={styles.line} >
+                      <div style={{width: 40, paddingLeft: 6}}>
+                        <Checkbox
+                          checked={this.state.allow}
+                          onCheck={() => this.setState({allow: !this.state.allow})}
+                          />
+                      </div>
+                      Allow us to send invites
+                    </li>
                 </div>
+                <div style={{height: 50}}/>
+                <FlatButton secondary={true}
+                  label='Back'
+                  onClick={this.handleBack}/>
+
+              <RaisedButton primary={true}
+                  onClick={this.handleSave}
+                  label='Save and send'/>
 
               </div>
-              <div style={{width: 100}}/>
-              <div style={{width: 500, maxWidth: '100vw', boxSizing: 'border-box', padding: 20}}>
-                {
-                  this.state.organisation ?
-                  <div>
-                    <h2>Customise your signup form</h2>
-                    <div style={{borderRadius: 2, border: '1px solid #DBDBDB', maxWidth: 400}}>
-                      <CustomInvite demo={true} organisation={this.state.organisation}/>
-                    </div>
-                  </div>
-                  :
-                  null
-                }
-              </div>
+
+
 
           </div>
         </App>
@@ -120,3 +154,5 @@ export default class Invite extends React.Component {
     )
   }
 }
+
+export default withMui(Invite)

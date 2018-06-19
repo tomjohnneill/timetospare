@@ -14,6 +14,9 @@ import fire from '../fire';
 import TextField from 'material-ui/TextField';
 import RegisterInterest from '../components/registerinterest.jsx';
 import Subheader from 'material-ui/Subheader';
+import withMui from '../components/hocs/withMui';
+
+let mobile = require('is-mobile');
 
 let db = fire.firestore()
 
@@ -55,11 +58,12 @@ export function changeImageAddress(file, size) {
 
 
 
-export default class Index extends React.Component {
+class Index extends React.Component {
   constructor(props) {
     super(props);
     this.state = {projects: this.props.projects, upcoming: this.props.upcoming,
       successful: this.props.successful}
+
   }
 
   static async getInitialProps() {
@@ -156,7 +160,7 @@ export default class Index extends React.Component {
 }
 
   render() {
-    console.log(this.props)
+    var isMobile = mobile(this.props.userAgent)
     return (
       <App>
           <img
@@ -193,7 +197,9 @@ export default class Index extends React.Component {
                 </div>
 
                 <div>
-            <MediaQuery minDeviceWidth={700}>
+            <MediaQuery
+              values={{deviceWidth: isMobile ? 600 : 1400}}
+              minDeviceWidth={700}>
               <div style={{position: 'sticky', top: '50px', display: 'flex', alignItems: 'center',
                  paddingLeft: 100, zIndex: 10, paddingRight: 100
                 , background: 'linear-gradient(0deg, #ffffff, #f7f7f7)', paddingTop: 6,
@@ -204,7 +210,9 @@ export default class Index extends React.Component {
               </div>
 
             </MediaQuery>
-            <MediaQuery maxDeviceWidth={700}>
+            <MediaQuery
+              values={{deviceWidth: isMobile ? 600 : 1400}}
+              maxDeviceWidth={700}>
               <div style={{position: 'sticky', top: '50px', display: 'flex', alignItems: 'center', paddingLeft: 16, zIndex: 10, paddingRight: 10
                 , background: 'linear-gradient(0deg, #ffffff, #f7f7f7)', paddingTop: 6, paddingBottom: 6, borderBottom: '1px solid #DDDDDD'}}>
 
@@ -213,7 +221,9 @@ export default class Index extends React.Component {
               </div>
             </MediaQuery>
             <div>
-              <MediaQuery minDeviceWidth={700}>
+              <MediaQuery
+                values={{deviceWidth: isMobile ? 600 : 1400}}
+                minDeviceWidth={700}>
                 <h1 className='desktop-header' style={{paddingLeft: '100px', marginTop: 16}}>
                   Upcoming Projects</h1>
                 {this.props.loading ?
@@ -224,7 +234,9 @@ export default class Index extends React.Component {
                   <div style={{display: 'flex', flexWrap: 'wrap', paddingLeft: 100, paddingRight:100}}>
                     {this.state.upcoming.map((project) => (
                       <div style={{padding: 20, minWidth: 280, boxSizing: 'border-box', width: '33%', position: 'relative'}}>
-                        <EmbeddedProject style={{position: 'relative'}} noLogo={true} project={project}/>
+                        <EmbeddedProject
+                          isMobile={isMobile}
+                          style={{position: 'relative'}} noLogo={true} project={project}/>
                       </div>
                     ))}
                   </div>
@@ -248,7 +260,9 @@ export default class Index extends React.Component {
                   null
                 }
               </MediaQuery>
-              <MediaQuery maxDeviceWidth={700}>
+              <MediaQuery
+                values={{deviceWidth: isMobile ? 600 : 1400}}
+                maxDeviceWidth={700}>
 
                         <div style={{textAlign: 'left', paddingLeft: '18px', paddingRight: '18px', paddingBottom: '64px'}}>
                           <Subheader style={{fontSize: '25px', letterSpacing: '-0.6px', lineHeight: '30px', color: '#484848',
@@ -321,3 +335,5 @@ export default class Index extends React.Component {
   }
 
 }
+
+export default withMui(Index)

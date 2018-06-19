@@ -3,8 +3,9 @@ import MailchimpIntegrate from '../components/mailchimp/integrate.jsx';
 import MailchimpSuccess from '../components/mailchimp/success.jsx';
 import App from '../components/App.js'
 import Router from 'next/router'
+import withMui from '../components/hocs/withMui';
 
-export default class Mailchimp extends React.Component {
+class Mailchimp extends React.Component {
   constructor(props) {
     super(props);
     this.state = {}
@@ -34,3 +35,5 @@ export default class Mailchimp extends React.Component {
     )
   }
 }
+
+export default withMui(Mailchimp)

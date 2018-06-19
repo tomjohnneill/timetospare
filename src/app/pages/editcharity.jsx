@@ -15,6 +15,7 @@ import Snackbar from 'material-ui/Snackbar';
 import App from "../components/App"
 import fire from '../fire';
 import CloudUpload from 'material-ui/svg-icons/file/cloud-upload';
+import withMui from '../components/hocs/withMui';
 
 let db = fire.firestore()
 
@@ -238,7 +239,7 @@ export class CharityPhotoUpload extends React.Component {
   }
 }
 
-export default class EditCharity extends React.Component {
+class EditCharity extends React.Component {
   constructor(props) {
     super(props);
     this.state = {loading: true, details: {}}
@@ -534,3 +535,5 @@ export default class EditCharity extends React.Component {
     )
   }
 }
+
+export default withMui(EditCharity)

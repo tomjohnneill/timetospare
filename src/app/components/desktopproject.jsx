@@ -27,6 +27,7 @@ import GroupSignUp from './groups/groupsignup.jsx';
 import Suggest from './groups/suggest.jsx';
 import {ProjectReviewComponent} from './casestudy.jsx';
 import {withScriptjs,  withGoogleMap, GoogleMap, Marker } from "react-google-maps"
+import ChooseDates from "../components/choose-dates.jsx";
 import fire from '../fire';
 
   let db = fire.firestore()
@@ -171,7 +172,6 @@ import fire from '../fire';
   function readableTimeDiff(a, b) {
     try{
       var diff = Math.abs(a - b)
-      console.log(diff)
       if (diff/1000 < 60) {
         return `${Math.round(diff/1000)} seconds ago`
       } else if (diff/1000/60 < 60) {
@@ -361,20 +361,20 @@ import fire from '../fire';
   export default class DesktopProject extends React.Component {
     constructor(props) {
       super(props);
-      this.state = {open: false, adminDrawerOpen: false, selectedIndex: 0
-        , loading: true, selected: 'story', inkBarLeft: '30px', conditionalStatus: false,
-      challengeExists: false, completedOpen: false
-      }
-    }
-
-    componentDidMount(props) {
       let project = this.props.project
       if (typeof project['Start Time'] === 'string') {
         project['Start Time'] = new Date(project['Start Time'])
         project['End Time'] = new Date(project['End Time'])
       }
+      this.state = {open: false, adminDrawerOpen: false, selectedIndex: 0
+        , loading: false, selected: 'story', inkBarLeft: '30px', conditionalStatus: false,
+      challengeExists: false, completedOpen: false, project: project,
+      charity: this.props.charity, creator: this.props.creator,
+      }
+    }
 
-      this.setState({project: project, charity: this.props.charity, loading: false, creator: this.props.creator})
+    componentDidMount(props) {
+
 
       if (window.location.pathname.substr(window.location.pathname.length - 10) === '/completed') {
 
@@ -607,17 +607,25 @@ import fire from '../fire';
 
 
       return (
-        <div>
+        <div >
 
+          <Dialog
+            modal={false}
+            open={this.state.chooseDates}
+            onRequestClose={() => this.setState({chooseDates: false})}>
+            <ChooseDates
+              subProjects={this.props.subProjects}
+              project={this.props.project}
+              closeModal={() => this.setState({chooseDates: false})}
+              />
+        </Dialog>
           <Snackbar
             open={this.state.waitingListAdded}
             message="We've added you to the waiting list"
             autoHideDuration={4000}
             onRequestClose={this.handleRequestClose}
           />
-          {this.state.loading ?
-              <Loading />
-           :
+
               <div >
                 <img
                   onMouseEnter={this.handleDropzoneEnter}
@@ -626,6 +634,12 @@ import fire from '../fire';
                     objectPosition: this.state.project.imageY ? `50% ${this.state.project.imageY}`  : '50% 50%'
                   , objectFit: 'cover'}}/>
 
+
+                {
+                  // Only show the number of people box if this a one-off event
+                  this.props.subProjects ?
+                  null
+                  :
 
                 <div style={{position: 'absolute', right: 200, boxSizing: 'border-box',
                   borderRadius: '50%',
@@ -641,6 +655,7 @@ import fire from '../fire';
                       this.state.project['People Pledged']}/{this.state.project['Target People']} people
                   </span>
                 </div>
+              }
 
 
                 {this.state.dropzoneHover && fire.auth().currentUser &&
@@ -727,7 +742,17 @@ import fire from '../fire';
                       borderRadius: 4, display: 'flex',
                        paddingTop: 10, textAlign: 'left'}}
                       className='datetime-container'>
-                      {this.state.project['Start Time'] ?
+                      {this.props.subProjects ?
+                        <div className='date-container' style={{display: 'flex', minWidth: 160}}>
+                          <div className='date-icon'>
+                            <CalendarIcon color={'black'} style={{height: 20, width: 20, marginRight: 10}}/>
+                          </div>
+                          <div>
+                            Multiple Dates
+                          </div>
+                        </div>
+                        :
+                        this.state.project['Start Time'] ?
                       <div className='date-container' style={{display: 'flex', minWidth: 160}}>
                         <div className='date-icon'>
                           <CalendarIcon color={'black'} style={{height: 20, width: 20, marginRight: 10}}/>
@@ -794,12 +819,6 @@ import fire from '../fire';
                         className='story-text'
                          dangerouslySetInnerHTML={this.descriptionMarkup()}/>
 
-                       <RaisedButton
-                         secondary={true}
-                         label='Email Organiser'
-                         icon={<Email/>}
-                         onClick={this.handleEmailOrganiser}
-                         />
                             </div>
                           }>
 
@@ -889,51 +908,63 @@ import fire from '../fire';
                     </Tabs>
                   </div>
                   <div className='join-container' style={{width: 350, paddingLeft: 150}}>
-                    <div style={{paddingTop: 60}}>
+                    <div >
+
                       {
-                        !this.props.joined && this.props.project['People Pledged'] >= this.props.project['Maximum People'] ?
+                        // If this is recurring show see dates
+                        this.props.subProjects ?
                         <div>
+                        <p style={{textAlign: 'left', fontWeight: 700}}>Choose a date</p>
+                       <ChooseDates
+                         limit={3}
+
+                         project={this.props.project}
+                         subProjects={this.props.subProjects}/>
+                         <div
+                           style={{color: '#65A1e7', paddingTop: 24, paddingBottom: 24,
+                             textAlign: 'left', cursor: 'pointer',
+                           borderBottom: '1px solid rgb(219, 219, 219)'}}
+                           onClick={() => this.setState({chooseDates: true})}>
+                           See all available dates
+                         </div>
+                         <div
+                           style={{color: '#65A1e7', paddingTop: 24, paddingBottom: 24,
+                             textAlign: 'left', cursor: 'pointer',
+                           borderBottom: '1px solid rgb(219, 219, 219)'}}
+                           onClick={() => this.setState({chooseDates: true})}>
+                           Contact organiser
+                         </div>
+                   </div>
+                       :
+                        // Joining button (turns into I can't come)
+                        !this.props.joined && this.props.project['People Pledged'] >= this.props.project['Maximum People'] ?
+                        <div style={{paddingTop: 60}}>
                           <RaisedButton
                              primary={true} fullWidth={true}
                               labelStyle={{letterSpacing: '0.6px', fontWeight: 'bold'}}
                              label="Join Waiting List" onTouchTap={this.handleModal} />
                          </div>
                          :
-                        !this.props.joined && this.props.challenge ?
-                        <div>
-                          <div style={{marginBottom: 10}}>
-                          <span style={{fontWeight: 700, fontSize: '18px', display: 'inline-block', width: '100%'}}>
-                            {`Accept ${this.props.challengeUser.Name}'s challenge:`}
-                        </span>
-                        <span style={{fontWeight: 'lighter', color: 'grey', fontSize: '14px'}}>(They're not coming unless you are)</span>
-                        </div>
-                        <RaisedButton
-                           primary={true} fullWidth={true}
-                            labelStyle={{letterSpacing: '0.6px', fontWeight: 'bold'}}
-                           label='Join Now' onTouchTap={this.handleModal} />
-                         </div>
-                         :
+
                          !this.props.joined ?
-                        <div>
-                            {!this.state.challengeExists && !this.props.challengeExists && !this.props.challenge ?
-                              <div>
-                          <RaisedButton
-                             primary={true} fullWidth={true}
-                              labelStyle={{letterSpacing: '0.6px', fontWeight: 'bold'}}
-                             label="Join Now" onTouchTap={this.handleModal} />
-                         </div> : <RaisedButton
+                        <div style={{paddingTop: 60}}>
+                              <RaisedButton
                             primary={true} fullWidth={true}
                              labelStyle={{letterSpacing: '0.6px', fontWeight: 'bold'}}
-                            label='Join Now' onTouchTap={this.handleModal} />}
+                            label='Join Now' onTouchTap={this.handleModal} />
                            </div>
                      :
                      <RaisedButton
                          fullWidth={true}
                          labelStyle={{letterSpacing: '0.6px', fontWeight: 'bold'}}
-                        label="I can't come anymore" onTouchTap={this.handleUnJoin} />}
+                        label="I can't come anymore" onTouchTap={this.handleUnJoin} />
+                    }
 
+                    {this.props.subProjects ?
+                      null
+                      :
                         <Suggest projectId={this.props.project._id}/>
-
+                      }
                       </div>
                       <div>
 
@@ -943,6 +974,7 @@ import fire from '../fire';
 
                         <WhosIn
                           setAttendeeCount={this.changeAttendees}
+                          subProjects={this.props.subProjects}
                           project={this.props.project}/>
 
 
@@ -975,7 +1007,7 @@ import fire from '../fire';
 
 
             </div>
-      }
+
 
     </div>
       )

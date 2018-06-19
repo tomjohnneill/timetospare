@@ -9,6 +9,19 @@ import Divider from 'material-ui/Divider';
 import TextField from 'material-ui/TextField';
 import MenuItem from 'material-ui/MenuItem';
 import 'react-datasheet/lib/react-datasheet.css';
+import Router from 'next/router';
+import fire from '../fire';
+import withMui from '../components/hocs/withMui';
+
+let db = fire.firestore()
+
+function encodeEmail (email) {
+  return email.replace(/\./g, 'ASDFadf94nc1OKC')
+}
+
+function decodeEmail (email) {
+  return email.replace(/ASDFadf94nc1OKC/g, '.')
+}
 
 function validateEmail(email)
 {
@@ -25,7 +38,7 @@ function parseExcelPaste(str) {
     return row.split('\t')});
 }
 
-export default class UploadList extends React.Component {
+class UploadList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -34,7 +47,8 @@ export default class UploadList extends React.Component {
         [{value:  2}, {value:  4}],
         [{value:  1}, {value:  3}],
       ],
-      columns: [{name: 'Email'}, {name: "Full Name"}]
+      columns: [{name: 'Email'}, {name: "Full Name"}],
+      listName: 'Volunteers'
     }
   }
 
@@ -89,13 +103,52 @@ export default class UploadList extends React.Component {
     var emailColumnPosition = this.state.columnNames.indexOf(emailColumn[0])
     console.log(emailColumnPosition)
     var data = this.state.grid
+    var error = false
     for (var i = 0; i < data.length; i++) {
       if (!validateEmail(data[i][emailColumnPosition].value)) {
         alert("Some of the records in the email field don't look like emails")
+        error = true
         break;
       }
     }
+    if (!error) {
+      var batch = db.batch();
+      var collRef = db.collection("Lists").doc()
+      var columns = this.state.columns
+      var Pending = {}
+      console.log(columns)
+      var emailPosition = columns.findIndex(x => x.name=="Email")
+      data.forEach((row) => {
+        Pending[encodeEmail(row[emailPosition].value)] = true
+      })
+      collRef.set({
+        Organisation: Router.query.organisation,
+        Pending: Pending,
+        Columns: columns
+        // set admins in here
+      }).then(() => {
+        var memberCollection = collRef.collection("Members")
+        data.forEach((row) => {
+          var member = {}
+          for (var j = 0; j < row.length; j++) {
+            if (columns[j].name) {
+              member[columns[j].name] = row[j].value
+            }
+          }
+          batch.set(memberCollection.doc(), member)
+        })
+        batch.commit().then(function () {
+            console.log("batch committed")
+        });
 
+      })
+    }
+
+  }
+
+  handleChangeName = (e, nv) => {
+    console.log(nv)
+    this.setState({listName: nv})
   }
 
   render() {
@@ -108,9 +161,23 @@ export default class UploadList extends React.Component {
 
             <div style={{display: 'flex',  flexDirection: 'column',
               justifyContent: 'left', padding: 50}}>
-              <h2 style={{textAlign: 'left'}}>Import your volunteer list</h2>
+              <h2 style={{textAlign: 'left', marginLeft: 5}}>Import your volunteer list</h2>
+              <div style={{padding: 5, marginBottom: 10}}>
+                <p style={{fontWeight: 700, margin: 0, marginBottom: 5}}>Name this list</p>
+                <TextField
+                  inputStyle={{borderRadius: '2px', border: '1px solid #aaa',
+                    paddingLeft: '12px',  boxSizing: 'border-box'}}
+                  underlineShow={false}
+                  hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
+                  onChange={this.handleChangeName}
+                  style={{
+                    backgroundColor: 'rgb(255,255,255)',
+                    height: '40px'
+                  }}
+                  value={this.state.listName}/>
+              </div>
               {!this.state.clicked ?
-              <div style={{maxWidth: '80vw',  maxHeight: '80vh', overflow: 'auto'}}>
+              <div style={{maxWidth: '80vw',  maxHeight: '80vh', overflow: 'auto', marginLeft: 5}}>
                 <ReactDataSheet
                   sheetRenderer={theseProps => (
                     <table style={{backgroundColor: 'white', padding: 6}} className={theseProps.className}>
@@ -177,7 +244,7 @@ export default class UploadList extends React.Component {
               <div>
                 <div style={{display: 'flex', maxWidth: '90vw', overflow: 'auto'}}>
                   {this.state.columns.map((item) => (
-                    <div style={{width: 275,  margin: 5,
+                    <div style={{width: 275, minWidth: 275, margin: 5,
                         backgroundColor: 'white',
                         borderColor: this.state.selected === item ?
                           '#65A1e7' :
@@ -203,10 +270,10 @@ export default class UploadList extends React.Component {
                               disabled={this.state.columnNames &&
                                 this.state.columnNames.filter(column => (column.name === "Email")).length > 0}
                               value={"Email"} primaryText="Email" />
-                            <MenuItem value={"Name"}
+                            <MenuItem value={"Full Name"}
                               disabled={this.state.columnNames &&
-                                this.state.columnNames.filter(column => (column.name === "Name")).length > 0}
-                              primaryText="Name" />
+                                this.state.columnNames.filter(column => (column.name === "Full Name")).length > 0}
+                              primaryText="Full Name" />
                             <MenuItem value={"Address"}
                               disabled={this.state.columnNames &&
                                 this.state.columnNames.filter(column => (column.name === "Address")).length > 0}
@@ -328,3 +395,5 @@ export default class UploadList extends React.Component {
     )
   }
 }
+
+export default withMui(UploadList)

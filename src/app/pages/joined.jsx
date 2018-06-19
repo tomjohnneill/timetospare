@@ -12,6 +12,7 @@ import {YouMightLike} from './declined.jsx';
 import MediaQuery from 'react-responsive';
 import fire from '../fire';
 import App from "../components/App"
+import withMui from '../components/hocs/withMui';
 
 let db = fire.firestore()
 
@@ -32,7 +33,7 @@ const styles = {
 }
 
 
-export default class ProjectJoined extends React.Component{
+class ProjectJoined extends React.Component{
   constructor(props) {
     super(props)
     this.state = {loading: true}
@@ -43,13 +44,30 @@ export default class ProjectJoined extends React.Component{
       var project = doc.data()
       project._id = doc.id
       this.setState({project: project, loading: false, charity: {}})
-      this.setState({event: {
-              title: project.Name,
-             description: project.Summary,
-             location: project.Location,
-             startTime: project['Start Time'],
-             endTime: project['End Time']
-      }})
+      db.collection("Project").doc(Router.query.project).collection("SubProject")
+      .doc(Router.query.sub).get().then((subDoc) => {
+        if (subDoc.data()) {
+          var subProject = subDoc.data()
+          subProject._id = subDoc.id
+          this.setState({event: {
+                  title: project.Name,
+                 description: project.Summary,
+                 location: project.Location,
+                 startTime: subProject['Start Time'],
+                 endTime: subProject['End Time']
+          }})
+        } else {
+          this.setState({event: {
+                  title: project.Name,
+                 description: project.Summary,
+                 location: project.Location,
+                 startTime: project['Start Time'],
+                 endTime: project['End Time']
+          }})
+        }
+
+      })
+
     });
 
   }
@@ -103,9 +121,9 @@ export default class ProjectJoined extends React.Component{
             </div>
             <div style={{marginBottom: '16px', fontWeight: 'lighter'}}>
               {
-                this.state.project['Start Time'] ?
+                this.state.event && this.state.event.startTime ?
                 <div>
-                  See you on {!this.state.loading && this.state.project['Start Time'] ? this.state.project['Start Time'].toLocaleString('en-gb', {month: 'long', day: 'numeric'}) : null}, don't forget to let them know if you can't make it.
+                  See you on {!this.state.loading && this.state.event.startTime ? this.state.event.startTime.toLocaleString('en-gb', {month: 'long', day: 'numeric'}) : null}, don't forget to let them know if you can't make it.
                 </div>
                 : null}
             </div>
@@ -135,3 +153,5 @@ export default class ProjectJoined extends React.Component{
     )
   }
 }
+
+export default withMui(ProjectJoined)

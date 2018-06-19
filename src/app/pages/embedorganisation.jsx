@@ -9,6 +9,7 @@ import EmbeddedProject from '../components/embeddedproject.jsx';
 import {CharityProjects} from './charity.jsx';
 import App from "../components/App"
 import fire from '../fire';
+import withMui from '../components/hocs/withMui';
 
 let db = fire.firestore()
 
@@ -66,7 +67,7 @@ const styles = {
   }
 }
 
-export default class EmbeddedOrganisation extends React.Component {
+class EmbeddedOrganisation extends React.Component {
   constructor(props) {
     super(props);
     this.state = {loading: true}
@@ -180,3 +181,5 @@ export default class EmbeddedOrganisation extends React.Component {
     )
   }
 }
+
+export default withMui(EmbeddedOrganisation)

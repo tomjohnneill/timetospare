@@ -7,6 +7,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
 import Avatar from 'material-ui/Avatar';
 import {List, ListItem} from 'material-ui/List';
+import withMui from '../components/hocs/withMui';
 
 import fire from '../fire';
 
@@ -24,7 +25,7 @@ const styles = {
     },
 }
 
-export default class Register extends React.Component {
+class Register extends React.Component {
   constructor(props) {
     super(props);
     this.state = {}
@@ -183,3 +184,5 @@ export default class Register extends React.Component {
     )
   }
 }
+
+export default withMui(Register)

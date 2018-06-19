@@ -12,6 +12,7 @@ import Router from 'next/router'
 import MediaQuery from 'react-responsive';
 import App from "../components/App"
 import fire from '../fire';
+import withMui from '../components/hocs/withMui';
 
 let db = fire.firestore()
 
@@ -178,7 +179,7 @@ export class YouMightLike extends React.Component {
   }
 }
 
-export default class CantCome extends React.Component{
+class CantCome extends React.Component{
   constructor(props) {
     super(props)
     this.state = {loading: true}
@@ -249,3 +250,5 @@ export default class CantCome extends React.Component{
     )
   }
 }
+
+export default withMui(CantCome)

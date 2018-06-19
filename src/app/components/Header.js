@@ -102,17 +102,22 @@ export default class Header extends React.Component {
   constructor(props){
     super(props);
     console.log(props)
+    console.log(props.router.pathname)
 
 
-    this.state = {drawerOpen: false, open: false, changePasswordOpen: false, modalOpen: false, loading: true};
+    this.state = {
+      path: '',
+      drawerOpen: false, open: false, changePasswordOpen: false, modalOpen: false, loading: true};
 
   }
 
 
   componentDidMount(props) {
+    this.setState({path: Router.asPath})
+
     fire.auth().onAuthStateChanged((user) => {
       if (user === null) {
-
+        this.setState({loading: false})
       } else {
         db.collection("User").doc(fire.auth().currentUser.uid).get().then((data) => {
           this.setState({user: data.data(), userPicture: data.data().Picture, loading: false})
@@ -241,8 +246,7 @@ export default class Header extends React.Component {
   }
 
   render() {
-    console.log(this.state)
-
+    console.log(this.props.router.pathname)
   return(
 
       <div >
@@ -253,8 +257,8 @@ export default class Header extends React.Component {
         </Head>
         <AppBar
 
-          style={typeof window !== 'undefined' && Router.asPath.includes('/embed/') ? style.embedAppBar :
-            typeof window !== 'undefined' && Router.asPath === '/why' ? style.whyAppBar : style.appBar}
+          style={this.props.router.pathname.includes('/embed/') ? style.embedAppBar :
+            this.props.router.pathname === '/why' ? style.whyAppBar : style.appBar}
           iconClassNameLeft='mobile-nav-bar'
           iconElementLeft={
             <div>
@@ -272,9 +276,11 @@ export default class Header extends React.Component {
           iconElementRight={
                             <div style={{display: 'flex', alignItems: 'center', height: '100%'}}>
 
-                            <MediaQuery minDeviceWidth={700}>
-                              {this.state.loading ||
-                                (typeof window !== 'undefined' && Router.asPath.includes('create-project')) ?
+                            <MediaQuery
+                              values={{deviceWidth: 700}}
+                              minDeviceWidth={700}>
+                              {
+                                this.props.router.pathname.includes('create-project') ?
                                 null
                                 :
                                 <div
@@ -339,7 +345,7 @@ export default class Header extends React.Component {
                                   <Link href='/edit-profile' prefetch>
                                     <MenuItem primaryText="Edit Profile" />
                                   </Link>
-                                  <Link href='/your-calendar'>
+                                  <Link  prefetch href='/your-calendar'>
                                     <MenuItem primaryText="Calendar"/>
                                   </Link>
                                   <Link prefetch href='/groups'>
@@ -392,7 +398,7 @@ export default class Header extends React.Component {
                             </div>}
           title={
             <div className='flexthis' style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-            <Link href={'/'}>
+            <Link prefetch href={'/'}>
             <span onTouchTap ={this.handleTitleTap.bind(this)}  className = 'whosin' style={style.title}>
               who's in?
             </span>

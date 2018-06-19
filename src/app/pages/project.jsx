@@ -37,7 +37,9 @@ import fire from '../fire';
 import Head from 'next/head'
 import App from "../components/App"
 import ChooseDates from "../components/choose-dates.jsx";
+import withMui from '../components/hocs/withMui';
 
+let mobile = require('is-mobile');
 let db = fire.firestore()
 
 
@@ -155,7 +157,7 @@ export function changeImageAddress(file, size) {
 }
 
 
-export default class Project extends React.Component {
+class Project extends React.Component {
   constructor(props) {
 
     super(props);
@@ -187,7 +189,6 @@ export default class Project extends React.Component {
     if (Router.query.project) {
           window.history.replaceState({}, 'Title', '/projects/p/' + Router.query.project)
     }
-    this.setState({ loading: true });
 
     if (localStorage.getItem('project')) {
       let project = JSON.parse(localStorage.getItem('project'))
@@ -442,7 +443,7 @@ export default class Project extends React.Component {
   }
 
   render () {
-
+    var isMobile = mobile(this.props.userAgent)
 
 
     console.log(this.state)
@@ -498,23 +499,31 @@ export default class Project extends React.Component {
                 position: 'fixed',backgroundColor: 'white'}}>
                 <ChooseDates
                   subProjects={this.state.subProjects}
+                  project={this.state.project}
                   closeModal={() => this.setState({chooseDates: false})}
                   />
               </div>
               :
               null}
-          <MediaQuery minDeviceWidth={700}>
-            <DesktopProject project={this.state.project}
-              joined={this.state.joined}
-              creator={this.state.creator}
-              projectReviews={this.state.projectReviews}
-              challengeExists={this.state.challengeExists}
-              challenge = {this.state.challenge}
-              challengeUser={this.state.challengeUser}
-              charity={this.state.charity} questions={this.state.questions}/>
+          <MediaQuery
+            values={{deviceWidth: isMobile ? 600 : 1400}}
+            minDeviceWidth={700}>
+
+              <DesktopProject project={this.state.project}
+                joined={this.state.joined}
+                creator={this.state.creator}
+                subProjects={this.state.subProjects}
+                projectReviews={this.state.projectReviews}
+                challengeExists={this.state.challengeExists}
+                challenge = {this.state.challenge}
+                challengeUser={this.state.challengeUser}
+                charity={this.state.charity} questions={this.state.questions}/>
+
           </MediaQuery>
 
-          <MediaQuery maxDeviceWidth = {700}>
+          <MediaQuery
+            values={{deviceWidth: isMobile ? 600 : 1400}}
+             maxDeviceWidth = {700}>
               {fire.auth().currentUser &&
                 (this.state.project.Admin && this.state.project.Admin[fire.auth().currentUser.uid]
                 || this.state.project.Creator === fire.auth().currentUser.uid) ?
@@ -720,6 +729,7 @@ export default class Project extends React.Component {
               <div style={{paddingLeft: 10, paddingRight: 10, paddingBottom: 20}}>
                 <ChooseDates
                   limit={3}
+                  project={this.state.project}
                   subProjects={this.state.subProjects}/>
                 <div
                   style={{color: '#65A1e7', paddingTop: 24, paddingBottom: 24,
@@ -790,3 +800,5 @@ export default class Project extends React.Component {
     }
   }
 }
+
+export default withMui(Project)

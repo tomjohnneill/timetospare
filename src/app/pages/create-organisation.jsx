@@ -5,8 +5,9 @@ import Link from "next/link"
 import Router from 'next/router'
 import DocumentTitle from 'react-document-title';
 import MediaQuery from 'react-responsive';
+import withMui from '../components/hocs/withMui';
 
-export default class CreateOrganisation extends React.Component {
+class CreateOrganisation extends React.Component {
   constructor(props) {
     super(props);
     this.state = {stage: 0}
@@ -228,3 +229,5 @@ export default class CreateOrganisation extends React.Component {
     )
   }
 }
+
+export default withMui(CreateOrganisation)

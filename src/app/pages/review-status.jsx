@@ -4,8 +4,9 @@ import Link from "next/link"
 import Router from 'next/router'
 import GoodThanks from '../components/feedback/good-thanks.jsx';
 import Sorry from '../components/feedback/sorry.jsx';
+import withMui from '../components/hocs/withMui';
 
-export default class ReviewStatus extends React.Component {
+class ReviewStatus extends React.Component {
   render() {
     if (Router.query.status === 'good-thanks') {
       return (
@@ -22,3 +23,5 @@ export default class ReviewStatus extends React.Component {
     }
   }
 }
+
+export default withMui(ReviewStatus)

@@ -63,7 +63,8 @@ export default class CustomInvite extends React.Component {
                   multiLine={true}
                   fullWidth={true}
                   onChange={this.changeTagline}
-                  value={this.state.organisation.tagline ? this.state.organisation.tagline :
+                  value={this.state.organisation.tagline !== null &&
+                    this.state.organisation.tagline !== undefined ? this.state.organisation.tagline :
                     "Once you join, you'll be able to see all of " + this.props.organisation.Name + "'s projects. You can then choose what you want to get involved with."
                   }/>
                 :

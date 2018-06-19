@@ -9,6 +9,7 @@ import {changeImageAddress} from '../components/desktopproject.jsx';
 import Link from "next/link"
 import App from "../components/App"
 import Router from 'next/router'
+import withMui from '../components/hocs/withMui';
 
 const styles = {
   title: {
@@ -132,7 +133,7 @@ const styles = {
   }
 }
 
-export default class About extends React.Component {
+class About extends React.Component {
   constructor(props) {
     super(props);
     this.state = {}
@@ -476,3 +477,5 @@ export default class About extends React.Component {
     )
   }
 }
+
+export default withMui(About)

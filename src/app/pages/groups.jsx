@@ -20,6 +20,7 @@ import {changeImageAddress} from '../components/desktopproject.jsx';
 import SignupModal from '../components/signupmodal.jsx';
 import App from "../components/App"
 import fire from '../fire';
+import withMui from '../components/hocs/withMui';
 
 let db = fire.firestore()
 
@@ -228,7 +229,7 @@ class NoGroups extends React.Component {
   }
 }
 
-export default class GroupList extends React.Component {
+class GroupList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {modalOpen: false, createOpen: false, users: [], emails: []}
@@ -674,3 +675,5 @@ export default class GroupList extends React.Component {
     )
   }
 }
+
+export default withMui(GroupList)

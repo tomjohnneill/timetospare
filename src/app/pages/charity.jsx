@@ -25,6 +25,7 @@ import TextField from 'material-ui/TextField'
 import App from "../components/App"
 import {ProjectReviewComponent} from '../components/casestudy.jsx';
 import fire from '../fire';
+import withMui from '../components/hocs/withMui';
 
 let db = fire.firestore()
 
@@ -360,7 +361,7 @@ export class CharitySubscribe extends React.Component {
   }
 }
 
-export default class CharityProfile extends React.Component {
+class CharityProfile extends React.Component {
   constructor(props) {
     super(props);
     this.state = {user: {}, loading: true, slideIndex: 0,
@@ -674,3 +675,5 @@ export default class CharityProfile extends React.Component {
     )
   }
 }
+
+export default withMui(CharityProfile)

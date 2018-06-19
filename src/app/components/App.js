@@ -4,6 +4,7 @@ import Footer from "./footer.jsx"
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import "../style.css"
+import { withRouter } from 'next/router'
 
 var injectTapEventPlugin = require("react-tap-event-plugin");
 try {
@@ -31,7 +32,7 @@ const muiTheme = getMuiTheme({
   fontFamily: 'Nunito'
 });
 
-const App = ({ children }) => (
+export const App = ({ children, router, href }) => (
   <main
     style={{
       margin: 0,
@@ -42,15 +43,15 @@ const App = ({ children }) => (
       color: 'inherit',
       listStyleType: 'none'
     }}>
-    <MuiThemeProvider muiTheme={muiTheme}>
+
       <div>
-        <Header />
+        <Header router={router}/>
         <div style={{height: 50}}/>
         {children}
         <Footer/>
       </div>
-    </MuiThemeProvider>
+
   </main>
 )
 
-export default App
+export default withRouter(App)

@@ -8,6 +8,7 @@ import Link from "next/link"
 import Router from 'next/router'
 import App from "../components/App"
 import fire from '../fire';
+import withMui from '../components/hocs/withMui';
 
 let db = fire.firestore()
 
@@ -99,7 +100,7 @@ const styles = {
   }
 }
 
-export default class ShortReview extends React.Component {
+class ShortReview extends React.Component {
   constructor(props) {
     super(props);
     this.state = {}
@@ -300,3 +301,5 @@ export default class ShortReview extends React.Component {
     )
   }
 }
+
+export default withMui(ShortReview)
