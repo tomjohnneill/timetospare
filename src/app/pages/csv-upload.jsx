@@ -11,6 +11,7 @@ import MenuItem from 'material-ui/MenuItem';
 import 'react-datasheet/lib/react-datasheet.css';
 import Router from 'next/router';
 import fire from '../fire';
+import Breadcrumbs from '../components/onboarding/breadcrumbs.jsx';
 import withMui from '../components/hocs/withMui';
 
 let db = fire.firestore()
@@ -157,25 +158,13 @@ class UploadList extends React.Component {
     return (
       <div style={{textAlign: 'left '}}>
         <App>
+          <Breadcrumbs stepIndex={1}/>
           <div style={{backgroundColor: '#F5F5F5'}}>
 
             <div style={{display: 'flex',  flexDirection: 'column',
-              justifyContent: 'left', padding: 50}}>
+              justifyContent: 'left', padding: '20px 50px 50px 50px'}}>
               <h2 style={{textAlign: 'left', marginLeft: 5}}>Import your volunteer list</h2>
-              <div style={{padding: 5, marginBottom: 10}}>
-                <p style={{fontWeight: 700, margin: 0, marginBottom: 5}}>Name this list</p>
-                <TextField
-                  inputStyle={{borderRadius: '2px', border: '1px solid #aaa',
-                    paddingLeft: '12px',  boxSizing: 'border-box'}}
-                  underlineShow={false}
-                  hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
-                  onChange={this.handleChangeName}
-                  style={{
-                    backgroundColor: 'rgb(255,255,255)',
-                    height: '40px'
-                  }}
-                  value={this.state.listName}/>
-              </div>
+
               {!this.state.clicked ?
               <div style={{maxWidth: '80vw',  maxHeight: '80vh', overflow: 'auto', marginLeft: 5}}>
                 <ReactDataSheet
@@ -242,6 +231,20 @@ class UploadList extends React.Component {
               </div>
               :
               <div>
+                <div style={{padding: 5, marginBottom: 10}}>
+                  <p style={{fontWeight: 700, margin: 0, marginBottom: 5}}>Name this list</p>
+                  <TextField
+                    inputStyle={{borderRadius: '2px', border: '1px solid #aaa',
+                      paddingLeft: '12px',  boxSizing: 'border-box'}}
+                    underlineShow={false}
+                    hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
+                    onChange={this.handleChangeName}
+                    style={{
+                      backgroundColor: 'rgb(255,255,255)',
+                      height: '40px'
+                    }}
+                    value={this.state.listName}/>
+                </div>
                 <div style={{display: 'flex', maxWidth: '90vw', overflow: 'auto'}}>
                   {this.state.columns.map((item) => (
                     <div style={{width: 275, minWidth: 275, margin: 5,
@@ -369,11 +372,12 @@ class UploadList extends React.Component {
 
               <div style={{height: 50}}/>
               {this.state.clicked ?
-                <div>
+                <div style={{display: 'flex'}}>
                 <RaisedButton label='Back'
                   secondary={true}
                   onClick={() => this.setState({clicked: false})}
                   />
+                <div style={{width: 20}}/>
                 <RaisedButton label='Import contacts'
                   primary={true}
                   disabled={!this.state.columnNames || this.state.columnNames.length < this.state.columns.length}

@@ -399,7 +399,7 @@ export default class Header extends React.Component {
           title={
             <div className='flexthis' style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
             <Link prefetch href={'/'}>
-            <span onTouchTap ={this.handleTitleTap.bind(this)}  className = 'whosin' style={style.title}>
+            <span  className = 'whosin' style={style.title}>
               who's in?
             </span>
             </Link>

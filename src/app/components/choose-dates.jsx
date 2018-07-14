@@ -16,16 +16,18 @@ export default class ChooseDates extends React.Component {
   }
 
   componentDidMount(props) {
-    db.collection("Engagement").where("User", "==", fire.auth().currentUser.uid)
-    .where("Project", "==", this.props.project._id)
-    .get().then((engSnapshot) => {
-      var data = {}
-      engSnapshot.forEach((engDoc) => {
-        data[engDoc.data().SubProject] = true
-        this.setState({userEngagements: data})
-        console.log(data)
+    if (fire.auth().currentUser) {
+      db.collection("Engagement").where("User", "==", fire.auth().currentUser.uid)
+      .where("Project", "==", this.props.project._id)
+      .get().then((engSnapshot) => {
+        var data = {}
+        engSnapshot.forEach((engDoc) => {
+          data[engDoc.data().SubProject] = true
+          this.setState({userEngagements: data})
+          console.log(data)
+        })
       })
-    })
+    }
   }
 
   updateChoices = () => {

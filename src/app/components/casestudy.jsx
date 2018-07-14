@@ -12,7 +12,7 @@ import Divider from 'material-ui/Divider';
 import {WhosIn} from './desktopproject.jsx';
 import Social from 'material-ui/svg-icons/social/notifications';
 import InstagramEmbed from 'react-instagram-embed'
-
+import Link from "next/link"
 import Masonry from 'react-masonry-css';
 import FontIcon from 'material-ui/FontIcon';
 import {changeImageAddress} from './desktopproject.jsx';

@@ -133,6 +133,8 @@ const styles = {
   }
 }
 
+let mobile = require('is-mobile');
+
 class About extends React.Component {
   constructor(props) {
     super(props);
@@ -140,6 +142,7 @@ class About extends React.Component {
   }
 
   render() {
+    var isMobile = mobile(this.props.userAgent)
     return (
       <App>
       <div className='aboutContainer' style={{width: '100%', display: 'flex', flexDirection: 'column',
@@ -147,7 +150,9 @@ class About extends React.Component {
       overflowX: 'hidden'}}>
       <DocumentTitle title='About'/>
 
-        <MediaQuery minDeviceWidth={700}>
+        <MediaQuery
+          values={{deviceWidth: isMobile ? 600 : 1400}}
+           minDeviceWidth={700}>
           <div style={{backgroundColor: 'white', height: 450, paddingLeft: 100, paddingRight: 100,
           boxSizing: 'border-box', width: '100%'}}>
             <div style={{display: 'flex', alignItems: 'center', height: '100%'}}>
@@ -307,7 +312,9 @@ class About extends React.Component {
         </MediaQuery>
 
 
-        <MediaQuery maxDeviceWidth={700}>
+        <MediaQuery
+          values={{deviceWidth: isMobile ? 600 : 1400}}
+          maxDeviceWidth={700}>
           <div style={{backgroundColor: 'white', padding: 24}}>
             <div style={{height: 50}}/>
             <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>

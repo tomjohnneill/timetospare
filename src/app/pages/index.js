@@ -66,6 +66,30 @@ class Index extends React.Component {
 
   }
 
+  getPrivateProjects = (uid) => {
+    db.collection("Project").where("View." + fire.auth().currentUser.uid, "==", true)
+    .get().then((querySnapshot) => {
+      var data = []
+      querySnapshot.forEach((project) => {
+        var elem = project.data()
+        elem._id = project.id
+        data.push(elem)
+      })
+      this.setState({private: data})
+    })
+  }
+
+  componentDidMount(props) {
+    if (fire.auth().currentUser) {
+      this.getPrivateProjects(fire.auth().currentUser.uid)
+    }
+    fire.auth().onAuthStateChanged((user) => {
+      if (user !== null) {
+        this.getPrivateProjects(fire.auth().currentUser.uid)
+      }
+    })
+  }
+
   static async getInitialProps() {
     const res = await db.collection("Project").get()
     .then((querySnapshot) => {
@@ -224,6 +248,22 @@ class Index extends React.Component {
               <MediaQuery
                 values={{deviceWidth: isMobile ? 600 : 1400}}
                 minDeviceWidth={700}>
+                {this.state.private ?
+                  <div>
+                <h1 className='desktop-header' style={{paddingLeft: '100px', marginTop: 16}}>
+                  Private Projects</h1>
+                  <div style={{display: 'flex', flexWrap: 'wrap', paddingLeft: 100, paddingRight:100}}>
+                    {this.state.private.map((project) => (
+                      <div style={{padding: 20, minWidth: 280, boxSizing: 'border-box', width: '33%', position: 'relative'}}>
+                        <EmbeddedProject
+                          isMobile={isMobile}
+                          style={{position: 'relative'}} noLogo={true} project={project}/>
+                      </div>
+                    ))}
+                  </div>
+                  </div>
+                :
+                null}
                 <h1 className='desktop-header' style={{paddingLeft: '100px', marginTop: 16}}>
                   Upcoming Projects</h1>
                 {this.props.loading ?
@@ -265,6 +305,26 @@ class Index extends React.Component {
                 maxDeviceWidth={700}>
 
                         <div style={{textAlign: 'left', paddingLeft: '18px', paddingRight: '18px', paddingBottom: '64px'}}>
+                          {this.state.private ?
+                            <div>
+                              <Subheader style={{fontSize: '25px', letterSpacing: '-0.6px', lineHeight: '30px', color: '#484848',
+                              fontWeight: 700, marginTop: '48px', marginBottom: '24px', paddingLeft: '0px'}}>
+                                Private Projects
+                              </Subheader>
+                              <div style={{display: 'flex', flexWrap: 'wrap',
+                              textAlign: 'left'}}>
+                                {this.state.private.map((project) => (
+                                  <div style={{paddingTop: 10, paddingBottom: 10, width: '100%', boxSizing: 'border-box'}}>
+                                    <EmbeddedProject noLogo={true}
+                                      project={project}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          :
+                          null}
+
                           <Subheader style={{fontSize: '25px', letterSpacing: '-0.6px', lineHeight: '30px', color: '#484848',
                           fontWeight: 700, marginTop: '48px', marginBottom: '24px', paddingLeft: '0px'}}>
                             Upcoming Projects

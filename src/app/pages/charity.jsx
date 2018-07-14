@@ -20,6 +20,7 @@ import SignupModal from '../components/signupmodal.jsx';
 import CharityProjectList from '../components/charityprojectlist.jsx';
 import IconButton from 'material-ui/IconButton';
 import Code from 'material-ui/svg-icons/action/code';
+import Head from 'next/head'
 import Dialog from 'material-ui/Dialog';
 import TextField from 'material-ui/TextField'
 import App from "../components/App"
@@ -364,7 +365,7 @@ export class CharitySubscribe extends React.Component {
 class CharityProfile extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {user: {}, loading: true, slideIndex: 0,
+    this.state = {user: {}, loading: this.props.charity ? false : true, slideIndex: 0,
       charity: this.props.charity ? this.props.charity : null, loading: true,
       left: '10%', selected: 'projects', modalOpen: false}
   }
@@ -459,6 +460,16 @@ class CharityProfile extends React.Component {
           <Loading/>
           :
           <div>
+            <Head>
+              <title>{this.state.charity.Name}</title>
+              <meta name="viewport" content="initial-scale=1.0, width=device-width" key="viewport" />
+                <meta property="og:title" content={this.charity.project.Name}/>
+                <meta property="twitter:title" content={this.state.charity.Name}/>
+                <meta property="og:type" content="article" />
+                <meta property="og:description" content={this.state.charity.Name + "'s projects on Who's In?"} />
+                <meta property="og:image" content={changeImageAddress(this.state.charity['Featured Image'], '750xauto')} />
+                <meta name="twitter:card" content="summary" />
+            </Head>
             <DocumentTitle title={this.state.charity.Name}/>
             <MediaQuery minDeviceWidth={700}>
               <div className='container' style={{paddingLeft: 100, paddingRight: 100, paddingTop: 32,

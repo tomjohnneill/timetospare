@@ -1,8 +1,10 @@
 import React from 'react';
 import App from '../components/App.js';
 import OrganisationDetails from '../components/organisation-details.jsx';
+import withMui from '../components/hocs/withMui';
+import Breadcrumbs from '../components/onboarding/breadcrumbs.jsx';
 
-export default class CreateOther extends React.Component {
+export class CreateOther extends React.Component {
   constructor(props) {
     super(props);
     this.state = {}
@@ -11,9 +13,11 @@ export default class CreateOther extends React.Component {
   render() {
     return (
       <App>
+        <Breadcrumbs stepIndex={0}/>
         <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
         backgroundColor: '#F5F5F5'}}>
           <div style={{width: '100%', maxWidth: 600}}>
+
             <OrganisationDetails />
           </div>
         </div>
@@ -21,3 +25,5 @@ export default class CreateOther extends React.Component {
     )
   }
 }
+
+export default withMui(CreateOther)

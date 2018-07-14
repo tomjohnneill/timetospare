@@ -23,7 +23,6 @@ import Snackbar from 'material-ui/Snackbar';
 import {Spiral, CalendarIcon, Place, Clock, World, Tick} from './icons.jsx';
 import Share from './share.jsx'
 import {List, ListItem} from 'material-ui/List';
-import GroupSignUp from './groups/groupsignup.jsx';
 import Suggest from './groups/suggest.jsx';
 import {ProjectReviewComponent} from './casestudy.jsx';
 import {withScriptjs,  withGoogleMap, GoogleMap, Marker } from "react-google-maps"
