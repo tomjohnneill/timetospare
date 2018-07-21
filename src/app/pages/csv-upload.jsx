@@ -13,6 +13,7 @@ import Router from 'next/router';
 import fire from '../fire';
 import Breadcrumbs from '../components/onboarding/breadcrumbs.jsx';
 import withMui from '../components/hocs/withMui';
+import {buttonStyles} from '../components/styles.jsx';
 
 let db = fire.firestore()
 
@@ -122,13 +123,22 @@ class UploadList extends React.Component {
       data.forEach((row) => {
         Pending[encodeEmail(row[emailPosition].value)] = true
       })
+      console.log(collRef)
       collRef.set({
         Organisation: Router.query.organisation,
         Pending: Pending,
         Columns: columns
         // set admins in here
       }).then(() => {
+        db.collection("Charity").doc(Router.query.organisation).update({
+        ['lists.' + collRef.id] : true
+      })
+    })
+      .then(() => {
+        console.log('got past charity bit')
+
         var memberCollection = collRef.collection("Members")
+        console.log(memberCollection)
         data.forEach((row) => {
           var member = {}
           for (var j = 0; j < row.length; j++) {
@@ -140,6 +150,8 @@ class UploadList extends React.Component {
         })
         batch.commit().then(function () {
             console.log("batch committed")
+            Router.push(`/volunteer-preview?organisation=${Router.query.organisation}`,
+                  `/volunteer-preview/${Router.query.organisation}`)
         });
 
       })
@@ -164,71 +176,78 @@ class UploadList extends React.Component {
             <div style={{display: 'flex',  flexDirection: 'column',
               justifyContent: 'left', padding: '20px 50px 50px 50px'}}>
               <h2 style={{textAlign: 'left', marginLeft: 5}}>Import your volunteer list</h2>
-
+              <p style={{marginLeft: 5, marginTop: 0}}>
+                Copy and paste directly from the spreadsheet. Include any extra details you want to store
+              </p>
               {!this.state.clicked ?
-              <div style={{maxWidth: '80vw',  maxHeight: '80vh', overflow: 'auto', marginLeft: 5}}>
-                <ReactDataSheet
-                  sheetRenderer={theseProps => (
-                    <table style={{backgroundColor: 'white', padding: 6}} className={theseProps.className}>
-                        <thead>
-                            <tr >
-                                {this.state.columns.map(col => (<th
-                                  style={{paddingLeft: 6, paddingRight: 6, minWidth: 100}}>
-                                  {col.name}</th>))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {theseProps.children}
-                        </tbody>
-                    </table>
-                  )}
-                  data={this.state.grid}
+                <div style={{display: 'flex'}}>
+                  <div style={{maxWidth: '80vw',  maxHeight: '80vh', overflow: 'auto', marginLeft: 5}}>
+                    <ReactDataSheet
+                      sheetRenderer={theseProps => (
+                        <table style={{backgroundColor: 'white', padding: 6}} className={theseProps.className}>
+                            <thead>
+                                <tr >
+                                    {this.state.columns.map(col => (<th
+                                      style={{paddingLeft: 6, paddingRight: 6, minWidth: 100}}>
+                                      {col.name}</th>))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {theseProps.children}
+                            </tbody>
+                        </table>
+                      )}
+                      data={this.state.grid}
 
-                  parsePaste={parseExcelPaste}
-                  valueRenderer={(cell) => cell.value}
-                  onCellsChanged={(changes, outOfBounds) => {
-                    const grid = this.state.grid.map(row => [...row])
-                    changes.forEach(({cell, row, col, value}) => {
-                      grid[row][col] = {...grid[row][col], value}
-                    })
-
-                    if (outOfBounds) {
-                      var maxWidth = 1
-                      console.log(outOfBounds)
-                      outOfBounds.forEach((entry) => {
-                        if (maxWidth < entry.col) {
-                          maxWidth = entry.col
-                        }
-                      })
-                      console.log('was out of bounds')
-
-
-                      var columns = this.state.columns
-                      console.log(maxWidth)
-                      for (var i = 1; i < maxWidth + 1; i++) {
-
-                        if (i > 1) {
-                          columns[i] = {name: `Custom Column ${i-1}`}
-                          this.setState({columns: columns})
-                        }
-                      }
-                      console.log(columns)
-                      outOfBounds.forEach(({row, col, value}) => {
-                        if (grid[row]) {
+                      parsePaste={parseExcelPaste}
+                      valueRenderer={(cell) => cell.value}
+                      onCellsChanged={(changes, outOfBounds) => {
+                        const grid = this.state.grid.map(row => [...row])
+                        changes.forEach(({cell, row, col, value}) => {
                           grid[row][col] = {...grid[row][col], value}
-                        } else {
-                          grid[row] = []
-                          for (var i = 0; i < maxWidth; i++) {
-                            grid[row][i] = {value: ""}
+                        })
+
+                        if (outOfBounds) {
+                          var maxWidth = 1
+                          console.log(outOfBounds)
+                          outOfBounds.forEach((entry) => {
+                            if (maxWidth < entry.col) {
+                              maxWidth = entry.col
+                            }
+                          })
+                          console.log('was out of bounds')
+
+
+                          var columns = this.state.columns
+                          console.log(maxWidth)
+                          for (var i = 1; i < maxWidth + 1; i++) {
+
+                            if (i > 1) {
+                              columns[i] = {name: `Custom Column ${i-1}`}
+                              this.setState({columns: columns})
+                            }
                           }
-                          grid[row][col] = {...grid[row][col], value}
+                          console.log(columns)
+                          outOfBounds.forEach(({row, col, value}) => {
+                            if (grid[row]) {
+                              grid[row][col] = {...grid[row][col], value}
+                            } else {
+                              grid[row] = []
+                              for (var i = 0; i < maxWidth; i++) {
+                                grid[row][i] = {value: ""}
+                              }
+                              grid[row][col] = {...grid[row][col], value}
+                            }
+                          })
                         }
-                      })
-                    }
-                    this.setState({grid})
-                  }}
-                  />
-              </div>
+                        this.setState({grid})
+                      }}
+                      />
+                  </div>
+                  <div style={{paddingLeft: 5, paddingRight: 5}}>
+                    Custom columns...
+                  </div>
+                </div>
               :
               <div>
                 <div style={{padding: 5, marginBottom: 10}}>
@@ -255,7 +274,7 @@ class UploadList extends React.Component {
                            this.state.columns.indexOf(this.state.selected) ||
                            this.state.columnNames && this.state.columnNames.length === this.state.columns.length ?
                           '#DBDBDB':
-                           '#E55749',
+                           '#000AB2',
                         borderWidth: '2px',
                         borderStyle: 'solid'
                         }}>
@@ -302,19 +321,24 @@ class UploadList extends React.Component {
                           <div style={{display: 'flex', paddingBottom: 6}}>
                             {
                               this.state.columns.indexOf(item) !== 0 ?
-                            <FlatButton labelStyle={{fontWeight: 700, fontSize: '14px', color: '#E55749'}}
+                            <FlatButton
+                              style={buttonStyles.smallSize}
+                            labelStyle={buttonStyles.smallLabel}
                                 onClick={() => this.handleBack(item)}
                                 label='Back'/>
                               :
                               null
                             }
-                          <RaisedButton labelStyle={{fontWeight: 700, fontSize: '14px'}}
+                          <RaisedButton
+                            style={buttonStyles.smallSize}
+                            labelStyle={buttonStyles.smallLabel}
                             secondary={true}
                             disabled={item.name.includes('Custom Column') && !this.state.newColumnName}
                             onClick={() => this.handleSave(item)}
                             label='Save'/>
-                          <FlatButton labelStyle={{color: '#65A1e7',
-                            fontWeight: 700, fontSize: '14px'}}
+                          <FlatButton
+                            style={buttonStyles.smallSize}
+                            labelStyle={buttonStyles.smallLabel}
                             onClick={() => this.handleSkip(item)}
                               label='Skip'/>
                           </div>
@@ -326,7 +350,7 @@ class UploadList extends React.Component {
                             {this.state.columnNames &&
                               this.state.columnNames[this.state.columns.indexOf(item)]
                               && this.state.columnNames[this.state.columns.indexOf(item)].name === null ?
-                              <div style={{fontStyle:'italic',fontWeight: 'lighter', color: '#E55749'}}>
+                              <div style={{fontStyle:'italic',fontWeight: 'lighter', color: '#000AB2'}}>
                               Will not be imported
                             </div> : null}
                           </div>
@@ -375,11 +399,15 @@ class UploadList extends React.Component {
                 <div style={{display: 'flex'}}>
                 <RaisedButton label='Back'
                   secondary={true}
+                  style={buttonStyles.smallSize}
+                  labelStyle={buttonStyles.smallLabel}
                   onClick={() => this.setState({clicked: false})}
                   />
                 <div style={{width: 20}}/>
                 <RaisedButton label='Import contacts'
                   primary={true}
+                  style={buttonStyles.smallSize}
+                  labelStyle={buttonStyles.smallLabel}
                   disabled={!this.state.columnNames || this.state.columnNames.length < this.state.columns.length}
                   onClick={this.handleImportContacts}
                   />
@@ -388,6 +416,8 @@ class UploadList extends React.Component {
               <div style={{width: 'auto'}}>
               <RaisedButton label='Next'
                 primary={true}
+                style={buttonStyles.smallSize}
+                labelStyle={buttonStyles.smallLabel}
                 onClick={() => this.setState({clicked: true, selected: this.state.columns[0]})}
                 />
               </div>

@@ -10,6 +10,7 @@ import Snackbar from 'material-ui/Snackbar';
 import Masonry from 'react-masonry-css';
 import Loading from '../components/loading.jsx';
 import SignupModal from '../components/signupmodal.jsx';
+import Router from 'next/router';
 import fire from '../fire';
 import TextField from 'material-ui/TextField';
 import RegisterInterest from '../components/registerinterest.jsx';
@@ -77,6 +78,10 @@ class Index extends React.Component {
       })
       this.setState({private: data})
     })
+  }
+
+  handleImIn = () => {
+    Router.push('/signup')
   }
 
   componentDidMount(props) {
@@ -187,38 +192,256 @@ class Index extends React.Component {
     var isMobile = mobile(this.props.userAgent)
     return (
       <App>
+        <MediaQuery
+          values={{deviceWidth: isMobile ? 600 : 1400}}
+          minDeviceWidth={700}>
           <img
-                  style={{height: '90vh', width: '100%', objectFit: 'cover', position: 'relative', marginTop: '-51px'}}
-                  src={changeImageAddress('https://d3kkowhate9mma.cloudfront.net/important/jeremy-bishop-170994-unsplash.jpg', '750xauto')}/>
-                <div style={{position: 'absolute',top:'-51px',  height: '100%', width: '100%',
-                  background: 'radial-gradient(ellipse closest-side, rgba(0,0,0,0.75), rgba(0,0,0,0))',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                paddingLeft: '20px', paddingRight: '20px', boxSizing: 'border-box'}}>
-                  <div style={{display: 'flex', alignItems: 'center', flexDirection: 'column'
-                    , justifyContent: 'center', width: '300px'}}>
-                    <h2 style={{color: 'white', fontSize: '36px'}}>Get up off your ass and do something good</h2>
-                    <span style={{fontWeight: 'lighter', color: 'white'}}>
-                      Doing good shouldn't be hard. Find a project near you to get involved with.
+                  style={{height: '70vh',objectPosition: '50% 0%', width: '100%',
+                   objectFit: 'cover', position: 'relative', marginTop: '-51px'}}
+                  src={'https://images.unsplash.com/photo-1472289065668-ce650ac443d2?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=cdff4c62302fd44491d4850202323d11&auto=format&fit=crop&w=1050&q=80'}/>
+                <div style={{position: 'absolute',top:'-51px',  height: '80%', width: '100%',
+                flexDirection: 'column',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',paddingRight: '20px', boxSizing: 'border-box', paddingLeft: 80}}>
+                  <div style={{width: '600px', paddingLeft: 200}}>
+                    <h2 style={{textAlign: 'left', color: 'black', fontSize: '48px',
+                  marginBottom: 15}}>Do good, better.</h2>
 
-                    </span>
-                    {
-                      !fire.auth().currentUser ?
 
-                    <div style={{paddingTop: 20}}>
-                    <RaisedButton label="I'm In."
-                      primary={true}
-                      onClick={this.handleImIn}
-                      labelStyle={{letterSpacing: 0.3, fontWeight: 700}}
-                      />
-                    <div style={{width: '80vw'}}>
+                  <p style={{fontSize: '20px', marginTop: 25, color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
+                    All the tools you need to better engage your volunteers.
+                  </p>
+                  {
+                    !fire.auth().currentUser ?
+
+                  <div style={{paddingTop: 0, width: '100%', display: 'flex', justifyContent: 'flex-start'}}>
+                  <RaisedButton label="Sign Up Free"
+                    primary={true}
+                    style={{height: 44, width: 150,
+                      boxShadow: '0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2)',
+                      borderRadius: 4}}
+                    onClick={this.handleImIn}
+                    labelStyle={{letterSpacing: 0.3, fontWeight: 700, fontSize: '16px', textTransform: 'none'}}
+                    />
+                  </div>
+                  :
+                  null
+                }
+                  </div>
+
+                </div>
+
+              <div style={{position: 'relative'}}>
+                <img
+                    style={{height: '70vh',objectPosition: '50% 60%', width: '100%',
+                     objectFit: 'cover', position: 'relative', marginTop: '-51px'}}
+                    src={'https://images.unsplash.com/photo-1492999104346-cabaa757be8f?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=e0e3f3e765bde2f5094873747a695c85&auto=format&fit=crop&w=1051&q=80'}/>
+                  <div style={{position: 'absolute',top:'-51px',  height: '80%', width: '100%',
+                  flexDirection: 'column',
+                    display: 'flex', justifyContent: 'center',paddingRight: '20px', boxSizing: 'border-box', paddingLeft: 80}}>
+                    <div style={{width: '600px'}}>
+                      <h2 style={{textAlign: 'left', color: 'black', fontSize: '48px',
+                    marginBottom: 15}}>Better manage your people</h2>
+
+
+                    <p style={{fontSize: '20px', marginTop: 25, color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
+                      Contact lists, invites, reminders - all done automatically
+
+                    </p>
 
                     </div>
-                    </div>
-                    :
-                    null
-                  }
+
                   </div>
                 </div>
+
+
+                <div style={{position: 'relative'}}>
+                  <img
+                      style={{height: '70vh',objectPosition: '50% 100%', width: '100%',
+                       objectFit: 'cover', position: 'relative', marginTop: '-51px'}}
+                      src={'https://images.unsplash.com/photo-1530220616-3f1c5a86e6cb?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=29d3687e117dd607197b051ac2009473&auto=format&fit=crop&w=1191&q=80'}/>
+                    <div style={{position: 'absolute',top:'-51px',  height: '80%', width: '100%',
+                    flexDirection: 'column', alignItems: 'flex-end',
+                      display: 'flex', justifyContent: 'center',paddingRight: '20px', boxSizing: 'border-box', paddingLeft: 80}}>
+                      <div style={{width: '600px', paddingRight: 100}}>
+                        <h2 style={{textAlign: 'left', color: 'black', fontSize: '48px',
+                      marginBottom: 15}}>Better manage your time</h2>
+
+
+                      <p style={{fontSize: '20px', marginTop: 25, color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
+                        Create events and choose who can seen them.
+                        <br/>Share your calendar with your volunteers.
+                          <br/>Find out who's coming to which project.
+                      </p>
+
+                      </div>
+
+                    </div>
+                  </div>
+
+                  <div style={{position: 'relative', color: 'white'}}>
+                    <img
+                        style={{height: '70vh',objectPosition: '50% 60%', width: '100%',
+                         objectFit: 'cover', position: 'relative', marginTop: '-51px'}}
+                        src={'https://images.unsplash.com/photo-1517728848779-e95acb6ac40f?ixlib=rb-0.3.5&s=66620169dac15962f051322abe54d4b6&auto=format&fit=crop&w=1050&q=80'}/>
+                      <div style={{position: 'absolute',top:'-51px',  height: '80%', width: '100%',
+                      flexDirection: 'column',
+                        display: 'flex', justifyContent: 'center',paddingRight: '20px', boxSizing: 'border-box', paddingLeft: 80}}>
+                        <div style={{width: '600px'}}>
+                          <h2 style={{textAlign: 'left',fontSize: '48px',
+                        marginBottom: 15}}>Do better together</h2>
+
+
+                        <p style={{fontSize: '20px', marginTop: 25,fontWeight: 'lighter', textAlign: 'left'}}>
+                          Receive feedback to help you improve your projects.<br/>
+                          Help your volunteers showcase their effort.
+
+                        </p>
+
+                        </div>
+
+                      </div>
+                    </div>
+                  </MediaQuery>
+
+                  {/*Mobile version */}
+
+            <MediaQuery
+              values={{deviceWidth: isMobile ? 600 : 1400}}
+              maxDeviceWidth={700}>
+              <img
+                      style={{height: '90vh',objectPosition: '40% 0%', width: '100%',
+                       objectFit: 'cover', position: 'relative', marginTop: '-51px'}}
+                      src={'https://images.unsplash.com/photo-1472289065668-ce650ac443d2?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=cdff4c62302fd44491d4850202323d11&auto=format&fit=crop&w=1050&q=80'}/>
+                    <div style={{position: 'absolute',top:'-51px',  height: '90vh', width: '100%',
+                    flexDirection: 'column',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                      <div style={{width: '100%', paddingLeft: '20%',  boxSizing: 'border-box'}}>
+                        <h2 style={{textAlign: 'left', color: 'black', fontSize: '40px',
+                      marginBottom: 15}}>Do good, <br/> better.</h2>
+
+
+                      <p style={{fontSize: '20px', marginTop: 25, color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
+                        All the tools you need to better engage your volunteers.
+                      </p>
+                      {
+                        !fire.auth().currentUser ?
+
+                      <div style={{paddingTop: 0, width: '100%', display: 'flex', justifyContent: 'flex-start'}}>
+                      <RaisedButton label="Sign Up Free"
+                        primary={true}
+                        style={{height: 44, width: 150,
+                          boxShadow: '0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2)',
+                          borderRadius: 4}}
+                        onClick={this.handleImIn}
+                        labelStyle={{letterSpacing: 0.3, fontWeight: 700, fontSize: '16px', textTransform: 'none'}}
+                        />
+                      </div>
+                      :
+                      null
+                    }
+                      </div>
+
+                    </div>
+
+                  <div style={{position: 'relative'}}>
+                    <img
+                        style={{height: '90vh',objectPosition: '40% 60%', width: '100%',
+                         objectFit: 'cover', position: 'relative', marginTop: '-51px'}}
+                        src={'https://images.unsplash.com/photo-1492999104346-cabaa757be8f?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=e0e3f3e765bde2f5094873747a695c85&auto=format&fit=crop&w=1051&q=80'}/>
+                      <div style={{position: 'absolute',top:'-51px',  height: '80%', width: '95%',
+                      flexDirection: 'column',
+                        display: 'flex', justifyContent: 'center',paddingRight: '20px',
+                        boxSizing: 'border-box', paddingLeft: 20}}>
+                        <div style={{width: '100%'}}>
+                          <h2 style={{textAlign: 'left', color: 'black', fontSize: '48px',
+                        marginBottom: 15}}>Better manage your people</h2>
+
+
+                        <p style={{fontSize: '20px', marginTop: 25, color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
+                          Contact lists, invites, reminders - all done automatically
+
+                        </p>
+
+                        </div>
+
+                      </div>
+                    </div>
+
+
+                    <div style={{position: 'relative'}}>
+                      <img
+                          style={{height: '90vh',objectPosition: '55% 100%', width: '100%',
+                           objectFit: 'cover', position: 'relative', marginTop: '-51px'}}
+                          src={'https://images.unsplash.com/photo-1530220616-3f1c5a86e6cb?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=29d3687e117dd607197b051ac2009473&auto=format&fit=crop&w=1191&q=80'}/>
+                        <div style={{position: 'absolute',top:'-51px',  height: '80%', width: '100%',
+                        flexDirection: 'column', alignItems: 'flex-end',
+                          display: 'flex', justifyContent: 'center',paddingRight: '20px',
+                           boxSizing: 'border-box', paddingLeft: 20}}>
+                          <div style={{ paddingRight: 10}}>
+                            <h2 style={{textAlign: 'left', color: 'black', fontSize: '48px',
+                          marginBottom: 15}}>Better manage your time</h2>
+
+
+                          <p style={{fontSize: '20px', marginTop: 25, color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
+                            Create events and choose who can seen them.</p>
+                          <p style={{fontSize: '20px', paddingLeft: 40,  color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
+                              Share your calendar with your volunteers.</p>
+                            <p style={{fontSize: '20px', paddingLeft: 100,  color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
+                                Find out who's coming to which project.</p>
+
+                          </div>
+
+                        </div>
+                      </div>
+
+                      <div style={{position: 'relative', color: 'white'}}>
+                        <img
+                            style={{height: '90vh',objectPosition: '50% 60%', width: '100%',
+                             objectFit: 'cover', position: 'relative', marginTop: '0px'}}
+                            src={'https://images.unsplash.com/photo-1517728848779-e95acb6ac40f?ixlib=rb-0.3.5&s=66620169dac15962f051322abe54d4b6&auto=format&fit=crop&w=1050&q=80'}/>
+                          <div style={{position: 'absolute',top:'0px',  height: '100%', width: '100%',
+                          flexDirection: 'column',
+                            display: 'flex', justifyContent: 'center',paddingRight: '20px', boxSizing: 'border-box',
+                            paddingLeft: 30}}>
+                            <div style={{width: '100%'}}>
+                              <h2 style={{textAlign: 'left',fontSize: '48px',
+                                marginTop: 0, paddingBottom: 105,
+                            marginBottom: 65}}>Do better together</h2>
+
+
+                          <p style={{fontSize: '20px',paddingTop: 50, marginTop: 25,fontWeight: 'lighter', textAlign: 'left'}}>
+                              Receive feedback to help you improve your projects.</p>
+                            <p style={{fontSize: '20px',fontWeight: 'lighter', textAlign: 'left'}}>
+                              Help your volunteers showcase their effort.
+                            </p>
+
+
+                            </div>
+
+                          </div>
+                        </div>
+
+            </MediaQuery>
+
+                    <div style={{display: 'flex', height: 300, width: '100%', fontSize: '48px',
+                      padding: 10, boxSizing: 'border-box',
+                      flexDirection: 'column',
+                      alignItems: 'center', justifyContent: 'center'}}>
+                      Get started today
+                      <div style={{display: 'block', width: 300, marginTop: 30, fontSize: '16px'}}>
+                        <div style={{paddingTop: 0, width: '100%', display: 'flex', justifyContent: 'center'}}>
+                        <RaisedButton label="Sign Up Free"
+                          primary={true}
+                          style={{height: 44, width: 150,
+                            boxShadow: '0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2)',
+                            borderRadius: 4}}
+                          onClick={this.handleImIn}
+                          labelStyle={{letterSpacing: 0.3, fontWeight: 700, fontSize: '16px', textTransform: 'none'}}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
 
                 <div>
             <MediaQuery

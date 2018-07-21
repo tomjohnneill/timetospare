@@ -13,11 +13,12 @@ import IconButton from 'material-ui/IconButton';
 import MediaQuery from 'react-responsive';
 import Settings from 'material-ui/svg-icons/action/settings';
 import Drawer from 'material-ui/Drawer';
-import {Ass} from './icons.jsx'
+import {Ass, Plant} from './icons.jsx'
 import InfoOutline from 'material-ui/svg-icons/action/info';
 import SignupModal from './signupmodal.jsx';
 //import MessagingButton from '/imports/ui/components/messagingbutton.jsx';
 import fire from '../fire';
+import {buttonStyles} from './styles.jsx'
 import Head from 'next/head'
 import "../style.css"
 import 'react-datasheet/lib/react-datasheet.css';
@@ -29,9 +30,9 @@ const style = {
   margin: '16px 32px 16px 0',
   title: {
     cursor: 'pointer',
-    fontFamily: 'Permanent Marker',
-    color: '#E55749',
-    fontSize: '30px',
+    fontFamily: 'Pacifico',
+    color: '#000AB2',
+    fontSize: '25px',
     marginRight: '10px'
   },
   appBar: {
@@ -228,11 +229,7 @@ export default class Header extends React.Component {
 
   handleCreateProject = (e) => {
     e.preventDefault()
-    if (fire.auth().currentUser) {
-      Router.push('/create-project?stage=0')
-    } else {
-      this.setState({modalOpen: true})
-    }
+    Router.push('/signup')
 
   }
 
@@ -251,7 +248,7 @@ export default class Header extends React.Component {
 
       <div >
         <Head>
-          <title>Who's In?</title>
+          <title>Time to Spare</title>
           <meta name="viewport" content="initial-scale=1.0, width=device-width" key="viewport" />
           <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script>
         </Head>
@@ -285,23 +282,23 @@ export default class Header extends React.Component {
                                 :
                                 <div
                                   className='link-container'
-                                   style={{display: 'flex', height: '100%', alignItems: 'center'}}>
-                                   <Link prefetch style={{height: '100%'}} href='/create-organisation'>
+                                   style={{display: 'flex', height: '100%', fontWeight: 'normal', alignItems: 'center'}}>
+                                   <Link prefetch href='/projects'>
                                      <div style={{
                                        cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
 
                                        >
-                                       Organisations
+                                       Our Mission
                                      </div>
                                    </Link>
-                                  <Link prefetch style={{height: '100%'}} href='/why'>
-                                    <div style={{
-                                      cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
+                                   <Link prefetch href='/projects'>
+                                     <div style={{
+                                       cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
 
-                                      >
-                                      Why start a project?
-                                    </div>
-                                  </Link>
+                                       >
+                                       Pricing
+                                     </div>
+                                   </Link>
                                   <Link prefetch href='/about'>
                                     <div style={{
                                       cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
@@ -319,15 +316,15 @@ export default class Header extends React.Component {
                                       Projects
                                     </div>
                                   </Link>
-
+                                  <div style={{paddingRight: 15}}>
                                     <RaisedButton
-                                      style={{height: '36px', marginRight: '16px', boxShadow: ''}} primary={true} overlayStyle={{height: '36px'}}
-                                      buttonStyle={{height: '36px'}}
-                                       labelStyle={{height: '36px', display: 'inline-flex', alignItems: 'center',
-                                            letterSpacing: '0.6px', fontWeight: 'bold'}}
-                                      labelClassName
-                                       label={<span className='flexthis' style={{display: 'flex'}}>Start a Project</span>} onTouchTap={this.handleCreateProject}/>
+                                      style={buttonStyles.smallSize} primary={true} overlayStyle={{height: '36px'}}
 
+                                       labelStyle={buttonStyles.smallLabel}
+
+                                       label={<span className='flexthis' style={{display: 'flex'}}>
+                                       Sign up free</span>} onClick={this.handleCreateProject}/>
+                                  </div>
                                </div>
                              }
 
@@ -356,6 +353,8 @@ export default class Header extends React.Component {
                                       primaryText="Sign out" />
 
 
+
+
                               </Menu>
                             </Popover>
                             {this.state.loading ? null :
@@ -366,7 +365,7 @@ export default class Header extends React.Component {
                                   display: 'flex'
                                 }}>
 
-                                <IconButton onTouchTap={(event) => {
+                                <IconButton onClick={(event) => {
                                      event.preventDefault();
                                       this.setState({
                                     popoverOpen: true,
@@ -387,7 +386,7 @@ export default class Header extends React.Component {
                             null}
                             {!this.state.user ?
                               <div
-                                onTouchTap={this.setModal}
+                                onClick={this.setModal}
                                 style={{cursor: 'pointer',
                                   fontWeight: 700,
                                   color: 'inherit',
@@ -399,9 +398,12 @@ export default class Header extends React.Component {
           title={
             <div className='flexthis' style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
             <Link prefetch href={'/'}>
-            <span  className = 'whosin' style={style.title}>
-              who's in?
-            </span>
+            <div style={{display: 'flex'}}>
+
+              <span  className = 'whosin' style={style.title}>
+                Time to Spare
+              </span>
+            </div>
             </Link>
 
             </div>
@@ -436,8 +438,8 @@ export default class Header extends React.Component {
                 onClick={() => this.setState({drawerOpen: false})} tooltip='Menu'>
                 <MenuIcon/>
               </IconButton>
-              <span onTouchTap ={this.handleTitleTap.bind(this)}  className = 'whosin' style={style.title}>
-                who's in?
+              <span onClick ={this.handleTitleTap.bind(this)}  className = 'whosin' style={style.title}>
+                Time to Spare
               </span>
             </div>
             <Link href='/about'>
@@ -457,6 +459,8 @@ export default class Header extends React.Component {
             </Link>
             <MenuItem onClick={this.handleSignOut}>
               Sign out</MenuItem>
+              <MenuItem onClick={this.setModal}
+                primaryText="Log in" />
           </Drawer>
 
       </div>

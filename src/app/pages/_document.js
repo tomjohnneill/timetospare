@@ -11,6 +11,8 @@ export default class MyDocument extends Document {
       <html>
         <Head>
           <link rel="stylesheet" href="/_next/static/style.css" />
+          <link href="https://fonts.googleapis.com/css?family=Nunito:200,500,700" rel="stylesheet"/>
+          <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet"/>
         </Head>
         <body
           style={{

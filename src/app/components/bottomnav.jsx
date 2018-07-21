@@ -36,7 +36,7 @@ class BottomNavigationExampleSimple extends Component {
 
   render() {
     return (
-      <Paper style={{borderTop: '2px solid #E55749' ,
+      <Paper style={{borderTop: '2px solid #000AB2' ,
 
         zIndex: 7, position: 'fixed', width: '100%', backgroundColor: '#65A1e7', bottom: 0}} zDepth={6}>
         <BottomNavigation

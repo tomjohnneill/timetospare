@@ -207,7 +207,7 @@ class StoryForm extends React.Component {
             onTouchTap={this.handlePrevious}
             labelStyle={{ color: 'white',  fontWeight: 700}}/>
         <div style={{width: '16px', display: 'inline-block'}}/>
-        <RaisedButton label='Finish' backgroundColor='#E55749'
+        <RaisedButton label='Finish' backgroundColor='#000AB2'
             onClick={this.handleNext}
             disabled={!this.state.story || !this.state.summary || !this.state.title || !localStorage.getItem('coverPhoto')}
             labelStyle={{ color: 'white', fontWeight: 700}}/>

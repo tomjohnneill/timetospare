@@ -71,7 +71,7 @@ const styles = {
     alignItems: 'center',
     color: 'white',
     marginBottom: 20,
-    backgroundColor: '#E55749',
+    backgroundColor: '#000AB2',
     padding: 20,
     borderRadius: 2
   },
@@ -81,7 +81,7 @@ const styles = {
     alignItems: 'center',
     color: 'white',
     marginBottom: 20,
-    backgroundColor: '#E55749',
+    backgroundColor: '#000AB2',
     padding: 20,
     borderRadius: 2
   },

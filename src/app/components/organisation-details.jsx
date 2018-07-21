@@ -19,7 +19,7 @@ var algoliasearch = require('algoliasearch/lite')
 
 let db = fire.firestore()
 
-const styles = {
+export const styles = {
   textfield: {
     height: '40px',
     backgroundColor: 'white',
@@ -278,6 +278,10 @@ export default class OrganisationDetails extends React.Component {
       charityNumber: state.charityNumber,
       name: state.searchText
     })
+  }
+
+  componentDidMount(props) {
+    Router.prefetch('/import-volunteers')
   }
 
   render() {

@@ -103,28 +103,29 @@ export default class UploadPhoto extends React.Component{
       <div>
         <MediaQuery minDeviceWidth={700}>
           <div style={{boxSizing: 'border-box', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-            <div style={{width: '500px', display: 'flex'
+            <div style={{width: this.props.width ? this.props.width : '500px', display: 'flex'
               , justifyContent: 'center'}} className='basics-container'>
               <div className='form' style={{textAlign: 'left', width: '100%'}}>
                 {!this.props.edit ?
                 <p className='desktop-header'>
                   Upload a cover photo</p>
                 : null }
-                <div style={{width: '100%', paddingBottom: '40px',
-                  paddingRight: '50px', boxSizing: 'border-box'}}>
+                <div style={{width: '100%', paddingBottom: this.props.edit ? 0 : '40px',
+                  paddingRight: this.props.edit ? 0 :'50px', boxSizing: 'border-box'}}>
                   <Dropzone key={'photos'} onDrop={this.upload.bind(this)}
                     onMouseEnter={this.handleDropzoneEnter}
                     onMouseLeave={this.handleDropzoneLeave}
                      style={{}}>
                         {({ isDragActive, isDragReject }) => {
                           let styles = {
-                            width: '40vw',
-                            height: '40vh',
+                            width: this.props.width ? this.props.width : '40vw',
+                            height: this.props.height ? this.props.height : '40vh',
                             textAlign: 'center',
                             justifyContent: 'center',
                             display: 'flex',
                             alignItems: 'center',
-                            border: '2px dashed rgb(133, 137, 135)',
+                            backgroundColor: 'white',
+                            border: '1px solid #aaa',
                             borderRadius: 6,
                             color: grey500,
                             flexDirection: 'column'
@@ -176,7 +177,7 @@ export default class UploadPhoto extends React.Component{
                                   <RaisedButton label='Change Photo'
                                     style={{padding: 0, position: 'absolute', top: 'calc(50% - 20px)', right: 'calc(50% - 98px)', height: 40, zIndex: 10}}
                                     icon={<CloudUpload />}
-                                    labelStyle={{textTransform: 'none', fontFamily: 'Permanent Marker', fontSize: '20px'}}
+                                    labelStyle={{textTransform: 'none', fontWeight: 700, fontSize: '18px'}}
                                     primary={true}
                                     />
                                   :
@@ -192,7 +193,7 @@ export default class UploadPhoto extends React.Component{
                               <RaisedButton label='Change Photo'
                                 style={{padding: 0, position: 'absolute', top: 'calc(50% - 20px)', right: 'calc(50% - 98px)', height: 40, zIndex: 10}}
                                 icon={<CloudUpload />}
-                                labelStyle={{textTransform: 'none', fontFamily: 'Permanent Marker', fontSize: '20px'}}
+                                labelStyle={{textTransform: 'none', fontWeight: 700, fontSize: '18px'}}
                                 primary={true}
                                 />
                               :
@@ -241,8 +242,8 @@ export default class UploadPhoto extends React.Component{
                      style={{}}>
                         {({ isDragActive, isDragReject }) => {
                           let styles = {
-                            width: '100%',
-                            height: '40vh',
+                            width: this.props.width ? this.props.width : '40vw',
+                            height: this.props.height ? this.props.height : '40vh',
                             textAlign: 'center',
                             justifyContent: 'center',
                             boxSizing: 'border-box',

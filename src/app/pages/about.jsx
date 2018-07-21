@@ -62,7 +62,7 @@ const styles = {
     marginTop: 10,
     marginBottom: 10,
     width: '100px',
-    backgroundColor: '#E55749'
+    backgroundColor: '#000AB2'
   },
   para: {
     marginTop: 16,
@@ -146,7 +146,7 @@ class About extends React.Component {
     return (
       <App>
       <div className='aboutContainer' style={{width: '100%', display: 'flex', flexDirection: 'column',
-        justifyContent: 'center', alignItems: 'center', textAlign: 'left', backgroundColor: '#E55749',
+        justifyContent: 'center', alignItems: 'center', textAlign: 'left', backgroundColor: '#000AB2',
       overflowX: 'hidden'}}>
       <DocumentTitle title='About'/>
 
@@ -176,7 +176,7 @@ class About extends React.Component {
             </div>
           </div>
 
-          <div style={{backgroundColor: '#E55749', height: 450, paddingLeft: 100, paddingRight: 100,
+          <div style={{backgroundColor: '#000AB2', height: 450, paddingLeft: 100, paddingRight: 100,
               width: '100%', boxSizing: 'border-box', color: 'white'}}>
             <div style={{display: 'flex', alignItems: 'center', height: '100%'}}>
               <div style={styles.bigIcon}>
@@ -342,7 +342,7 @@ class About extends React.Component {
             <div style={{height: 50}}/>
           </div>
 
-          <div style={{backgroundColor: '#E55749', padding: 24,
+          <div style={{backgroundColor: '#000AB2', padding: 24,
               width: '100%', boxSizing: 'border-box', color: 'white'}}>
             <div style={{ alignItems: 'center', height: '100%'}}>
               <div style={styles.mobileBigIcon}>

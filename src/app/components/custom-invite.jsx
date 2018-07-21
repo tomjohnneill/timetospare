@@ -12,7 +12,7 @@ import Head from 'next/head'
 
 const styles = {
   number: {
-    color: '#E55749',
+    color: '#000AB2',
     fontSize: '20px',
   },
   bottomBit: {
@@ -119,7 +119,7 @@ export default class CustomInvite extends React.Component {
             <div style={{width: '100%', boxSizing: 'border-box', backfaceVisibility: 'inherit'
               ,borderRadius: '10px', paddingBottom: '20px'}}>
               <RaisedButton fullWidth={true}
-                backgroundColor={this.state.email && this.state.password && this.state.name ?  '#E55749' : '#C5C8C7'}
+                backgroundColor={this.state.email && this.state.password && this.state.name ?  '#000AB2' : '#C5C8C7'}
                 buttonStyle={{borderRadius: '6px'}}
                 onClick={this.handleCreateAccount}
                 disabled={this.props.demo ? true : false}
@@ -210,7 +210,7 @@ export default class CustomInvite extends React.Component {
             <div style={{width: '100%', boxSizing: 'border-box', backfaceVisibility: 'inherit'
               ,borderRadius: '10px', paddingBottom: '20px'}}>
               <RaisedButton fullWidth={true}
-                backgroundColor={this.state.email && this.state.password  ?  '#E55749' : '#C5C8C7'}
+                backgroundColor={this.state.email && this.state.password  ?  '#000AB2' : '#C5C8C7'}
                 buttonStyle={{borderRadius: '6px'}}
                 onTouchTap={this.handleLogin}
                 labelStyle={{textTransform: 'none',display: 'inline-flex', alignItems: 'center', height: '100%'}}

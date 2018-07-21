@@ -92,7 +92,7 @@ import fire from '../fire';
       padding: 30,
     },
     number: {
-      color: '#E55749',
+      color: '#000AB2',
       fontSize: '20px',
 
     },
@@ -112,7 +112,7 @@ import fire from '../fire';
   },     selectedTab: {
       height: '36px',
       backgroundColor: 'white',
-      color: '#E55749',
+      color: '#000AB2',
       textTransform: 'none',
       letterSpacing: '0.4px',
       lineHeight: '16px',
@@ -642,10 +642,10 @@ import fire from '../fire';
 
                 <div style={{position: 'absolute', right: 200, boxSizing: 'border-box',
                   borderRadius: '50%',
-                    border: '3px solid #E55749', fontWeight: 700
+                    border: '3px solid #000AB2', fontWeight: 700
                   , height: 150, width: 150, display: 'flex',
                   alignItems: 'center', justifyContent: 'center',
-                  background: `linear-gradient( 0deg, #E55749, #E55749 ${this.state.project['People Pledged'] === undefined ? 0 : (this.state.project['People Pledged']/this.state.project['Target People'] * 100)}%,
+                  background: `linear-gradient( 0deg, #000AB2, #000AB2 ${this.state.project['People Pledged'] === undefined ? 0 : (this.state.project['People Pledged']/this.state.project['Target People'] * 100)}%,
                   white ${this.state.project['People Pledged'] === undefined ? 0 : (this.state.project['People Pledged']/this.state.project['Target People'] * 100)}%, white 100%)`,
                   top: 375, zIndex: 3}}>
                   <span style={{backgroundColor: 'rgba(255,255,255,1)', padding: 4, borderRadius: 4}}>
@@ -800,7 +800,7 @@ import fire from '../fire';
                       ref='tabs'
                       style={{flex: 1, borderBottom: '1px solid #e4e4e4', paddingTop: 16}}
                       tabItemContainerStyle={{ backgroundColor: 'white', borderBottom: '1px solid #DDDDDD'}}
-                      inkBarStyle={{zIndex: 2, backgroundColor: '#E55749',
+                      inkBarStyle={{zIndex: 2, backgroundColor: '#000AB2',
                       left:this.state.inkBarLeft, width: '60px'}}
                       onChange={this.handleChangeTab}
                       tabTemplateStyle={{backgroundColor: 'white'}}

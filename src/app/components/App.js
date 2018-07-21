@@ -16,8 +16,8 @@ catch (err) {
 
 const muiTheme = getMuiTheme({
   palette: {
-    primary1Color: '#E55749',
-    primary2Color:  '#E55749',
+    primary1Color: '#000AB2',
+    primary2Color:  '#000AB2',
     accent1Color: '#65A1e7',
   },
   appBar: {

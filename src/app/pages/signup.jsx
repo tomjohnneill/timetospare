@@ -1,18 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom'
-import Dialog from 'material-ui/Dialog';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import CircularProgress from 'material-ui/CircularProgress';
-import {Plant, Spiral, Tick} from './icons.jsx';
+import {Plant, Spiral, Tick} from '../components/icons.jsx';
 import {grey500} from 'material-ui/styles/colors'
 import MediaQuery from 'react-responsive';
+import Router from 'next/router'
 import fire from '../fire';
-import IconButton from 'material-ui/IconButton';
-import Close from 'material-ui/svg-icons/navigation/close';
 import firebase from "firebase/app";
 import 'firebase/auth';
-import {textFieldStyles} from './styles.jsx';
+import withMui from '../components/hocs/withMui.js'
 
 let db = fire.firestore()
 
@@ -29,12 +27,17 @@ const styles = {
   textfield: {
     height: '40px',
     fontsize: '20px'
-  }
+  },
+  title: {
+    fontFamily: 'Pacifico',
+    color: '#000AB2',
+    fontSize: '40px',
+    paddingBottom: 20,
+    marginRight: '10px'
+  },
 }
 
-
-
-export default  class SignupModal extends React.Component {
+export class SignupModal extends React.Component {
   constructor(props) {
     super(props)
     console.log(this.props)
@@ -76,6 +79,7 @@ export default  class SignupModal extends React.Component {
             )
               .then(data =>
                 {
+                  Router.push('/create-other')
                   this.setState({type: 'phone', createdClicked: false})
                 })
               .catch(error => console.log('Error', error))
@@ -242,32 +246,44 @@ export default  class SignupModal extends React.Component {
     return (
       <div>
         <MediaQuery minDeviceWidth={700}>
-          <Dialog
-            open={this.props.open && (!fire.auth().currentUser || !fire.auth().currentUser.phoneNumber) ? true : false}
-            modal={false}
 
-            onRequestClose={this.props.changeOpen}
-            contentStyle={{width: '90%', maxWidth: '350px', overflowY: 'auto'}}
-            >
             {this.state.loading  ?
             <div style={{width: '100%', height: '100%', position: 'absolute', top: '0px',left: '0px',zIndex: '20', boxSizing: 'border-box', backgroundColor: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
               <CircularProgress/>
             </div>
             : null }
-            <div>
+            <div style={{display: 'flex', justifyContent: 'center', textAlign: 'left'}}>
               {this.state.type === 'signup' ?
+            <div style={{display: 'flex', maxWidth: 900, width: '100%', padding: 36, marginTop: 48}}>
+              <div style={{height: 150, width: 270, display: 'flex', justifyContent: 'flex-end'}}>
+
+                <span  className = 'whosin' style={styles.title}>
+                  Time to Spare
+                </span>
+              </div>
             <span
-                style={{display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column'}}>
+                style={{display: 'flex', alignItems: 'baseline', justifyContent: 'flex-start',
+                  boxSizing: 'border-box', marginLeft: 60,
+                   flexDirection: 'column', flex: 1}}>
 
 
-                  <Plant color={"#3B9E74"} style={{marginBottom: '16px', height: '80px'}}/>
-                  <div style={{paddingBottom: '16px'}}>
-                    Create your Account
+
+                  <div style={{fontSize: '36px', fontWeight: 700}}>
+                    Get started with a free account
                   </div>
-                  <div style={{width: '100%',  paddingBottom: '16px',
+                  <p style={{fontSize: '18px', marginBottom: 6}}>
+                    Engage your volunteers. Save yourself time. Do it all with Time to Spare.
+                  </p>
+                  <p style={{fontSize: '18px', marginTop: 0}}>
+                    Already have an account? <b onTouchTap={this.handleSwitchType} style={{color: '#000AB2'}}>Log in</b>
+                  </p>
+                  <div style={{width: '100%',
                      boxSizing: 'border-box'}}>
+                     <p style={{fontWeight: 700}}>
+                       Your Name
+                     </p>
                     <TextField fullWidth={true}
-                      inputStyle={{borderRadius: '6px', border: '1px solid #858987',
+                      inputStyle={{borderRadius: '4px', border: '1px solid #aaa',
                         paddingLeft: '12px',  boxSizing: 'border-box'}}
                       underlineShow={false}
 
@@ -277,10 +293,13 @@ export default  class SignupModal extends React.Component {
                       onChange={this.handleName}
                       style={styles.textfield}/>
                   </div>
-                  <div style={{width: '100%',paddingBottom: '16px',
+                  <div style={{width: '100%',
                     boxSizing: 'border-box'}}>
+                    <p style={{fontWeight: 700}}>
+                      Email
+                    </p>
                     <TextField fullWidth={true}
-                      inputStyle={{borderRadius: '6px', border: '1px solid #858987',
+                      inputStyle={{borderRadius: '4px', border: '1px solid #aaa',
                         paddingLeft: '12px',  boxSizing: 'border-box'}}
                       underlineShow={false}
                       hintText={'Email'}
@@ -290,10 +309,13 @@ export default  class SignupModal extends React.Component {
                       key='email'
                       style={styles.textfield}/>
                   </div>
-                  <div style={{width: '100%',  paddingBottom: '16px',
+                  <div style={{width: '100%',
                      boxSizing: 'border-box'}}>
+                     <p style={{fontWeight: 700}}>
+                       Password
+                     </p>
                     <TextField fullWidth={true}
-                      inputStyle={{borderRadius: '6px', border: '1px solid #858987',
+                      inputStyle={{borderRadius: '4px', border: '1px solid #aaa',
                         paddingLeft: '12px',  boxSizing: 'border-box'}}
                       underlineShow={false}
                       onChange={this.handlePassword}
@@ -307,22 +329,29 @@ export default  class SignupModal extends React.Component {
                       key='password'
                       style={styles.textfield}/>
                   </div>
-                  <div style={{width: '100%', boxSizing: 'border-box', backfaceVisibility: 'inherit'
-                    ,borderRadius: '10px', paddingBottom: '20px'}}>
-                    <RaisedButton fullWidth={true}
-                      backgroundColor={this.state.email && this.state.password && this.state.name ?  '#000AB2' : '#C5C8C7'}
-                      buttonStyle={{borderRadius: '6px'}}
-                      onClick={this.handleCreateAccount}
+                  <div style={{width: '100%', boxSizing: 'border-box', backfaceVisibility: 'inherit',
+                    display: 'flex', alignItems: 'center',
+                     marginTop: 30,paddingBottom: '20px'}}>
+                    <div style={{width: '35%', marginRight: 10}}>
+                      <RaisedButton fullWidth={true}
+                        overlayStyle={{borderRadius: 6}}
+                        backgroundColor={this.state.email && this.state.password && this.state.name ?  '#000AB2' : '#C5C8C7'}
+                        buttonStyle={{borderRadius: '6px'}}
+                        onClick={this.handleCreateAccount}
+                        disabled={!this.state.email || !this.state.password || !this.state.name}
+                        labelStyle={{textTransform: 'none',display: 'inline-flex',
+                          fontWeight: 700, fontSize: '18px',
+                          alignItems: 'center', height: '100%'}}
+                        labelColor='white' label='Get Started!' style={{height: '50px'}}
+                        />
+                    </div>
+                    <div style={{flex: 1, marginLeft: 20, marginRight: 30}}>
+                      By clicking this button, you agree to Time to Spare's Terms of Use.
+                    </div>
 
-                      labelStyle={{textTransform: 'none',display: 'inline-flex', alignItems: 'center', height: '100%'}}
-                      labelColor='white' label='Complete' style={{height: '50px'}}
-                      />
                   </div>
-                  <div>
-                    Or switch to <b onTouchTap={this.handleSwitchType} style={{color: '#000AB2'}}>Login</b>
-                  </div>
-
             </span>
+            </div>
 
             :
 
@@ -467,200 +496,113 @@ export default  class SignupModal extends React.Component {
 
           </div>
 
-          </Dialog>
         </MediaQuery>
         <MediaQuery maxDeviceWidth={700}>
-          <div style={{backgroundColor: 'white', zIndex: 4000,
-            display: this.props.open && (!fire.auth().currentUser || !fire.auth().currentUser.phoneNumber) ? 'inherit' : 'none',
-             width: '100vw', position: 'absolute', height: '100vh', zIndex: 4000,
-          boxShadow: 'rgba(0, 0, 0, 0.12) 0px 1px 6px, rgba(0, 0, 0, 0.12) 0px 1px 4px', borderRadius: 6, padding: 10, boxSizing: 'border-box'}}>
-          <div style={{position: 'absolute', top: 10, left: 10}}>
-            <IconButton
-              onClick={this.props.changeOpen}
-              tooltip='Exit'
-              style={{padding: 0, width: 54, height: 54, cursor: 'pointer'}}
-               iconStyle={{width: 54, height: 30}}>
-              <Close  color={'#484848'}/>
-            </IconButton>
-          </div>
+          <div style={{backgroundColor: 'white', zIndex: 10, marginTop: 10,
 
+             width: '100%', position: 'relative',
+           borderRadius: 6, padding: 20, boxSizing: 'border-box'}}>
           {this.state.loading  ?
-          <div style={{width: '100%', height: '100%', position: 'absolute', top: '0px',left: '0px',zIndex: '20', boxSizing: 'border-box', backgroundColor: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+          <div style={{width: '100%', height: '100%', position: 'absolute', top: '0px',left: '0px'
+            ,zIndex: '20', boxSizing: 'border-box', backgroundColor: 'rgba(255,255,255,0.8)'
+            , display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
             <CircularProgress/>
           </div>
           : null }
           <div>
-            {this.state.type === 'signup' ?
-          <span
-              style={{display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column'}}>
+
+            <span
+                style={{display: 'flex', alignItems: 'baseline', justifyContent: 'flex-start',
+                  boxSizing: 'border-box', textAlign: 'left',
+                   flexDirection: 'column', flex: 1}}>
+
+                   <div style={styles.title}>
+                     Time to Spare
+                   </div>
+
+                  <div style={{fontSize: '30px', fontWeight: 700}}>
+                    Get started with a free account
+                  </div>
+                  <p style={{fontSize: '16px', marginTop: 20}}>
+                    Already have an account? <b onTouchTap={this.handleSwitchType} style={{color: '#000AB2'}}>Log in</b>
+                  </p>
+                  <div style={{width: '100%',
+                     boxSizing: 'border-box'}}>
+                     <p style={{fontWeight: 700}}>
+                       Your Name
+                     </p>
+                    <TextField fullWidth={true}
+                      inputStyle={{borderRadius: '4px', border: '1px solid #aaa',
+                        paddingLeft: '12px',  boxSizing: 'border-box'}}
+                      underlineShow={false}
+
+                      hintText={'Name'}
+                      hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
+                      key='name'
+                      onChange={this.handleName}
+                      style={styles.textfield}/>
+                  </div>
+                  <div style={{width: '100%',
+                    boxSizing: 'border-box'}}>
+                    <p style={{fontWeight: 700}}>
+                      Email
+                    </p>
+                    <TextField fullWidth={true}
+                      inputStyle={{borderRadius: '4px', border: '1px solid #aaa',
+                        paddingLeft: '12px',  boxSizing: 'border-box'}}
+                      underlineShow={false}
+                      hintText={'Email'}
+                      value={this.state.email}
+                      onChange={this.handleEmail}
+                      hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
+                      key='email'
+                      style={styles.textfield}/>
+                  </div>
+                  <div style={{width: '100%',
+                     boxSizing: 'border-box'}}>
+                     <p style={{fontWeight: 700}}>
+                       Password
+                     </p>
+                    <TextField fullWidth={true}
+                      inputStyle={{borderRadius: '4px', border: '1px solid #aaa',
+                        paddingLeft: '12px',  boxSizing: 'border-box'}}
+                      underlineShow={false}
+                      onChange={this.handlePassword}
+                      errorStyle={{marginTop: 6, textAlign: 'center'}}
+                      errorText={this.state.pwned === null  ? null : `That password has been leaked ${this.state.pwned.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} times, try something else`}
+                      onChange={this.handlePassword}
+                      type='password'
+                      hintText={'Password'}
+                      onKeyPress={this.handleKeyPress}
+                      hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
+                      key='password'
+                      style={styles.textfield}/>
+                  </div>
+                  <div style={{width: '100%', boxSizing: 'border-box', backfaceVisibility: 'inherit',
+                    display: 'flex', alignItems: 'center',
+                     marginTop: 30,paddingBottom: '20px'}}>
+                    <div style={{width: '100%'}}>
+                      <RaisedButton fullWidth={true}
+                        overlayStyle={{borderRadius: 6}}
+                        backgroundColor={this.state.email && this.state.password && this.state.name ?  '#000AB2' : '#C5C8C7'}
+                        buttonStyle={{borderRadius: '6px'}}
+                        onClick={this.handleCreateAccount}
+                        disabled={!this.state.email || !this.state.password || !this.state.name}
+                        labelStyle={{textTransform: 'none',display: 'inline-flex',
+                          fontWeight: 700, fontSize: '18px',
+                          alignItems: 'center', height: '100%'}}
+                        labelColor='white' label='Get Started!' style={{height: '50px'}}
+                        />
+                    </div>
 
 
-                <Plant color={"#3B9E74"} style={{marginBottom: '16px', height: '80px'}}/>
-                <div style={{paddingBottom: '16px', fontWeight: 700, fontSize: '30px'}}>
-                  Create your account
-                </div>
-                <div style={{width: '100%',  paddingBottom: '16px',
-                   boxSizing: 'border-box'}}>
-                  <TextField fullWidth={true}
-                    inputStyle={textFieldStyles.input}
-                    underlineShow={false}
-                    hintText={'Name'}
-                    hintStyle={textFieldStyles.hint}
-                    key='name'
-                    onChange={this.handleName}
-                    style={textFieldStyles.style}/>
-                </div>
-                <div style={{width: '100%',paddingBottom: '16px',
-                  boxSizing: 'border-box'}}>
-                  <TextField fullWidth={true}
-                    inputStyle={textFieldStyles.input}
-                    underlineShow={false}
-                    hintText={'Email'}
-                    value={this.state.email}
-                    onChange={this.handleEmail}
-                    hintStyle={textFieldStyles.hint}
-                    key='email'
-                    style={textFieldStyles.style}/>
-                </div>
-                <div style={{width: '100%',  paddingBottom: '16px',
-                   boxSizing: 'border-box'}}>
-                  <TextField fullWidth={true}
-                    inputStyle={textFieldStyles.input}
-                    underlineShow={false}
-                    onChange={this.handlePassword}
-                    errorStyle={{marginTop: 6, textAlign: 'center'}}
-                    errorText={this.state.pwned === null  ? null : `That password has been leaked ${this.state.pwned.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} times, try something else`}
-                    onChange={this.handlePassword}
-                    type='password'
-                    hintText={'Password'}
-                    onKeyPress={this.handleKeyPress}
-                    hintStyle={textFieldStyles.hint}
-                    key='password'
-                    style={textFieldStyles.style}/>
-                </div>
-                <div style={{width: '100%', boxSizing: 'border-box', backfaceVisibility: 'inherit'
-                  ,borderRadius: '10px', paddingBottom: '20px'}}>
-                  <RaisedButton fullWidth={true}
-                    backgroundColor={this.state.email && this.state.password && this.state.name ?  '#000AB2' : '#C5C8C7'}
-                    buttonStyle={{borderRadius: '6px'}}
-                    onClick={this.handleCreateAccount}
-
-                    labelStyle={{textTransform: 'none',display: 'inline-flex', alignItems: 'center', height: '100%'}}
-                    labelColor='white' label='Complete' style={{height: '50px'}}
-                    />
-                </div>
-                <div>
-                  Or switch to <b onTouchTap={this.handleSwitchType} style={{color: '#000AB2'}}>Login</b>
-                </div>
-
-          </span>
-
-        :  this.state.type === 'login' ?
-
-          <span
-              style={{display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column'}}>
+                  </div>
+                  <div style={{flex: 1}}>
+                    By clicking this button, you agree to Time to Spare's Terms of Use.
+                  </div>
+            </span>
 
 
-                <Spiral style={{marginBottom: '16px', height: '80px'}}/>
-                <div style={{paddingBottom: '16px', fontWeight: 700, fontSize: '30px'}}>
-                  Login
-                </div>
-
-
-                <div style={{width: '100%',paddingBottom: '16px',
-                  boxSizing: 'border-box'}}>
-                  <TextField fullWidth={true}
-                    inputStyle={textFieldStyles.input}
-                    underlineShow={false}
-                    hintText={'Email'}
-                    value={this.state.email}
-                    onChange={this.handleEmail}
-                    hintStyle={textFieldStyles.hint}
-                    key='email'
-                      style={textFieldStyles.style}/>
-                </div>
-                <div style={{width: '100%',  paddingBottom: '16px',
-                   boxSizing: 'border-box'}}>
-                  <TextField fullWidth={true}
-                    inputStyle={textFieldStyles.input}
-                    underlineShow={false}
-                    onChange={this.handlePassword}
-                    type='password'
-                    hintText={'Password'}
-                    onKeyPress={this.handleLoginKeyPress}
-                    hintStyle={textFieldStyles.hint}
-                    key='password'
-                    style={textFieldStyles.style}/>
-                </div>
-                <div style={{textAlign: 'center', marginBottom: 10}}>
-                  {this.state.forgotPassword ?
-                    <div>
-                      Forgotten your password? <br/><b
-                      style={{cursor: 'pointer'}}
-                      onClick={() => fire.auth().sendPasswordResetEmail(this.state.email, {
-                        url: window.location.href
-                      }).then(() => {
-                        console.log('sending new password')
-                        this.setState({sendPasswordClicked: true})
-                      })}
-                      >Send a reminder?</b>
-                    </div> :
-                    null
-                  }
-                </div>
-                <div style={{width: '100%', boxSizing: 'border-box', backfaceVisibility: 'inherit'
-                  ,borderRadius: '10px', paddingBottom: '20px'}}>
-                  <RaisedButton fullWidth={true}
-                    backgroundColor={this.state.email && this.state.password  ?  '#000AB2' : '#C5C8C7'}
-                    buttonStyle={{borderRadius: '6px'}}
-                    onTouchTap={this.handleLogin}
-                    labelStyle={{textTransform: 'none',display: 'inline-flex', alignItems: 'center', height: '100%'}}
-                    labelColor='white' label='Log in' style={{height: '50px'}}
-                    />
-                </div>
-                <div>
-                  Or switch to <b onTouchTap={this.handleSwitchType} style={{cursor: 'pointer',color: '#000AB2'}}>
-                  {this.state.type === 'login' ? 'Sign up' : 'Login'}</b>
-
-                </div>
-
-          </span>
-
-          :
-          this.state.type === 'phone' ?
-          <div style={{padding: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center'}}>
-            <h2>We need to check you're a real person (robots don't have phones)</h2>
-            <TextField
-              key='phoneno'
-              ref={(ref)=>this.phoneText=ref} hintText='Phone Number (+44...)'/>
-            <div style={{paddingTop: 24, paddingBottom: 24, display: this.state.type === 'phone' ? 'flex' : 'none',
-                 justifyContent: 'center', width: '100%'}} ref={(ref)=>this.recaptcha=ref}>
-
-            </div>
-
-            <RaisedButton
-              style={{height: '36px', boxShadow: ''}} overlayStyle={{height: '36px'}}
-              buttonStyle={{height: '36px'}}
-              labelStyle={{ height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                   letterSpacing: '0.6px', fontWeight: 'bold'}}
-              primary={true} onClick={this.handlePhoneAuth} label='Get Verification Code'/>
-          </div>
-          :
-          <div style={{padding: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center'}}>
-            <h2>We've sent you a code, enter it here</h2>
-            <TextField style={{marginBottom: 10}}
-              value={this.state.confirmationCode}
-              key='code'
-              onChange={(e,nv) => this.setState({confirmationCode: nv})} hintText='Confirmation code'/>
-
-            <RaisedButton
-              style={{height: '36px', boxShadow: ''}} overlayStyle={{height: '36px'}}
-              buttonStyle={{height: '36px'}}
-              labelStyle={{ height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                   letterSpacing: '0.6px', fontWeight: 'bold'}}
-              primary={true} onClick={this.handleConfirmPhone} label='Confirm'/>
-          </div>
-        }
       </div>
       </div>
 
@@ -671,3 +613,5 @@ export default  class SignupModal extends React.Component {
     )
   }
 }
+
+export default withMui(SignupModal)

@@ -60,6 +60,9 @@ class ImportVolunteers extends React.Component {
                   />
 
                 </List>
+                <p>
+                  You'll need to do one of these to create private projects
+                </p>
                 <div style={{height: '100vh'}}/>
             </div>
           </div>

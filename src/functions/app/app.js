@@ -75,6 +75,18 @@ server.get('/charity/:charityId', (request, response) => {
       app.render(request, response, actualPage, queryParams)
     })
 
+server.get('/volunteer-preview/:organisation', (request, response) => {
+      const actualPage = '/volunteer-preview'
+      const queryParams = { organisation: request.params.organisation }
+      app.render(request, response, actualPage, queryParams)
+    })
+
+server.get('/csv-upload/:organisation', (request, response) => {
+      const actualPage = '/csv-upload'
+      const queryParams = { organisation: request.params.organisation }
+      app.render(request, response, actualPage, queryParams)
+    })
+
 server.get('*', (req, res) => handle(req, res));
 
 

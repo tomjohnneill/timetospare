@@ -103,7 +103,7 @@ const styles = {
     padding: 30,
   },
   number: {
-    color: '#E55749',
+    color: '#000AB2',
     fontSize: '20px',
 
   },
@@ -121,7 +121,7 @@ explanation: {
 selectedTab: {
     height: '36px',
     backgroundColor: 'white',
-    color: '#E55749',
+    color: '#000AB2',
     textTransform: 'none',
     letterSpacing: '0.4px',
     lineHeight: '16px',

@@ -48,7 +48,7 @@ export default class OrganisationType extends React.Component {
         alignItems: 'center',
         flexDirection: 'column',
         borderRadius: 6,
-        border: '3px solid #E55749',
+        border: '3px solid #000AB2',
         position: 'relative',
         boxSizing: 'border-box',
         cursor: 'pointer',

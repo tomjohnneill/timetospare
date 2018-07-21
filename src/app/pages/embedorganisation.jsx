@@ -103,7 +103,7 @@ class EmbeddedOrganisation extends React.Component {
           :
           <div style={{marginTop: -50, borderRadius: 2, border: '1px solid #aaa', backgroundColor: 'rgba(0,0,0,0)'}}>
             <div style={{display: 'flex', alignItems: 'center', minHeight: 148.8}}>
-              <div style={{fontFamily: 'Permanent Marker', fontSize: '50px', color: '#E55749',
+              <div style={{fontFamily: 'Permanent Marker', fontSize: '50px', color: '#000AB2',
                 height: '100%', display: 'flex', alignItems: 'top',
                   paddingRight: 50, paddingLeft: 16}}>
                 who's in?

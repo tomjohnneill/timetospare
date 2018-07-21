@@ -15,7 +15,7 @@ import withMui from '../components/hocs/withMui';
 
 const styles = {
   number: {
-    color: '#E55749',
+    color: '#000AB2',
     fontSize: '20px',
   },
   bottomBit: {

@@ -34,7 +34,7 @@ const styles = {
   selectedTab: {
     height: '60px',
     backgroundColor: 'white',
-    color: '#E55749',
+    color: '#000AB2',
     textTransform: 'none',
     fontSize: '16px',
     letterSpacing: '0.4px',

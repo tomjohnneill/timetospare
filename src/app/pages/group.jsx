@@ -33,7 +33,7 @@ const styles = {
   selectedTab: {
     height: '60px',
     backgroundColor: 'white',
-    color: '#E55749',
+    color: '#000AB2',
     textTransform: 'none',
     fontSize: '16px',
     letterSpacing: '0.4px',
@@ -1080,7 +1080,7 @@ class GroupPage extends React.Component {
                           tabItemContainerStyle={{height: '60px', backgroundColor: 'white', borderBottom: '1px solid #DDDDDD'}}
                           value={Router.query.tab}
                           onChange={this.handleTwoTabClick}
-                          inkBarStyle={{zIndex: 2, backgroundColor: '#E55749',
+                          inkBarStyle={{zIndex: 2, backgroundColor: '#000AB2',
                           left:this.state.inkBarLeft, width: '60px'}}
                         >
                           <Tab label="Projects"

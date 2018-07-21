@@ -254,7 +254,7 @@ class Form extends React.Component {
                     letterSpacing: '0.6px', fontWeight: 'bold'}}/>
         </MediaQuery>
         <MediaQuery maxDeviceWidth={700}>
-          <RaisedButton label='NEXT' backgroundColor='#E55749'
+          <RaisedButton label='NEXT' backgroundColor='#000AB2'
               onClick={this.handleNext}
               style={{marginRight: 16, height: '36px', marginTop: '16px', boxShadow: ''}} primary={true} overlayStyle={{height: '36px'}}
               buttonStyle={{height: '36px'}}

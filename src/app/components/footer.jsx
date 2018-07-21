@@ -15,7 +15,7 @@ const styles = {
   selectedTab: {
     height: '60px',
     backgroundColor: 'white',
-    color: '#E55749',
+    color: '#000AB2',
     textTransform: 'none',
     fontSize: '16px',
     letterSpacing: '0.4px',
@@ -40,7 +40,7 @@ const styles = {
   mobileSelectedTab: {
     height: '60px',
     backgroundColor: 'white',
-    color: '#E55749',
+    color: '#000AB2',
     textTransform: 'none',
     fontSize: '16px',
     letterSpacing: '0.4px',
@@ -111,7 +111,7 @@ export default class Footer extends React.Component {
             marginTop: 50, paddingLeft: '100px', paddingRight: '100px', display: 'flex'}}>
             <div style={{width: '100%', display: 'flex', justifyContent: 'center'}} className='footer-data'>
               <div style={{flex: 3, maxWidth: 400}}>
-                <div style={{fontSize: '24px', fontFamily: 'Permanent Marker', color: '#E55749'}}>
+                <div style={{fontSize: '24px', fontFamily: 'Permanent Marker', color: '#000AB2'}}>
                   Who's In?
                 </div>
                 <div style={{paddingTop: 10, paddingBottom: '20px', textAlign: 'left', fontWeight: 700}}>
