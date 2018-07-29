@@ -3,6 +3,7 @@ import fire from '../../fire';
 import Checkbox from 'material-ui/Checkbox';
 import Router from 'next/router'
 import RaisedButton from 'material-ui/RaisedButton';
+import {buttonStyles} from '../styles.jsx'
 import {List, ListItem} from 'material-ui/List';
 
 function encodeEmail (email) {
@@ -187,6 +188,8 @@ export default class MailchimpSuccess extends React.Component {
         <div style={{display: 'flex', marginTop: 20}}>
         <RaisedButton label='Import contacts'
           primary={true}
+          style={buttonStyles.smallSize}
+          labelStyle={buttonStyles.smallLabel}
           disabled={Object.keys(this.state.checked).length === 0}
           onClick={this.handleImportContacts}
           />

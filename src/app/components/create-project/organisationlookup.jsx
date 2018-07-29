@@ -565,7 +565,7 @@ export default class OrganisationLookup extends React.Component{
                     <br/>
                     {this.state.error ? this.state.error.toString() :null}
                     <br/><br/>
-                    Try again, or contact us at help@whosin.io
+                    Try again, or contact us at help@timetospare.org.uk
                   </Dialog>
                 </div>
               }
@@ -846,7 +846,7 @@ export default class OrganisationLookup extends React.Component{
                     <br/>
                     {this.state.error ? this.state.error.toString() :null}
                     <br/><br/>
-                    Try again, or contact us at help@whosin.io
+                    Try again, or contact us at help@timetospare.org.uk
                   </Dialog>
                 </div>
               }

@@ -126,12 +126,17 @@ class YourCalendar extends React.Component {
       var endMinutes = this.state.endTime.getMinutes()
       var startDate = this.state.startDate.setHours(startHours, startMinutes)
       var endDate = this.state.endDate.setHours(endHours, endMinutes)
-      Router.push(`/projectedit?organisation=true&startDate=${startDate}&endDate=${endDate}&title=${this.state.title}`)
+      Router.push(`/projectedit?organisation=${Router.query.organisation}&startDate=${startDate}&endDate=${endDate}&title=${this.state.title}`)
     } else {
-      Router.push(`/projectedit?organisation=true&title=${this.state.title}`)
+      Router.push(`/projectedit?organisation=${Router.query.organisation}&title=${this.state.title}`)
     }
 
 
+  }
+
+  handleEventClick = (event) => {
+    console.log(event)
+    Router.push(`/project-admin?project=${event._id}`)
   }
 
   render() {
@@ -228,7 +233,7 @@ class YourCalendar extends React.Component {
               this.state.events ?
               <div style={{height: '80vh', width: '80vw'}}>
                 <h2 style={{textAlign: 'left', width: '100%', display: 'flex', justifyContent: 'space-between'}}>
-                  <div style={{width: '80%'}}>
+                  <div style={{width: '80%', fontSize: '30px', fontWeight: 200}}>
                     {this.state.onboarding ? 'Pick a date, and add a project' : 'Your project calendar'}
                   </div>
                   <IconButton style={{display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -249,7 +254,7 @@ class YourCalendar extends React.Component {
                     events={this.state.events}
                     startAccessor='Start Time'
                     endAccessor='End Time'
-                    onSelectEvent={event => alert(event.Name)}
+                    onSelectEvent={this.handleEventClick}
                     onSelectSlot={(slotInfo, e) =>
                       {
                         this.setAsOpen(slotInfo)

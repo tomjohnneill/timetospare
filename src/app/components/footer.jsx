@@ -112,7 +112,7 @@ export default class Footer extends React.Component {
             <div style={{width: '100%', display: 'flex', justifyContent: 'center'}} className='footer-data'>
               <div style={{flex: 3, maxWidth: 400}}>
                 <div style={{fontSize: '24px', fontFamily: 'Permanent Marker', color: '#000AB2'}}>
-                  Who's In?
+                  Time to Spare
                 </div>
                 <div style={{paddingTop: 10, paddingBottom: '20px', textAlign: 'left', fontWeight: 700}}>
                   Newsletter
@@ -143,13 +143,13 @@ export default class Footer extends React.Component {
               <div style={{flex: 2}}/>
               <div style={{flex: 2, marginLeft: 24, display: 'flex', justifyContent: 'center'}}>
                 <div style={{width: '100%'}}>
-                  hello@whosin.io
+                  hello@timetospare.org.uk
                   <div style={{display: 'block'}}>
                     <Link style={{width: '100%', display: 'block'}} href='/about'><div>About</div></Link>
                     <Link style={{width: '100%', display: 'block'}} href='/why'><div>Why Start a Project?</div></Link>
                     <Link style={{width: '100%', display: 'block'}} href='/terms'><div>Terms</div></Link>
                     <div style={{display: 'flex'}}>
-                        <a style={{padding: 10}} href={`https://www.facebook.com/whosin.io/`}>
+                        <a style={{padding: 10}} href={`https://www.facebook.com/timetospare.org.uk/`}>
                           <span style={styles.contactIcon}>
                             <Avatar
                               icon={<FontIcon className="fab fa-facebook-f fa-2x" />}
@@ -160,7 +160,7 @@ export default class Footer extends React.Component {
                             />
                         </span>
                       </a>
-                      <a style={{padding: 10}} href={`https://www.instagram.com/whosin.io/`}>
+                      <a style={{padding: 10}} href={`https://www.instagram.com/timetospare.org.uk/`}>
                       <span style={styles.contactIcon}>
                         <Avatar
                           icon={<FontIcon className="fab fa-instagram fa-2x" />}
@@ -213,7 +213,7 @@ export default class Footer extends React.Component {
               </div>
               <div style={{flex: 2, marginTop: 24}}>
 
-                Contact Us: support@whosin.io
+                Contact Us: support@timetospare.org.uk
                 <br/>
               </div>
             </div>

@@ -330,7 +330,7 @@ export default class EmbeddedProject extends React.Component {
                     </div>
 
                       <div style={{flex: 2, fontFamily: 'Permanent Marker', color: '#000AB2', fontSize: '24px', paddingTop: 24, paddingRight: 24}}>
-                        Who's In?
+                        Time to Spare
                       </div>
 
                   </div>

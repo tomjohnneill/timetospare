@@ -4,6 +4,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import Close from 'material-ui/svg-icons/navigation/close';
 import {CalendarIcon, Clock, AvatarIcon} from './icons.jsx';
 import fire from '../fire';
+import {buttonStyles} from '../components/styles.jsx';
 import SignupModal from './signupmodal.jsx';
 import Router from 'next/router';
 
@@ -112,13 +113,31 @@ export default class ChooseDates extends React.Component {
   }
 
   render() {
-    if (this.state.logInModal) {
+    if (this.props.preview) {
+      return (
+        <div style={{height: 80, width: '100%', display: 'flex', textAlign: 'left',
+          alignItems: 'center',
+        boxSizing: 'border-box', padding: 10}}>
+          <div style={{flex: 1}}>
+            No Reviews just yet
+          </div>
+          <div>
+            <RaisedButton
+              label='See dates'
+              primary={true}
+              style={buttonStyles.bigSize}
+              labelStyle={buttonStyles.bigLabel}
+              onClick={this.props.openPreview}
+              />
+          </div>
+        </div>
+      )
+    }
+    else if (this.state.logInModal) {
       return (
         <div>
           <SignupModal
             _id={this.props.project._id}
-
-
             open={this.state.logInModal}
             changeOpen={() => this.setState({logInModal: false, clicked: false})}
           onComplete={this.onComplete}/>
@@ -149,12 +168,16 @@ export default class ChooseDates extends React.Component {
               {
                 this.state.userEngagements[sub._id] ?
                 <RaisedButton  label='Un-Choose'
+                  style={buttonStyles.smallSize}
+                  labelStyle={buttonStyles.smallLabel}
                   onClick={() => this.handleUnChoose(sub)}
                   disabled={this.state.clicked}
                   />
                 :
                 <RaisedButton secondary={true} label='Choose'
                   onClick={() => this.handleChoose(sub)}
+                  style={buttonStyles.smallSize}
+                  labelStyle={buttonStyles.smallLabel}
                   disabled={this.state.clicked}
                   />
               }

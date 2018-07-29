@@ -466,7 +466,7 @@ class CharityProfile extends React.Component {
                 <meta property="og:title" content={this.charity.project.Name}/>
                 <meta property="twitter:title" content={this.state.charity.Name}/>
                 <meta property="og:type" content="article" />
-                <meta property="og:description" content={this.state.charity.Name + "'s projects on Who's In?"} />
+                <meta property="og:description" content={this.state.charity.Name + "'s projects on Time to Spare"} />
                 <meta property="og:image" content={changeImageAddress(this.state.charity['Featured Image'], '750xauto')} />
                 <meta name="twitter:card" content="summary" />
             </Head>
@@ -543,7 +543,7 @@ class CharityProfile extends React.Component {
                         <TextField
                           fullWidth={true}
                           multiLine={true}
-                          defaultValue={`<iframe src="https://whosin.io/embed/o/${this.props.params.charityId}" style="width:100%; height:1000px; border:none"></iframe>`}
+                          defaultValue={`<iframe src="https://timetospare.org.uk/embed/o/${this.props.params.charityId}" style="width:100%; height:1000px; border:none"></iframe>`}
                           />
                       </Dialog>
                     </div>

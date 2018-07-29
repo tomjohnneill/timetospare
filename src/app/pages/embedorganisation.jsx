@@ -106,7 +106,7 @@ class EmbeddedOrganisation extends React.Component {
               <div style={{fontFamily: 'Permanent Marker', fontSize: '50px', color: '#000AB2',
                 height: '100%', display: 'flex', alignItems: 'top',
                   paddingRight: 50, paddingLeft: 16}}>
-                who's in?
+                Time to Spare
               </div>
               <div className='charity-header-container' >
                 {this.state.charity['Featured Image'] ?

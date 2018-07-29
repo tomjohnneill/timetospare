@@ -136,24 +136,31 @@ class UploadList extends React.Component {
     })
       .then(() => {
         console.log('got past charity bit')
-
-        var memberCollection = collRef.collection("Members")
-        console.log(memberCollection)
-        data.forEach((row) => {
-          var member = {}
-          for (var j = 0; j < row.length; j++) {
-            if (columns[j].name) {
-              member[columns[j].name] = row[j].value
-            }
-          }
-          batch.set(memberCollection.doc(), member)
+        fire.auth().currentUser.getIdToken()
+        .then((token) =>
+        fetch(`https://us-central1-whosin-next.cloudfunctions.net/users-addMember?organisation=${Router.query.organisation}`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({
+            data: data,
+            columns: columns
+          })
         })
-        batch.commit().then(function () {
-            console.log("batch committed")
-            Router.push(`/volunteer-preview?organisation=${Router.query.organisation}`,
-                  `/volunteer-preview/${Router.query.organisation}`)
-        });
-
+        .then(response => response.json())
+        .then(data => {
+          console.log(data)
+          if (Router.query.onboarding)
+          { Router.push(`/volunteer-preview?organisation=${Router.query.organisation}`,
+                `/volunteer-preview/${Router.query.organisation}`)
+              } else {
+                Router.push(`/people?organisation=${Router.query.organisation}`)
+              }
+        }
+        )
+        )
       })
     }
 
@@ -165,12 +172,16 @@ class UploadList extends React.Component {
   }
 
   render() {
+    console.log(this.props.url.query)
     console.log(this.state.columnNames)
     var columns = [{name: 'Email'}, {name: "Full Name"}]
     return (
       <div style={{textAlign: 'left '}}>
         <App>
-          <Breadcrumbs stepIndex={1}/>
+          {this.props.url.query && this.props.url.query.onboarding ?
+            <Breadcrumbs stepIndex={1}/>
+            :
+          null}
           <div style={{backgroundColor: '#F5F5F5'}}>
 
             <div style={{display: 'flex',  flexDirection: 'column',

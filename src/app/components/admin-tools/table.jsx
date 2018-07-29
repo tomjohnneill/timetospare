@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactTable from "react-table";
 import fire from '../../fire';
+import Router from 'next/router';
 import 'react-table/react-table.css'
 
 let db = fire.firestore()
@@ -24,7 +25,12 @@ const columns = [{
 export default class Table extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {}
+    this.state = {
+      columns: [{id: 'Email', Header: 'Email', accessor: 'Email'},
+                {id: 'Full Name', Header: 'Full Name', accessor: 'Full Name'}],
+      data: [],
+      selected: null
+    }
   }
 
   componentDidMount(props) {
@@ -33,6 +39,30 @@ export default class Table extends React.Component {
     if (this.props.organisation) {
       var data = []
       var columns = []
+      fire.auth().onAuthStateChanged((user) => {
+        if (user === null) {
+
+        } else {
+          fire.auth().currentUser.getIdToken()
+          .then((token) =>
+            fetch(`https://us-central1-whosin-next.cloudfunctions.net/users-getMemberDetails?organisation=${this.props.organisation}`, {
+              method: 'GET',
+              headers: {
+                'Accept': 'application/json',
+                'Authorization': 'Bearer ' + token
+              },
+            })
+            .then(response => response.json())
+            .then((memberArray) => {
+              console.log(memberArray)
+              if (memberArray) {
+                this.setState({data: memberArray})
+              }
+
+            })
+          )
+        }
+      })
       db.collection("Charity").doc(this.props.organisation).get().then((doc) => {
         var lists = doc.data().lists
         console.log(lists)
@@ -45,14 +75,6 @@ export default class Table extends React.Component {
               })
               this.setState({columns: columns})
             }
-
-          })
-          db.collection("Lists").doc(key).collection("Members").get().then((listSnapshot) => {
-            listSnapshot.forEach((member) => {
-              data.push(member.data())
-              console.log(data)
-              this.setState({data: data})
-            })
           })
         })
       })
@@ -65,9 +87,32 @@ export default class Table extends React.Component {
       <div>
         {this.state.columns && this.state.data ?
         <ReactTable
+          getTdProps={(state, rowInfo, column, instance) => {
+            return {
+              onClick: (e, handleOriginal) => {
+                console.log("A Td Element was clicked!");
+                console.log("it produced this event:", e);
+                console.log("It was in this column:", column);
+                console.log("It was in this row:", rowInfo);
+                console.log(rowInfo.original)
+                console.log("It was in this table instance:", instance);
+
+                // IMPORTANT! React-Table uses onClick internally to trigger
+                // events like expanding SubComponents and pivots.
+                // By default a custom 'onClick' handler will override this functionality.
+                // If you want to fire the original onClick handler, call the
+                // 'handleOriginal' function.
+                Router.push(`/member?member=${rowInfo.original._id}`, `/member/${rowInfo.original._id}}`)
+                if (handleOriginal) {
+                  handleOriginal();
+                }
+              }
+            };
+          }}
           defaultPageSize={this.props.defaultPageSize}
           data={this.state.data}
           columns={this.state.columns}
+          filterable={true}
         />
       :
       null}

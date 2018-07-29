@@ -27,7 +27,15 @@ import moment from 'moment'
 import TimePicker from '../components/timepicker.jsx';
 import Bottom from 'material-ui/svg-icons/editor/vertical-align-bottom';
 import 'react-quill/dist/quill.snow.css';
+import Chip from 'material-ui/Chip';
+import AutoComplete from 'material-ui/AutoComplete';
+import Category from 'material-ui/svg-icons/device/widgets';
 import {formatDateHHcolonMM} from '../components/timepicker.jsx';
+import fire from '../fire';
+import Avatar from 'material-ui/Avatar';
+import {List, ListItem} from 'material-ui/List';
+
+let db = fire.firestore()
 
 var tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
@@ -42,6 +50,30 @@ const modules = {
     ]
   }
 
+  var categories = ["Environment",
+  "Refugees",
+  "Equality",
+  "Poverty",
+  "Education",
+  "Healthcare",
+  "Disabilities",
+  "Young people",
+  "Old people",
+  "Loneliness",
+  "Animals",
+  "Mental Health",
+  "Homelessness",
+  "Democracy",
+  "Technology",
+  "Journalism",
+  "Conservation",
+  "Arts and culture",
+  "Women",
+  "LGBT+",
+  "Human rights",
+  "Justice"
+  ]
+
 const editStyles = {
   container : {
     display: 'flex', alignItems: 'center', padding: 10,
@@ -49,7 +81,18 @@ const editStyles = {
   },
   icon: {
     height: 20, width: 54
-  }
+  },
+  wrapper: {
+    display: 'flex',
+    flexWrap: 'wrap'
+  },
+  chip: {
+        margin: 4,
+        cursor: 'pointer'
+      },
+  selectedChip: {
+    margin: 4
+  },
 }
 
 class ProjectEdit extends React.Component {
@@ -68,6 +111,8 @@ class ProjectEdit extends React.Component {
       this.ReactQuill = require('react-quill')
       this.state = {
         story: '',
+        tags: [],
+        allTags: categories,
         startDate: Router.query.startDate ? new Date(Number(Router.query.startDate)) : new Date(),
         endDate: Router.query.endDate ? new Date(Number(Router.query.endDate)) : new Date(),
         title: Router.query.title
@@ -76,6 +121,8 @@ class ProjectEdit extends React.Component {
     } else {
       this.state = {
         story: '',
+        tags: [],
+        allTags: categories,
         startDate: this.props.url.query.startDate ? new Date(Number(this.props.url.query.startDate)) : new Date(),
         endDate: this.props.url.query.endDate ? new Date(Number(this.props.url.query.endDate)) : new Date(),
         title: this.props.title
@@ -87,6 +134,33 @@ class ProjectEdit extends React.Component {
 
   componentDidMount(props) {
     this.setState({client: true})
+    if (Router.query.organisation) {
+      fire.auth().onAuthStateChanged((user) => {
+        if (user === null) {
+
+        } else {
+          fire.auth().currentUser.getIdToken()
+          .then((token) =>
+            fetch(`https://us-central1-whosin-next.cloudfunctions.net/users-getMemberDetails?organisation=${Router.query.organisation}`, {
+              method: 'GET',
+              headers: {
+                'Accept': 'application/json',
+                'Authorization': 'Bearer ' + token
+              },
+            })
+            .then(response => response.json())
+            .then((memberArray) => {
+              console.log(memberArray)
+              if (memberArray) {
+                this.setState({members: memberArray})
+              }
+              console.log(memberArray)
+
+            })
+          )
+        }
+      })
+    }
   }
 
   handleSetStory = (value) => {
@@ -204,9 +278,112 @@ class ProjectEdit extends React.Component {
     this.setState({[item]: nv})
   }
 
+  handleSaveProject = () => {
+    console.log('Saving project')
+    var batch = db.batch();
+
+
+    var body = {
+      'Start Time' : this.state.startDate,
+      'End Time' : this.state.endDate,
+      'Admin' : {
+        [fire.auth().currentUser.uid] : true
+      },
+      Name: this.state.title ? this.state.title : null,
+      Description: this.state.story ? this.state.story : null,
+      Summary: this.state.tagline ? this.state.tagline : null,
+      Creator: fire.auth().currentUser.uid,
+      'Target People': this.state.min ? this.state.min : null,
+      'Maximum People': this.state.max ? this.state.max : null,
+      'Featured Image': localStorage.getItem('coverPhoto') ? localStorage.getItem('coverPhoto') :null,
+      'Location': this.state.address ? this.state.address : null,
+      Geopoint: this.state.geopoint ? this.state.geopoint : null,
+      created: new Date(),
+      Tags: this.state.tags ? this.state.tags : null,
+      Invited: this.state.users ? this.state.users : null,
+      Lists : this.state.lists ? this.state.lists : null
+    }
+    console.log(body)
+    db.collection("Project").add(body).then((docRef) => {
+      this.state.users.forEach((user) => {
+        let interactionDoc = db.collection("Interactions").doc()
+        batch.set(interactionDoc, {
+          Type: 'Invited',
+          Member: user._id,
+          Organisation: Router.query.organisation,
+          Date: new Date(),
+          Project: docRef.id
+        })
+      })
+      batch.commit()
+      Router.push(`/project?project=${docRef.id}`, `/projects/p/${docRef.id}`)
+    })
+  }
+
+  handleSetGeopoint = (lat, lng, address) => {
+    this.setState({geopoint: {lat: lat, lng: lng}, address: address})
+  }
+
+  handleRequestDelete = (key) => {
+    const chipToDelete = this.state.tags.indexOf(key);
+    var newTags = this.state.tags
+    newTags.splice(chipToDelete, 1);
+    var allTags = this.state.allTags
+    allTags.push(key)
+    this.setState({tags: newTags, allTags: allTags});
+
+  };
+
+  handleAddTag = (key) => {
+    const chipToDelete = this.state.allTags.indexOf(key);
+    var newAllTags = this.state.allTags
+    newAllTags.splice(chipToDelete, 1);
+    this.setState({allTags: newAllTags});
+    var tags = this.state.tags
+    tags.push(key)
+    this.setState({tags: tags})
+  }
+
+  handleUpdateInput = (e, searchText) => {
+    this.setState({searchText: searchText})
+  }
+
+  addPerson = (person) => {
+    this.setState({searchText: ''})
+    var users = this.state.users ? this.state.users : []
+    users.push(person)
+    this.setState({users: users})
+  }
+
+  removePerson = (person) => {
+    var users = this.state.users
+    var index = users.indexOf(person)
+    users.splice(index, 1)
+    this.setState({users: users})
+  }
+
+  handleStoryChange = (value) => {
+    this.setState({story: value})
+  }
+
   render() {
+    var updatedList
+    if (this.state.searchText && this.state.members) {
+      var length = this.state.searchText.length
+      var people = Object.values(this.state.members)
+      var filteredPeople = []
+      people.forEach((person) => {
+        if (person['Full Name'].substring(0, length).toLowerCase() === this.state.searchText.toLowerCase()) {
+          filteredPeople.push(person)
+          console.log(person)
+        }
+      })
+      console.log(filteredPeople)
+    }
+
     const ReactQuill = this.ReactQuill
     console.log(styles)
+    console.log(this.state)
     return (
       <div>
 
@@ -320,6 +497,7 @@ class ProjectEdit extends React.Component {
               <div style={{paddingTop: 15, height: 74, display: 'flex', alignItems: 'center'}}>
                 <RaisedButton primary={true} label='Save'
                   style={{height: 32, borderRadius: 3}}
+                  onClick={this.handleSaveProject}
                   labelStyle={{fontSize: '12px', fontWeight: 700}}
                   />
               </div>
@@ -361,12 +539,12 @@ class ProjectEdit extends React.Component {
                         currentLocation = {this.state.address}
                         reportPlaceToParent={(places) =>
                           {
-                            console.log(places)
+
                             var geo = places[0].geometry.location
                             var lat = geo.lat()
                             var lng = geo.lng()
                             this.handleSetGeopoint(lat, lng, places[0].formatted_address)
-                            console.log(this.state)
+
                           }
                         }
                         />
@@ -391,6 +569,38 @@ class ProjectEdit extends React.Component {
 
                   <div style={{display: 'flex', alignItems: 'top', padding: 10,
                   boxSizing: 'border-box'}}>
+                    <Category style={{paddingTop: 10, width: 54, height: 20}} color={'#484848'}/>
+                    <div style={{flex: 1}}>
+                      <div style={editStyles.wrapper}>
+                        {this.state.tags.map((tag) => (
+                          <Chip
+                            key={tag}
+                            style={editStyles.selectedChip}
+                            backgroundColor={'#65A1e7'}
+                            onRequestDelete={() => this.handleRequestDelete(tag)}
+                          >
+                            {tag}
+                          </Chip>
+                        ))}
+                      </div>
+
+
+                      <div style={editStyles.wrapper}>
+                        {this.state.allTags.map((tag) => (
+                          <Chip
+                            key={tag}
+                            style={editStyles.chip}
+                            onTouchTap={() => this.handleAddTag(tag)}
+                          >
+                            {tag}
+                          </Chip>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{display: 'flex', alignItems: 'top', padding: 10,
+                  boxSizing: 'border-box'}}>
                     <Notes style={{paddingTop: 10, width: 54, height: 20}}
                       color={'#484848'}/>
                     <div style={{flex: 1}}>
@@ -399,7 +609,7 @@ class ProjectEdit extends React.Component {
                         style={{fontFamily: 'Nunito', backgroundColor: 'white'}}
                         modules={modules}
                         toolbar={{fontName: 'Nunito'}}
-                        onChange={(e, nv) => this.handleChangeItem('story', nv)}
+                        onChange={this.handleStoryChange}
                         value={this.state.story}
                            />
                         : null}
@@ -507,13 +717,45 @@ class ProjectEdit extends React.Component {
                     <div style={editStyles.container}>
                       <People style={editStyles.icon} color={'#484848'}/>
                       <div style={{flex: 1}}>
+                        {
+                          this.state.users && this.state.users.length > 0 ?
+                          <div style={{display: 'flex', flexWrap: 'wrap', paddingBottom: 6}}>
+                            {this.state.users.map((user) => (
+                              <Chip style={{margin: 4, backgroundColor: '#FFCB00'}}
+                                onRequestDelete={() => this.removePerson(user._id, user['Full Name'], user.Email)}
+                                >
+                                {user['Full Name']}
+                              </Chip>
+                            ))}
+                          </div>
+                          :
+                          null
+                        }
                         <TextField fullWidth={true}
                           inputStyle={styles.inputStyle}
                           underlineShow={false}
+                          ref={el => { this.el = el; }}
+                          value={this.state.searchText}
                           hintText='Enter names or email addresses'
                           hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
                           key='invite'
+                          onChange={this.handleUpdateInput}
                           style={styles.whiteTextfield}/>
+                          {this.state.searchText && filteredPeople ?
+                        <List>
+                        {
+                          filteredPeople.map((person) => (
+                            <ListItem
+                              leftAvatar={<Avatar />}
+                              onClick={() => this.addPerson(person)}
+                              primaryText={person['Full Name']}
+                              secondaryText={person['Email']}
+                            />
+                          ))
+                        }
+                        </List>
+                      : null
+                      }
                       </div>
                     </div>
                 </div>

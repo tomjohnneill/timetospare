@@ -1115,8 +1115,8 @@ class GroupPage extends React.Component {
                         buttonClicked={() => {}}
                         Name={this.state.Name ? this.state.Name : ''}
                         url={window.location.href}
-                        smsbody={encodeURIComponent("Join my group on Who's In?: " + window.location.href )}
-                        emailbody={encodeURIComponent("Join my group on Who's In?: " +  window.location.href )}
+                        smsbody={encodeURIComponent("Join my group on Time to Spare: " + window.location.href )}
+                        emailbody={encodeURIComponent("Join my group on Time to Spare: " +  window.location.href )}
                         />
                       :
                       null}
@@ -1194,8 +1194,8 @@ class GroupPage extends React.Component {
                     buttonClicked={() => {}}
                     Name={this.state.Name ? this.state.Name : ''}
                     url={window.location.href }
-                    smsbody={encodeURIComponent("Join my group on Who's In?: " + window.location.href)}
-                    emailbody={encodeURIComponent("Join my group on Who's In?: " +  window.location.href )}
+                    smsbody={encodeURIComponent("Join my group on Time to Spare: " + window.location.href)}
+                    emailbody={encodeURIComponent("Join my group on Time to Spare: " +  window.location.href )}
                     />
                   :
                   null}

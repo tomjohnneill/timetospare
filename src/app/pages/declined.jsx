@@ -161,7 +161,7 @@ export class YouMightLike extends React.Component {
             </p>
             <div style={{dispay: 'flex'}}>
               <span style={{fontFamily: 'Permanent Marker', color: '#000AB2' }}>
-                Who's In?
+                Time to Spare
               </span>
               <FlatButton style={{marginLeft: '16px'}}
                 label='Read More' labelStyle={{color: '#65A1e7', textTransform: 'none'}}/>

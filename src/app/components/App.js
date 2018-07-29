@@ -1,10 +1,12 @@
 import React from "react"
 import Header from "./Header"
 import Footer from "./footer.jsx"
+import Router from 'next/router';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import "../style.css"
 import { withRouter } from 'next/router'
+import * as gtag from '../lib/gtag'
 
 var injectTapEventPlugin = require("react-tap-event-plugin");
 try {
@@ -31,6 +33,10 @@ const muiTheme = getMuiTheme({
   },
   fontFamily: 'Nunito'
 });
+
+Router.onRouteChangeComplete = url => {
+  gtag.pageview(url)
+}
 
 export const App = ({ children, router, href }) => (
   <main

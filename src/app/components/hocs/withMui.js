@@ -15,7 +15,7 @@ const muiTheme = getMuiTheme({
   palette: {
     primary1Color: '#000AB2',
     primary2Color:  '#000AB2',
-    accent1Color: '#65A1e7',
+    accent1Color: '#FFCB00',
   },
   appBar: {
     height: 50,

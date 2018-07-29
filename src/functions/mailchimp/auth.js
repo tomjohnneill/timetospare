@@ -4,7 +4,7 @@ var querystring = require('querystring');
 
 const CLIENT_ID = functions.config().mailchimp.client_id;
 const CLIENT_SECRET = functions.config().mailchimp.client_secret;
-const SITE = `https://whosin-next.firebaseapp.com`
+const SITE = `https://timetospare.org.uk`
 
 const mailchimpAuth = functions.https.onRequest((req, res) => {
   var code = req.query.code

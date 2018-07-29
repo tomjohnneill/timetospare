@@ -92,6 +92,6 @@ server.get('*', (req, res) => handle(req, res));
 
 export let nextApp = functions.https.onRequest(async (req, res) => {
   await app.prepare();
-  res.set('Cache-Control', 'public, max-age=60, s-maxage=60');
+  res.set('Cache-Control', 'public, max-age=3600, s-maxage=5000');
   server(req, res);
 });

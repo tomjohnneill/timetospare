@@ -7,6 +7,8 @@ import Avatar from 'material-ui/Avatar';
 import Divider from 'material-ui/Divider'
 import Breadcrumbs from '../components/onboarding/breadcrumbs.jsx';
 import CommunicationChatBubble from 'material-ui/svg-icons/av/play-arrow';
+import FlatButton from 'material-ui/FlatButton';
+import {buttonStyles} from '../components/styles.jsx';
 
 class ImportVolunteers extends React.Component {
   constructor(props) {
@@ -16,6 +18,8 @@ class ImportVolunteers extends React.Component {
 
   componentDidMount(props) {
     this.setState({organisation: Router.query.organisation})
+
+    Router.prefetch(`/project-calendar?onboarding=true&organisation=${Router.query.organisation}`)
   }
 
   onMailchimpClick = () => {
@@ -63,6 +67,13 @@ class ImportVolunteers extends React.Component {
                 <p>
                   You'll need to do one of these to create private projects
                 </p>
+                <div style={{paddingTop: 100, float: 'right'}}>
+                <FlatButton label='Skip'
+                  labelStyle={buttonStyles.smallLabel}
+                  style={buttonStyles.smallSize}
+                  onClick={() => Router.push(`/project-calendar?onboarding=true&organisation=${Router.query.organisation}`)}
+                  />
+                </div>
                 <div style={{height: '100vh'}}/>
             </div>
           </div>

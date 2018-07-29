@@ -54,7 +54,7 @@ export default class CustomInvite extends React.Component {
             <Plant color={"#3B9E74"} style={{marginBottom: '16px', height: '80px'}}/>
             }
             <div style={{ fontWeight: 'bold'}}>
-              {this.props.organisation.Name} have invited you to join their team on Who's In?
+              {this.props.organisation.Name} have invited you to join their team on Time to Spare
             </div>
             <div style={{fontWeight: 'lighter', width: '100%'}}>
               {

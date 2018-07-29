@@ -534,7 +534,7 @@ class Project extends React.Component {
             <img className='mobile-cover-image' src={changeImageAddress(this.state.project['Featured Image'], '500xauto')}
               style={{height: '222px', width: '100%', objectFit: 'cover'}}/>
 
-            <div style={{padding: '20px 35px 20px 35px'}} className='mobile-project-container'>
+            <div style={{padding: '20px 0px 20px 0px', margin: '0px 10px'}} className='mobile-project-container'>
 
               <p className='mobile-project-title'
                 style={{fontSize: '32px', fontWeight: 'bold', textAlign: 'left',
@@ -576,16 +576,24 @@ class Project extends React.Component {
                 </Link>
               }
 
-              <LinearProgress  style={{height: '5px', borderRadius: '1.5px', marginTop: 20}} color={'#00ABE8'} mode="determinate"
-                min={0} max={this.state.project['Target People']}
-                value={this.state.project['People Pledged'] === null ? 0 : this.state.project['People Pledged']} />
-              <div style={{textAlign: 'right', paddingTop: 6, fontWeight: 'lighter'}} className='to-go-text'>
-                {required} more {required === 1 ? 'person' : 'people'} needed
-              </div>
+              {this.state.subProjects ?
+                null
+                :
+                <div>
+                  <LinearProgress  style={{height: '5px', borderRadius: '1.5px', marginTop: 20}} color={'#00ABE8'} mode="determinate"
+                    min={0} max={this.state.project['Target People']}
+                    value={this.state.project['People Pledged'] === null ? 0 : this.state.project['People Pledged']} />
+                  <div style={{textAlign: 'right', paddingTop: 6, fontWeight: 'lighter'}} className='to-go-text'>
+                    {required} more {required === 1 ? 'person' : 'people'} needed
+                  </div>
+                </div>
+              }
             </div>
 
 
-            <div style={{backgroundColor: 'rgba(216,216,216,0.2)', padding: '20px 35px 20px 35px', textAlign: 'left'}}
+            <div style={{ padding: '20px 0px 0px 0px',
+              margin: "0px 10px", textAlign: 'left',
+            borderTop: '1px solid #DBDBDB'}}
               className='datetime-container'>
 
               {this.state.project['Start Time'] ?
@@ -638,7 +646,9 @@ class Project extends React.Component {
             <div style={{display: 'flex',
               bottom: 0,position: 'fixed', zIndex: 4, boxSizing: 'border-box',
               backgroundColor: 'white', width: '100%', borderTop: '1px solid rgb(216, 216, 216)',
-              justifyContent: 'center', padding: '20px 15px 20px 15px'}}>
+              justifyContent: 'center',
+              margin: '0px 10px',
+              padding: '20px 10px 20px 10px'}}>
               {this.state.subProjects ?
                 <div style={{display: 'flex', width: '100%', alignItems: 'center'}}>
                   <div style={{flex: 1, textAlign: 'left', fontSize: '14px',
@@ -680,9 +690,7 @@ class Project extends React.Component {
 
                   </div>
 
-                  <div style={{paddingLeft: 10, paddingRight: 10}}>
-                    <Suggest projectId={this.state.project._id}/>
-                  </div>
+
                   <div style={{position: 'sticky'}}>
                     <SignupModal
                       type={this.state.modalType}
@@ -693,9 +701,12 @@ class Project extends React.Component {
                     onComplete={this.onComplete}/>
                 </div>
 
-                <h2 style={{paddingLeft: 10, paddingTop: 16,textAlign: 'left', fontSize: '16px'}}>
+                <h2 style={{
+                    borderTop: '1px solid #DBDBDB',
+                      margin: '10px 10px', paddingTop: 20,textAlign: 'left', fontSize: '16px'}}>
                    What's going on?</h2>
-            <div style={{padding: '0px 10px 20px 10px', textAlign: 'left'}}>
+            <div style={{padding: '0px 0px 20px 0px',
+              margin: '0px 10px', textAlign: 'left'}}>
 
                  <div dangerouslySetInnerHTML={this.descriptionMarkup()}/>
 
@@ -703,8 +714,10 @@ class Project extends React.Component {
             </div>
 
 
-                        <p style={{fontSize: '16px', fontWeight: 700, margin:0, paddingBottom : 20,
-                          paddingLeft: 10, textAlign: 'left'}}>
+                        <p style={{fontSize: '16px', fontWeight: 700, margin:"0px 10px",
+                          borderTop: '1px solid #DBDBDB',
+                          paddingTop: 20, paddingBottom : 20,
+                           textAlign: 'left'}}>
                           Where this will be
                         </p>
                           {this.state.project.Geopoint ?
@@ -714,9 +727,9 @@ class Project extends React.Component {
                                 address={this.state.project.Location}
                                 isMarkerShown
                                 googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyBnLdq8kJzE87Ba_Q5NEph7nD6vkcXmzhA&v=3.exp&libraries=geometry,drawing,places"
-                                loadingElement={<div style={{ height: `100%` , borderRadius: 6}} />}
+                                loadingElement={<div style={{ height: `100%`}} />}
                                 containerElement={<div style={{ height: `350px`}} />}
-                                mapElement={<div style={{ height: `100%`, borderRadius: 6 }} />} />
+                                mapElement={<div style={{ height: `100%` }} />} />
                             </div>
                           : null}
 
@@ -777,7 +790,7 @@ class Project extends React.Component {
 
             <div style={{boxSizing: 'border-box', padding: 10}}>
               <div style={{height: '36px', borderBottom: 'solid 1px #DDDDDD'}}/>
-              <h1 style={{fontFamily: 'Permanent Marker', textAlign: 'left'}}>Who's In?</h1>
+              <h1 style={{ textAlign: 'left'}}>Who's coming?</h1>
               <li>
 
                 <WhosIn

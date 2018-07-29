@@ -15,7 +15,7 @@ import withMui from '../components/hocs/withMui';
 
 let db = fire.firestore()
 
-var SITE = `https://whosin-next.firebaseapp.com/`
+var SITE = `https://timetospare.org.uk/`
 
 const styles = {
   line: {

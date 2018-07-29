@@ -123,6 +123,12 @@ export default class Header extends React.Component {
         db.collection("User").doc(fire.auth().currentUser.uid).get().then((data) => {
           this.setState({user: data.data(), userPicture: data.data().Picture, loading: false})
         })
+        db.collection("Charity").where("Admin." + fire.auth().currentUser.uid, "==", true)
+        .get().then((snapshot) => {
+          if (snapshot.size > 0) {
+            this.setState({organisation: true})
+          }
+        })
         .catch(error => console.log('Error', error))
       }
     })
@@ -131,8 +137,16 @@ export default class Header extends React.Component {
       db.collection("User").doc(fire.auth().currentUser.uid).get().then((data) => {
         this.setState({user: data.data(), userPicture: data.data().Picture, loading: false})
       })
+      db.collection("Charity").where("Admin." + fire.auth().currentUser.uid, "==", true)
+      .get().then((snapshot) => {
+        if (snapshot.size > 0) {
+          this.setState({organisation: true})
+        }
+      })
       .catch(error => console.log('Error', error))
     }
+
+
   }
 
 
@@ -229,8 +243,12 @@ export default class Header extends React.Component {
 
   handleCreateProject = (e) => {
     e.preventDefault()
-    Router.push('/signup')
-
+    if (this.state.organisation) {
+      Router.push('/organisation')
+    }
+    else {
+      Router.push('/signup')
+    }
   }
 
   handleComplete = () => {
@@ -283,7 +301,7 @@ export default class Header extends React.Component {
                                 <div
                                   className='link-container'
                                    style={{display: 'flex', height: '100%', fontWeight: 'normal', alignItems: 'center'}}>
-                                   <Link prefetch href='/projects'>
+                                   <Link prefetch href='/mission'>
                                      <div style={{
                                        cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
 
@@ -291,22 +309,15 @@ export default class Header extends React.Component {
                                        Our Mission
                                      </div>
                                    </Link>
-                                   <Link prefetch href='/projects'>
+                                   <Link prefetch href='/groups'>
                                      <div style={{
                                        cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
 
                                        >
-                                       Pricing
+                                       Groups
                                      </div>
                                    </Link>
-                                  <Link prefetch href='/about'>
-                                    <div style={{
-                                      cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
 
-                                      >
-                                      About
-                                    </div>
-                                  </Link>
 
                                   <Link prefetch href='/projects'>
                                     <div style={{
@@ -323,7 +334,12 @@ export default class Header extends React.Component {
                                        labelStyle={buttonStyles.smallLabel}
 
                                        label={<span className='flexthis' style={{display: 'flex'}}>
-                                       Sign up free</span>} onClick={this.handleCreateProject}/>
+                                       {
+                                         this.state.organisation ?
+                                         'Your Admin Page' :
+                                         'Sign up free'
+                                       }
+                                       </span>} onClick={this.handleCreateProject}/>
                                   </div>
                                </div>
                              }
@@ -442,20 +458,15 @@ export default class Header extends React.Component {
                 Time to Spare
               </span>
             </div>
-            <Link href='/about'>
-              <MenuItem onClick={() => this.goToAndClose('/about')}>About</MenuItem>
-            </Link>
-            <Link href='/why'>
-              <MenuItem onClick={() => this.goToAndClose('/why')}>Why start a project?</MenuItem>
-            </Link>
+
             <Link href='/projects'>
               <MenuItem onClick={() => this.goToAndClose('/projects')}>Projects</MenuItem>
             </Link>
             <Link href='/groups'>
               <MenuItem onClick={() => this.goToAndClose('/groups')}>Groups</MenuItem>
             </Link>
-            <Link href='/create-project?stage=0' >
-              <MenuItem onClick={this.handleCreateProject}>Start a project</MenuItem>
+            <Link href='/create-other' >
+              <MenuItem onClick={this.handleCreateProject}>Start an organisation</MenuItem>
             </Link>
             <MenuItem onClick={this.handleSignOut}>
               Sign out</MenuItem>

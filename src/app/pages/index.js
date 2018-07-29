@@ -240,11 +240,20 @@ class Index extends React.Component {
                     display: 'flex', justifyContent: 'center',paddingRight: '20px', boxSizing: 'border-box', paddingLeft: 80}}>
                     <div style={{width: '600px'}}>
                       <h2 style={{textAlign: 'left', color: 'black', fontSize: '48px',
-                    marginBottom: 15}}>Better manage your people</h2>
+                    marginBottom: 15}}>Inspire your volunteers</h2>
 
 
                     <p style={{fontSize: '20px', marginTop: 25, color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
-                      Contact lists, invites, reminders - all done automatically
+                      Let them see all the great projects your organisation does. Let them sign up to extra if they have time to spare.
+                      <br/>
+                      <br/>
+                      Let volunteers create groups, and come with their friends.
+                      <br/>
+                      <br/>
+                      But you're in control, if a project is sensitive, you can restrict who can see it.
+
+
+
 
                     </p>
 
@@ -264,13 +273,14 @@ class Index extends React.Component {
                       display: 'flex', justifyContent: 'center',paddingRight: '20px', boxSizing: 'border-box', paddingLeft: 80}}>
                       <div style={{width: '600px', paddingRight: 100}}>
                         <h2 style={{textAlign: 'left', color: 'black', fontSize: '48px',
-                      marginBottom: 15}}>Better manage your time</h2>
+                      marginBottom: 15}}>Save yourself time</h2>
 
 
                       <p style={{fontSize: '20px', marginTop: 25, color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
-                        Create events and choose who can seen them.
-                        <br/>Share your calendar with your volunteers.
-                          <br/>Find out who's coming to which project.
+                        Don't waste hours on boring admin. Save your time for the things that make a real difference.
+                        <br/>
+                        <br/>
+                        We do reminder emails, calendar, and invite management all for you.
                       </p>
 
                       </div>
@@ -292,7 +302,7 @@ class Index extends React.Component {
 
 
                         <p style={{fontSize: '20px', marginTop: 25,fontWeight: 'lighter', textAlign: 'left'}}>
-                          Receive feedback to help you improve your projects.<br/>
+                          Receive feedback to help you improve your projects.<br/><br/>
                           Help your volunteers showcase their effort.
 
                         </p>
@@ -354,11 +364,17 @@ class Index extends React.Component {
                         boxSizing: 'border-box', paddingLeft: 20}}>
                         <div style={{width: '100%'}}>
                           <h2 style={{textAlign: 'left', color: 'black', fontSize: '48px',
-                        marginBottom: 15}}>Better manage your people</h2>
+                        marginBottom: 15}}>Inspire your volunteers</h2>
 
 
                         <p style={{fontSize: '20px', marginTop: 25, color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
-                          Contact lists, invites, reminders - all done automatically
+                          Let them see all the great projects your organisation does. Let them sign up to extra if they have time to spare.
+                          <br/>
+                          <br/>
+                          Let volunteers create groups, and come with their friends.
+                          <br/>
+                          <br/>
+                          But you're in control, if a project is sensitive, you can restrict who can see it.
 
                         </p>
 
@@ -379,15 +395,16 @@ class Index extends React.Component {
                            boxSizing: 'border-box', paddingLeft: 20}}>
                           <div style={{ paddingRight: 10}}>
                             <h2 style={{textAlign: 'left', color: 'black', fontSize: '48px',
-                          marginBottom: 15}}>Better manage your time</h2>
+                          marginBottom: 15}}>Save yourself time</h2>
 
 
                           <p style={{fontSize: '20px', marginTop: 25, color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
-                            Create events and choose who can seen them.</p>
+                            Don't waste hours on boring admin. Save your time for the things that make a real difference.
+
+                        </p>
                           <p style={{fontSize: '20px', paddingLeft: 40,  color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
-                              Share your calendar with your volunteers.</p>
-                            <p style={{fontSize: '20px', paddingLeft: 100,  color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
-                                Find out who's coming to which project.</p>
+                              We do reminder emails, calendar, and invite management all for you.</p>
+
 
                           </div>
 

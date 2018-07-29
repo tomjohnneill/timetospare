@@ -656,8 +656,8 @@ class GroupList extends React.Component {
           buttonClicked={this.handleButtonClicked}
           Name={this.state.Name ? this.state.Name : ''}
           url={Router.asPath + '/' + this.state.groupId}
-          smsbody={encodeURIComponent("Join my group on Who's In?: " + Router.asPath + '/' + this.state.groupId)}
-          emailbody={encodeURIComponent("Join my group on Who's In?: " +  Router.asPath + '/' + this.state.groupId)}
+          smsbody={encodeURIComponent("Join my group on Time to Spare: " + Router.asPath + '/' + this.state.groupId)}
+          emailbody={encodeURIComponent("Join my group on Time to Spare: " +  Router.asPath + '/' + this.state.groupId)}
           />
         }
       <div style={{width: '100%', paddingTop: 16}}>

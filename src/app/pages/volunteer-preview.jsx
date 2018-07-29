@@ -6,6 +6,7 @@ import App from '../components/App.js';
 import withMui from '../components/hocs/withMui';
 import RaisedButton from 'material-ui/RaisedButton';
 import Breadcrumbs from '../components/onboarding/breadcrumbs.jsx';
+import {buttonStyles} from '../components/styles.jsx';
 
 export  class VolunteerPreview extends React.Component {
   constructor(props) {
@@ -39,6 +40,8 @@ export  class VolunteerPreview extends React.Component {
             <div style={{display: 'flex', maxWidth: 1000, width: '100%', marginTop: 20}}>
               <RaisedButton label='Next'
                 primary={true}
+                style={buttonStyles.smallSize}
+                labelStyle={buttonStyles.smallLabel}
                 href={'/project-calendar?onboarding=true'}
                 />
             </div>
