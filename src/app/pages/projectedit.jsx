@@ -312,7 +312,11 @@ class ProjectEdit extends React.Component {
           Member: user._id,
           Organisation: Router.query.organisation,
           Date: new Date(),
-          Project: docRef.id
+          Project: docRef.id,
+          Details : {
+            Name : this.state.title,
+            Summary: this.state.tagline
+          }
         })
       })
       batch.commit()
@@ -558,8 +562,8 @@ class ProjectEdit extends React.Component {
                         inputStyle={styles.inputStyle}
                         underlineShow={false}
                         hintText='Tagline'
-                        value={this.state.summary}
-                        onChange={(e, nv) => this.handleChangeItem('summary', nv)}
+                        value={this.state.tagline}
+                        onChange={(e, nv) => this.handleChangeItem('tagline', nv)}
                         onFocus={this.handleFocus}
                         hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
                         key='tagline'

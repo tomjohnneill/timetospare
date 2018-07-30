@@ -136,6 +136,7 @@ export class Organisation extends React.Component {
                         </p>
                         <RaisedButton
                           primary={true}
+                          onClick={() => Router.push(`/messaging?organisation=${this.state.orgId}`)}
                           labelStyle={buttonStyles.smallLabel}
                           style={buttonStyles.smallSize}
                           label='Messaging'/>
