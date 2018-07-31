@@ -207,3 +207,7 @@ react-autosuggest__container {
     background: #FFCB00;
     cursor: pointer;
 }
+
+div.header-category:hover {
+  border-bottom: 2px solid #FFCB00
+}

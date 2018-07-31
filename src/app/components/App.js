@@ -51,7 +51,7 @@ export const App = ({ children, router, href }) => (
     }}>
 
       <div>
-        <Header router={router}/>
+        <Header children={children} router={router}/>
         <div style={{height: 50}}/>
         {children}
         <Footer/>

@@ -90,7 +90,7 @@ server.get('/csv-upload/:organisation', (request, response) => {
 server.get('*', (req, res) => handle(req, res));
 
 
-export let nextApp = functions.https.onRequest(async (req, res) => {
+export let nextApp = functions.region('europe-west1').https.onRequest(async (req, res) => {
   await app.prepare();
   res.set('Cache-Control', 'public, max-age=3600, s-maxage=5000');
   server(req, res);

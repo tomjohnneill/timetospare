@@ -127,7 +127,8 @@ class UploadList extends React.Component {
       collRef.set({
         Organisation: Router.query.organisation,
         Pending: Pending,
-        Columns: columns
+        Columns: columns,
+        Name: this.state.listName
         // set admins in here
       }).then(() => {
         db.collection("Charity").doc(Router.query.organisation).update({

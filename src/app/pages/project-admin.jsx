@@ -94,7 +94,7 @@ export class ProjectAdmin extends React.Component {
   }
 
   componentDidMount(props) {
-    db.collection("Interactions").where("Project", Router.query.project).get()
+    db.collection("Interactions").where("Project", "==" , Router.query.project).get()
     .then((intSnapshot) => {
       var data = []
       intSnapshot.forEach((intDoc) => {

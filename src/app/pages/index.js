@@ -93,6 +93,7 @@ class Index extends React.Component {
         this.getPrivateProjects(fire.auth().currentUser.uid)
       }
     })
+    Router.prefetch('/signup')
   }
 
   static async getInitialProps() {
@@ -187,6 +188,8 @@ class Index extends React.Component {
             loading: false});
       });
 }
+
+
 
   render() {
     var isMobile = mobile(this.props.userAgent)

@@ -136,7 +136,7 @@ class YourCalendar extends React.Component {
 
   handleEventClick = (event) => {
     console.log(event)
-    Router.push(`/project-admin?project=${event._id}`)
+    Router.push(`/project-admin?project=${event._id}&organisation=${Router.query.organisation}`)
   }
 
   render() {

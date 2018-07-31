@@ -7,7 +7,14 @@ import {buttonStyles, textFieldStyles} from '../components/styles.jsx'
 import Add from 'material-ui/svg-icons/content/add';
 import TextField from 'material-ui/TextField';
 import Divider from 'material-ui/Divider';
+import Router from 'next/router';
+import DropDownMenu from 'material-ui/DropDownMenu';
 import 'react-quill/dist/quill.snow.css';
+import MenuItem from 'material-ui/MenuItem';
+import fire from '../fire';
+
+let mobile = require('is-mobile');
+let db = fire.firestore()
 
 const modules = {
     toolbar: [
@@ -52,7 +59,29 @@ class Recipients extends React.Component{
         {
           this.props.focus === 'recipients' ?
           <div>
-            List
+            <div style={{padding: '20px 0px'}}>
+              <DropDownMenu
+                  style={{textAlign: 'left', height: 40}}
+                  onChange={(e, key, value) => this.setState({list: value})}
+                  labelStyle={{backgroundColor: 'white', height: 40, border: '1px solid #aaa',
+                    borderRadius: 2, display: 'flex', alignItems: 'center'}}
+                  iconStyle={{height: 40}}
+                  underlineStyle={{border: 'none'}}
+                  selectedMenuItemStyle={ {backgroundColor: '#f5f5f5', color: '#000AB2', fontWeight: 'bold'} }
+                  menuStyle={{textAlign: 'left'}}
+                  value={this.state.list ? this.state.list : 'norepeat'} >
+
+                  {
+                    this.props.lists ? this.props.lists.map((list) => (
+                      <MenuItem value={list._id} primaryText={list.Name} />
+                    ))
+                    :
+                    null
+                  }
+
+
+                </DropDownMenu>
+              </div>
             <div style={{display: 'flex'}}>
               <RaisedButton style={buttonStyles.smallSize}
                 labelStyle={buttonStyles.smallLabel}
@@ -246,7 +275,21 @@ export class CreateMessage extends React.Component {
     this.state = {focus: null}
   }
 
+  componentDidMount(props) {
+    db.collection("Lists").where("Organisation", "==", Router.query.organisation)
+    .get().then((listSnapshot) => {
+      var lists = []
+      listSnapshot.forEach((list) => {
+        var elem = list.data()
+        elem._id = list.id
+        lists.push(elem)
+      })
+      this.setState({lists: lists})
+    })
+  }
+
   render() {
+    console.log(this.state)
     console.log(this.props)
     return (
       <App>
@@ -263,6 +306,7 @@ export class CreateMessage extends React.Component {
               <div style={{padding: '0px 20px', border: '1px solid #DBDBDB', borderRadius: 6}}>
                 <Recipients
                   focus={this.state.focus}
+                  lists={this.state.lists}
                   changeFocus={() => this.setState({focus: 'recipients'})}
                   cancelFocus={() => this.setState({focus: null})}
                   />
@@ -277,6 +321,7 @@ export class CreateMessage extends React.Component {
               <div style={{padding: '0px 20px', border: '1px solid #DBDBDB', borderRadius: 6}}>
                 <Recipients
                   focus={this.state.focus}
+                  lists={this.state.lists}
                   changeFocus={() => this.setState({focus: 'recipients'})}
                   cancelFocus={() => this.setState({focus: null})}
                   />

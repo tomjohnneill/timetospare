@@ -20,6 +20,7 @@ import SignupModal from './signupmodal.jsx';
 import fire from '../fire';
 import {buttonStyles} from './styles.jsx'
 import Head from 'next/head'
+import Home from 'material-ui/svg-icons/action/home';
 import "../style.css"
 import 'react-datasheet/lib/react-datasheet.css';
 
@@ -94,7 +95,16 @@ const style = {
   }
   , verifiedPlain: {
     paddingRight: '24px'
-  }
+  },
+  category: {
+    height: '100%',
+  cursor: 'pointer', display: 'flex', alignItems: 'center', marginRight:25
+},
+selectedCategory : {
+  height: '100%',
+cursor: 'pointer', display: 'flex', alignItems: 'center', marginRight:25, borderBottom: '2px solid #000AB2'
+}
+
 };
 
 
@@ -126,7 +136,9 @@ export default class Header extends React.Component {
         db.collection("Charity").where("Admin." + fire.auth().currentUser.uid, "==", true)
         .get().then((snapshot) => {
           if (snapshot.size > 0) {
-            this.setState({organisation: true})
+            snapshot.forEach((doc) => {
+              this.setState({organisation: doc.id})
+            })
           }
         })
         .catch(error => console.log('Error', error))
@@ -140,7 +152,9 @@ export default class Header extends React.Component {
       db.collection("Charity").where("Admin." + fire.auth().currentUser.uid, "==", true)
       .get().then((snapshot) => {
         if (snapshot.size > 0) {
-          this.setState({organisation: true})
+          snapshot.forEach((doc) => {
+            this.setState({organisation: doc.id})
+          })
         }
       })
       .catch(error => console.log('Error', error))
@@ -301,8 +315,68 @@ export default class Header extends React.Component {
                                 <div
                                   className='link-container'
                                    style={{display: 'flex', height: '100%', fontWeight: 'normal', alignItems: 'center'}}>
+                                   {
+                                     this.state.organisation ?
+                                     <div style={{display: 'flex', height: '100%', fontWeight: 'normal', alignItems: 'center'}}>
+                                       <Link prefetch href={`/organisation`}>
+                                         <div
+                                           className='header-category'
+                                           style={
+                                             this.props.router.pathname.includes('/organisation') ?
+                                             style.selectedCategory :
+                                             style.category}
+
+                                           >
+                                           <Home/>
+                                         </div>
+                                       </Link>
+                                       <Link prefetch href={`/project-calendar?organisation=${this.state.organisation}`}>
+                                         <div
+                                           className='header-category'
+                                           style={
+                                             this.props.router.pathname.includes('project-calendar') ?
+                                             style.selectedCategory :
+                                             style.category}
+
+                                           >
+                                           Calendar
+                                         </div>
+                                       </Link>
+                                       <Link prefetch href={`/people?organisation=${this.state.organisation}`}>
+                                         <div
+                                           className='header-category'
+                                           style={
+                                             this.props.router.pathname.includes('people') ?
+                                             style.selectedCategory :
+                                             style.category}
+
+                                           >
+                                           People
+                                         </div>
+                                       </Link>
+                                       <Link prefetch href={`/messaging?organisation=${this.state.organisation}`}>
+                                         <div
+                                           className='header-category'
+                                           style={
+                                             this.props.router.pathname.includes('messaging') ?
+                                             style.selectedCategory :
+                                             style.category}
+
+                                           >
+                                           Messaging
+                                         </div>
+                                       </Link>
+                                     </div>
+
+                                     :
+                                     null
+                                   }
+
+
+
                                    <Link prefetch href='/mission'>
                                      <div style={{
+                                         paddingLeft: 25, borderLeft: '1px solid #DBDBDB',
                                        cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
 
                                        >
@@ -317,6 +391,9 @@ export default class Header extends React.Component {
                                       Projects
                                     </div>
                                   </Link>
+                                  {
+                                    this.state.organisation ?
+                                    null :
                                   <div style={{paddingRight: 15}}>
                                     <RaisedButton
                                       style={buttonStyles.smallSize} primary={true} overlayStyle={{height: '36px'}}
@@ -324,13 +401,12 @@ export default class Header extends React.Component {
                                        labelStyle={buttonStyles.smallLabel}
 
                                        label={<span className='flexthis' style={{display: 'flex'}}>
-                                       {
-                                         this.state.organisation ?
-                                         'Your Admin Page' :
-                                         'Sign up free'
-                                       }
+
+                                         Sign up free
+
                                        </span>} onClick={this.handleCreateProject}/>
                                   </div>
+                                }
                                </div>
                              }
 

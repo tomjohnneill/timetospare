@@ -52,7 +52,7 @@ export class Messaging extends React.Component {
             <ListItem
               style={{display: 'flex', height: 80, alignItems: 'center'}}
               primaryText="Send a standard email"
-
+              onClick={() => Router.push(`/create-message?organisation=${Router.query.organisation}&type=email`)}
               leftIcon={<Email color={'#000AB2'}/>}
               rightIcon={<CommunicationChatBubble color={'#000AB2'} />}
             />
@@ -60,7 +60,7 @@ export class Messaging extends React.Component {
             <ListItem
               style={{display: 'flex', height: 80, alignItems: 'center'}}
               primaryText="Send a text"
-
+              onClick={() => Router.push(`/create-message?organisation=${Router.query.organisation}&type=sms`)}
               leftIcon={<SMS color={'#FFCB00'}/>}
               rightIcon={<CommunicationChatBubble color={'#FFCB00'}/>}
             />
