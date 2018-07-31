@@ -12,9 +12,13 @@ import DropDownMenu from 'material-ui/DropDownMenu';
 import 'react-quill/dist/quill.snow.css';
 import MenuItem from 'material-ui/MenuItem';
 import fire from '../fire';
+import {PaperAirplane, Clock} from '../components/icons.jsx';
 
 let mobile = require('is-mobile');
 let db = fire.firestore()
+let functions = fire.functions('europe-west1')
+
+var getMemberInList = functions.httpsCallable('getMemberInListEurope')
 
 const modules = {
     toolbar: [
@@ -32,7 +36,24 @@ class Recipients extends React.Component{
     this.state = {}
   }
 
+  handleChangeList = (e, key, value) => {
+    console.log(key, value)
+    this.setState({list: value, listName: this.props.lists[key].Name})
+    db.collection("Members").where("lists." + value, "==", true).get()
+    .then((querySnapshot) => {
+      console.log(querySnapshot)
+      this.setState({listSnapshot: querySnapshot, size: querySnapshot.size})
+    })
+
+  }
+
+  handleSave = () => {
+    this.props.updateParent(this.state.list, this.state.listName, this.state.listSnapshot)
+  }
+
   render() {
+    console.log(this.props)
+    console.log(this.state)
     return (
       <div style={{padding: '20px 0px'}}>
         <div style={{display: 'flex', alignItems: 'top', justifyContent: 'space-between'}}>
@@ -41,16 +62,27 @@ class Recipients extends React.Component{
               To
             </span>
             <br/>
-            <span style={{fontWeight: 200, fontStyle: this.props.focus === 'recipients' ? "inherit" : 'italic'}}>
-              Who are you sending this message to?
-            </span>
+            {
+              this.state.list ?
+              <span style={{fontWeight: 200}}>
+                Sending to all members in the list <b>{this.state.listName}</b>
+              <i>{this.state.size ? `${this.state.size} recipients` : null}</i>
+              </span>
+              :
+              <span style={{fontWeight: 200, fontStyle: this.props.focus === 'recipients' ? "inherit" : 'italic'}}>
+                Who are you sending this message to?
+              </span>
+            }
+
           </div>
           {
             this.props.focus === 'recipients' ?
             null :
             <RaisedButton style={buttonStyles.smallSize}
               labelStyle={buttonStyles.smallLabel}
-              primary={true}
+              disabled={this.props.focus !== null &&  this.props.focus !== 'recipients'}
+              primary={this.state.list ? false : true}
+              secondary={this.state.list ? true : false}
               onClick={this.props.changeFocus}
               label='Add recipients'/>
           }
@@ -62,7 +94,7 @@ class Recipients extends React.Component{
             <div style={{padding: '20px 0px'}}>
               <DropDownMenu
                   style={{textAlign: 'left', height: 40}}
-                  onChange={(e, key, value) => this.setState({list: value})}
+                  onChange={this.handleChangeList}
                   labelStyle={{backgroundColor: 'white', height: 40, border: '1px solid #aaa',
                     borderRadius: 2, display: 'flex', alignItems: 'center'}}
                   iconStyle={{height: 40}}
@@ -86,7 +118,7 @@ class Recipients extends React.Component{
               <RaisedButton style={buttonStyles.smallSize}
                 labelStyle={buttonStyles.smallLabel}
                 primary={true}
-                onClick={this.props.changeFocus}
+                onClick={this.handleSave}
                 label='Save'/>
               <div style={{width: 20}}/>
               <FlatButton style={buttonStyles.smallSize}
@@ -115,7 +147,12 @@ class Subject extends React.Component{
     this.setState({subject: nv})
   }
 
+  handleSave = () => {
+    this.props.updateParent(this.state.subject)
+  }
+
   render() {
+    console.log(this.state)
     return (
       <div style={{padding: '20px 0px'}}>
         <div style={{display: 'flex', alignItems: 'top', justifyContent: 'space-between'}}>
@@ -124,16 +161,25 @@ class Subject extends React.Component{
               Subject
             </span>
             <br/>
-            <span style={{fontWeight: 200, fontStyle: this.props.focus === 'subject' ? "inherit" : 'italic'}}>
-              What's the subject line for this message?
-            </span>
+            {
+              this.state.subject ?
+              <span style={{fontWeight: 700}}>
+                {this.state.subject}
+              </span>
+              :
+              <span style={{fontWeight: 200, fontStyle: this.props.focus === 'subject' ? "inherit" : 'italic'}}>
+                What's the subject line for this message?
+              </span>
+            }
+
           </div>
           {
-            this.props.focus === 'body' ?
+            this.props.focus === 'subject' ?
             null :
             <RaisedButton style={buttonStyles.smallSize}
               labelStyle={buttonStyles.smallLabel}
-              primary={true}
+              primary={this.state.subject ? false : true}
+              secondary={this.state.subject ? true : false}
               disabled={this.props.focus !== null}
               onClick={this.props.changeFocus}
               label='Change subject'/>
@@ -148,8 +194,8 @@ class Subject extends React.Component{
                 underlineShow={false}
                 style={textFieldStyles.style}
                 fullWidth={true}
+                value={this.state.subject}
                 onChange={this.handleSubject}
-                multiLine={true}
                 hintStyle={textFieldStyles.hint}
                 inputStyle={textFieldStyles.input}
                 hintText={'Add a subject line'}/>
@@ -159,7 +205,7 @@ class Subject extends React.Component{
                 labelStyle={buttonStyles.smallLabel}
                 primary={true}
                 disabled={this.state.subject.length === 0}
-                onClick={this.props.changeFocus}
+                onClick={this.handleSave}
                 label='Save'/>
               <div style={{width: 20}}/>
               <FlatButton style={buttonStyles.smallSize}
@@ -189,11 +235,20 @@ class Body extends React.Component{
   }
 
   handleBody = (e, nv) => {
-    this.setState({body: nv})
+        this.setState({body: nv})
+  }
+
+  handleQuillBody = (value) => {
+
+    this.setState({body: value})
+  }
+
+  handleSave = () => {
+    this.props.updateParent(this.state.body)
   }
 
   render() {
-    console.log(this.state.body.length)
+    console.log(this.state.body)
     const ReactQuill = this.ReactQuill
     return (
       <div style={{padding: '20px 0px'}}>
@@ -203,16 +258,30 @@ class Body extends React.Component{
               Message
             </span>
             <br/>
-            <span style={{fontWeight: 200, fontStyle: this.props.focus === 'body' ? "inherit" : 'italic'}}>
-              What do you want to say?
-            </span>
+            {
+              this.state.body && this.props.focus === null ?
+              <div>
+                <div style={{padding: 10, maxWidth: 150, margin: 20}} className='speech-bubble'>
+                  {this.state.body}
+                </div>
+              </div>
+              :
+              this.props.focus === null ?
+              <span style={{fontWeight: 200, fontStyle: this.props.focus === 'body' ? "inherit" : 'italic'}}>
+                What do you want to say?
+              </span>
+              :
+              null
+            }
+
           </div>
           {
             this.props.focus === 'body' ?
             null :
             <RaisedButton style={buttonStyles.smallSize}
               labelStyle={buttonStyles.smallLabel}
-              primary={true}
+              primary={this.state.body ? false : true}
+              secondary={this.state.body ? true : false}
               disabled={this.props.focus !== null}
               onClick={this.props.changeFocus}
               label='Write message'/>
@@ -228,14 +297,14 @@ class Body extends React.Component{
               style={{fontFamily: 'Nunito', backgroundColor: 'white'}}
               modules={modules}
               toolbar={{fontName: 'Nunito'}}
-              onChange={this.handleStoryChange}
-              value={this.state.story}
+              onChange={this.handleQuillBody}
+              value={this.state.body}
                  />
               :
               <TextField
                 underlineShow={false}
                 style={textFieldStyles.style}
-                fullWidth={true}
+                textFieldStyle={textFieldStyles.style}
                 onChange={this.handleBody}
                 multiLine={true}
                 hintStyle={textFieldStyles.hint}
@@ -249,7 +318,7 @@ class Body extends React.Component{
                 labelStyle={buttonStyles.smallLabel}
                 primary={true}
                 disabled={this.state.body.length === 0}
-                onClick={this.props.changeFocus}
+                onClick={this.handleSave}
                 label='Save'/>
               <div style={{width: 20}}/>
               <FlatButton style={buttonStyles.smallSize}
@@ -288,6 +357,18 @@ export class CreateMessage extends React.Component {
     })
   }
 
+  handleRecipients = (list, listName, snapshot) => {
+    this.setState({focus: null, list: list, listName: listName, snapshot: snapshot})
+    console.log(list, listName, snapshot)
+    getMemberInList({list: list, organisation: Router.query.organisation})
+    .then((result) => {
+      console.log(result.data)
+    })
+    .catch((err) => {
+      console.log(err)
+    })
+  }
+
   render() {
     console.log(this.state)
     console.log(this.props)
@@ -299,13 +380,39 @@ export class CreateMessage extends React.Component {
             <div style={{paddingBottom: 30, alignItems: 'center',
                 display: 'flex', justifyContent: 'space-between',}}>
               <span style={{ fontWeight: 200, fontSize: '30px'}}>Send a new {this.props.url.query.type.replace("sms", "SMS")} message</span>
+              <div style={{display: 'flex'}}>
+                {
+                  this.props.url.query.type === 'sms' ?
+                  null :
+                  <RaisedButton
+                    icon={<Clock style={{height: 20, width: 30}}
+                    fill={'white'}/>}
+                    label='Schedule'
+                    primary={true}
+                    disabled={!(this.state.list && this.state.body && (this.props.url.query.type === 'sms' || this.state.subject))}
+                    style={buttonStyles.smallSize}
+                    labelStyle={buttonStyles.smallLabel}
+                    />
+                }
 
+                <div style={{width: 20}}/>
+                <RaisedButton
+                  icon={<PaperAirplane style={{height: 30}}
+                  fill={'white'}/>}
+                  label='Send'
+                  primary={true}
+                  disabled={!(this.state.list && this.state.body && (this.props.url.query.type === 'sms' || this.state.subject))}
+                  style={buttonStyles.smallSize}
+                  labelStyle={buttonStyles.smallLabel}
+                  />
+              </div>
             </div>
             {
               this.props.url.query.type === 'sms' ?
               <div style={{padding: '0px 20px', border: '1px solid #DBDBDB', borderRadius: 6}}>
                 <Recipients
                   focus={this.state.focus}
+                  updateParent={this.handleRecipients}
                   lists={this.state.lists}
                   changeFocus={() => this.setState({focus: 'recipients'})}
                   cancelFocus={() => this.setState({focus: null})}
@@ -313,6 +420,7 @@ export class CreateMessage extends React.Component {
                 <Divider/>
                 <Body
                   focus={this.state.focus}
+                  updateParent={(body) => this.setState({body: body, focus: null})}
                   changeFocus={() => this.setState({focus: 'body'})}
                   cancelFocus={() => this.setState({focus: null})}
                 />
@@ -322,18 +430,21 @@ export class CreateMessage extends React.Component {
                 <Recipients
                   focus={this.state.focus}
                   lists={this.state.lists}
+                  updateParent={this.handleRecipients}
                   changeFocus={() => this.setState({focus: 'recipients'})}
                   cancelFocus={() => this.setState({focus: null})}
                   />
                 <Divider/>
                 <Subject
                   focus={this.state.focus}
+                  updateParent={(subject) => this.setState({subject: subject, focus: null})}
                   changeFocus={() => this.setState({focus: 'subject'})}
                   cancelFocus={() => this.setState({focus: null})}
                 />
                 <Divider/>
                 <Body
                   focus={this.state.focus}
+                  updateParent={(body) => this.setState({body: body, focus: null})}
                   type={this.props.url.query.type}
                   changeFocus={() => this.setState({focus: 'body'})}
                   cancelFocus={() => this.setState({focus: null})}

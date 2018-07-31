@@ -147,7 +147,8 @@ class UploadList extends React.Component {
           },
           body: JSON.stringify({
             data: data,
-            columns: columns
+            columns: columns,
+            listId: collRef.id
           })
         })
         .then(response => response.json())

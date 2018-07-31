@@ -3,7 +3,7 @@ import { mars } from "./worlds/mars"
 import { jupiter } from "./worlds/jupiter"
 import { mailchimpAuth } from "./mailchimp/auth"
 import {getListOfLists, getContacts} from './mailchimp/import.js';
-import {addMember, getMemberDetails, getOneMember} from './users/members.js';
+import {addMember, getMemberDetails, getOneMember, getMemberInListEurope} from './users/members.js';
 
 /*
 Namespace application services with function groups.
@@ -34,7 +34,8 @@ const mailchimp = {
 const users = {
   addMember,
   getMemberDetails,
-  getOneMember
+  getOneMember,
+  getMemberInListEurope
 }
 
 export { app, greetings, mailchimp, users }
