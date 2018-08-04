@@ -4,11 +4,11 @@ var querystring = require('querystring');
 
 const CLIENT_ID = functions.config().mailchimp.client_id;
 const CLIENT_SECRET = functions.config().mailchimp.client_secret;
-const SITE = `https://timetospare.org.uk`
+const SITE = `https://timetospare.com`
 
-const mailchimpAuth = functions.https.onRequest((req, res) => {
+const mailchimpAuth = functions.region('europe-west1').https.onRequest((req, res) => {
   var code = req.query.code
-  var encoded_url = 'https://us-central1-whosin-next.cloudfunctions.net/greetings-mailchimpAuth'
+  var encoded_url = 'https://europe-west1-whosin-next.cloudfunctions.net/greetings-mailchimpAuth'
   var data = {
     grant_type: 'authorization_code',
     client_id: CLIENT_ID,

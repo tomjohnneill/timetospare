@@ -74,47 +74,75 @@ const getMemberDetails = functions.https.onRequest((req, res) => {
   cors(req, res, () => {
 
     var orgId = req.query.organisation
-    const tokenId = req.get('Authorization').split('Bearer ')[1];
+    console.log(req.cookies)
+    if ((!req.headers.authorization || !req.headers.authorization.startsWith('Bearer ')) &&
+        !(req.cookies && req.cookies.__session)) {
+      console.error('No Firebase ID token was passed as a Bearer token in the Authorization header.',
+          'Make sure you authorize your request by providing the following HTTP header:',
+          'Authorization: Bearer <Firebase ID Token>',
+          'or by passing a "__session" cookie.');
+      res.status(403).send('Unauthorized');
+      return;
+    }
 
-    return admin.auth().verifyIdToken(tokenId)
-      .then((decoded) => {
+    let idToken;
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      console.log('Found "Authorization" header');
+      // Read the ID Token from the Authorization header.
+      idToken = req.headers.authorization.split('Bearer ')[1];
+    } else if(req.cookies) {
+      console.log('Found "__session" cookie');
+      // Read the ID Token from cookie.
+      idToken = req.cookies.__session;
+    } else {
+      // No cookie
+      res.status(403).send('Unauthorized');
+      return;
+    }
+    admin.auth().verifyIdToken(idToken).then((decoded) => {
+      console.log('ID Token correctly decoded', decoded);
 
-        db.collection("Charity").doc(req.query.organisation).get()
-        .then((organisationDoc) => {
-          var organisation = organisationDoc.data()
+          db.collection("Charity").doc(req.query.organisation).get()
+          .then((organisationDoc) => {
+            var organisation = organisationDoc.data()
 
-          if (organisation.Admin[decoded.uid]) {
-            console.log('Authorised')
-            db.collection("Members").where(orgId, "==", true).get()
-            .then((memberSnapshot) => {
-              var memberArray = []
-              memberSnapshot.forEach((memberDoc) => {
-                var member = memberDoc.data()
-                var returnedMember = {}
-                returnedMember._id = memberDoc.id
-                Object.keys(member).forEach((key) => {
+            if (organisation.Admin[decoded.uid]) {
+              console.log('Authorised')
+              db.collection("Members").where(orgId, "==", true).get()
+              .then((memberSnapshot) => {
+                var memberArray = []
+                memberSnapshot.forEach((memberDoc) => {
+                  var member = memberDoc.data()
+                  var returnedMember = {}
+                  returnedMember._id = memberDoc.id
+                  Object.keys(member).forEach((key) => {
 
-                  if (typeof member[key] !== 'object' && key !== req.query.organisation) {
-                    returnedMember[key] = member[key]
-                  }
-                })
-                var orgSpecific = member.organisations && member.organisations[orgId]
-                if (orgSpecific) {
-                  Object.keys(orgSpecific).forEach((orgKey) => {
-                    returnedMember[orgKey] = orgSpecific[orgKey]
+                    if (typeof member[key] !== 'object' && key !== req.query.organisation) {
+                      returnedMember[key] = member[key]
+                    }
                   })
-                }
-                memberArray.push(returnedMember)
+                  var orgSpecific = member.organisations && member.organisations[orgId]
+                  if (orgSpecific) {
+                    Object.keys(orgSpecific).forEach((orgKey) => {
+                      returnedMember[orgKey] = orgSpecific[orgKey]
+                    })
+                  }
+                  memberArray.push(returnedMember)
+                })
+                res.status(200).send(memberArray)
               })
-              res.status(200).send(memberArray)
-            })
-          } else {
-            res.status(401).send({Authorized: false})
-          }
-        })
+            } else {
+              res.status(401).send({Authorized: false})
+            }
+          })
+    }).catch((error) => {
+      console.error('Error while verifying Firebase ID token:', error);
+      res.status(403).send('Unauthorized');
+    });
+    if (idToken) {
 
-      })
-      .catch((err) => res.status(401).send(err));
+    }
+
   })
 })
 
@@ -162,46 +190,54 @@ const getOneMember = functions.https.onRequest((req, res) => {
 })
 
 const getMemberInListEurope = functions.region('europe-west1').https.onCall((data, context) => {
-  cors(req, res, () => {
+    console.log(data)
     var orgId = data.organisation
     var listId = data.list
 
     const uid = context.auth.uid
-
-    db.collection("Charity").doc(data.organisation).get()
+    console.log(uid)
+    return db.collection("Charity").doc(orgId).get()
     .then((organisationDoc) => {
       var organisation = organisationDoc.data()
+      console.log(organisation)
       if (organisation.Admin[uid]) {
-        db.collection("Members").where("lists." + listId, "==", true).get()
-        .then((snapshot) => {
-          var memberArray = []
-          snapshot.forEach((member) => {
-            var member = memberDoc.data()
-            var returnedMember = {}
-            returnedMember._id = memberDoc.id
-            Object.keys(member).forEach((key) => {
-              if (typeof member[key] !== 'object' && key !== data.organisation) {
-                returnedMember[key] = member[key]
-              }
-            })
-            var orgSpecific = member.organisations && member.organisations[orgId]
-            if (orgSpecific) {
-              Object.keys(orgSpecific).forEach((orgKey) => {
-                returnedMember[orgKey] = orgSpecific[orgKey]
-              })
-            }
-            memberArray.push(returnedMember)
-          })
-
-        return(memberArray)
-
-        })
-      } else {
+        console.log('authorised')
+        return db.collection("Members").where("lists." + listId, "==", true).get()
+      }
+      else {
+        console.log('not authorised')
         throw new functions.https.HttpsError('failed-precondition', 'The function must be called ' +
           'while authenticated.');
+        return {error: true}
       }
     })
-  })
+    .then((memberSnapshot) => {
+      console.log('going through members')
+      var memberArray = []
+      memberSnapshot.forEach((memberDoc) => {
+        var member = memberDoc.data()
+        var returnedMember = {}
+        returnedMember._id = memberDoc.id
+        Object.keys(member).forEach((key) => {
+
+          if (typeof member[key] !== 'object' && key !== orgId) {
+            returnedMember[key] = member[key]
+          }
+        })
+        var orgSpecific = member.organisations && member.organisations[orgId]
+        console.log(returnedMember)
+        console.log(orgSpecific)
+        if (orgSpecific) {
+          Object.keys(orgSpecific).forEach((orgKey) => {
+            returnedMember[orgKey] = orgSpecific[orgKey]
+          })
+        }
+        memberArray.push(returnedMember)
+        console.log(memberArray)
+      })
+      return memberArray
+    })
+    .catch(err => console.log(err))
 })
 
 export {addMember, getMemberDetails, getOneMember, getMemberInListEurope}

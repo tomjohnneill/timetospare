@@ -18,7 +18,7 @@ let mobile = require('is-mobile');
 let db = fire.firestore()
 let functions = fire.functions('europe-west1')
 
-var getMemberInList = functions.httpsCallable('getMemberInListEurope')
+
 
 const modules = {
     toolbar: [
@@ -247,6 +247,11 @@ class Body extends React.Component{
     this.props.updateParent(this.state.body)
   }
 
+  descriptionMarkup() {
+    return {__html: this.state.body ?
+      this.state.body.replace('<img', '<img style="width:100%;height:auto"') : null}
+  }
+
   render() {
     console.log(this.state.body)
     const ReactQuill = this.ReactQuill
@@ -259,10 +264,17 @@ class Body extends React.Component{
             </span>
             <br/>
             {
-              this.state.body && this.props.focus === null ?
+              this.state.body && this.props.type === 'sms' && this.props.focus === null ?
               <div>
                 <div style={{padding: 10, maxWidth: 150, margin: 20}} className='speech-bubble'>
                   {this.state.body}
+                </div>
+              </div>
+              :
+              this.state.body && this.props.focus === null ?
+              <div>
+                <div style={{padding: 10, maxWidth: 450, width: '100%', margin: '20px 0px', borderRadius: 4, border: '1px solid #DBDBDB'}}>
+                  <div dangerouslySetInnerHTML={this.descriptionMarkup()}/>
                 </div>
               </div>
               :
@@ -360,13 +372,72 @@ export class CreateMessage extends React.Component {
   handleRecipients = (list, listName, snapshot) => {
     this.setState({focus: null, list: list, listName: listName, snapshot: snapshot})
     console.log(list, listName, snapshot)
+    var getMemberInList = functions.httpsCallable('users-getMemberInListEurope')
     getMemberInList({list: list, organisation: Router.query.organisation})
     .then((result) => {
-      console.log(result.data)
+      this.setState({recipients: result.data})
     })
     .catch((err) => {
       console.log(err)
     })
+  }
+
+  handleSend = () => {
+    console.log(this.state.recipients)
+    var sendEmail = functions.httpsCallable('messaging-sendCustomEmail')
+    var sendText = functions.httpsCallable('messaging-sendCustomSMS')
+    var emails = []
+    var emailMembers = []
+    var recipientVariables = {}
+    this.state.recipients.forEach((person) => {
+      if (person.Email) {
+        emails.push(person.Email)
+        emailMembers.push(person._id)
+        recipientVariables[person.Email] = {_id: person._id}
+      }
+    })
+    var phones = []
+    var phoneMembers = []
+    this.state.recipients.forEach((person) => {
+      if (person.Phone) {
+        phones.push(person.Phone)
+        phoneMembers.push(person._id)
+      }
+    })
+    if (this.props.url.query.type === 'email') {
+      var data = {
+        from: 'Jack <jack@mg.timetospare.com>',
+        to: emails,
+        Members: emailMembers,
+        Organisation: Router.query.organisation,
+        subject: this.state.subject,
+        html: this.state.body,
+        ListId: this.state.list,
+        recipientVariables: recipientVariables
+      };
+      console.log(data)
+      sendEmail(data).then((result) => {
+        console.log(result)
+        // Router.push('/organisat')
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+    } else {
+      var data = {
+        to: phones,
+        Members: phoneMembers,
+        Organisation: Router.query.organisation,
+        ListId: this.state.list,
+        body: this.state.body
+      };
+      sendText(data).then((result) => {
+        // Router.push('/organisat')
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+    }
   }
 
   render() {
@@ -401,6 +472,7 @@ export class CreateMessage extends React.Component {
                   fill={'white'}/>}
                   label='Send'
                   primary={true}
+                  onClick={this.handleSend}
                   disabled={!(this.state.list && this.state.body && (this.props.url.query.type === 'sms' || this.state.subject))}
                   style={buttonStyles.smallSize}
                   labelStyle={buttonStyles.smallLabel}
@@ -420,6 +492,7 @@ export class CreateMessage extends React.Component {
                 <Divider/>
                 <Body
                   focus={this.state.focus}
+                  type={this.props.url.query.type}
                   updateParent={(body) => this.setState({body: body, focus: null})}
                   changeFocus={() => this.setState({focus: 'body'})}
                   cancelFocus={() => this.setState({focus: null})}

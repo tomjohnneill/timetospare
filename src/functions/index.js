@@ -4,6 +4,8 @@ import { jupiter } from "./worlds/jupiter"
 import { mailchimpAuth } from "./mailchimp/auth"
 import {getListOfLists, getContacts} from './mailchimp/import.js';
 import {addMember, getMemberDetails, getOneMember, getMemberInListEurope} from './users/members.js';
+import {sendCustomEmail, receiveReply} from './messaging/emails.js';
+import {sendCustomSMS} from './messaging/sms.js';
 
 /*
 Namespace application services with function groups.
@@ -38,4 +40,10 @@ const users = {
   getMemberInListEurope
 }
 
-export { app, greetings, mailchimp, users }
+const messaging = {
+  sendCustomEmail,
+  sendCustomSMS,
+  receiveReply
+}
+
+export { app, greetings, mailchimp, users, messaging }

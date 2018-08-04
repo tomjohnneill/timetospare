@@ -14,6 +14,9 @@ import Dialog from 'material-ui/Dialog';
 import Divider from 'material-ui/Divider'
 import Router from 'next/router';
 import Search from 'material-ui/svg-icons/action/search';
+import fire from '../fire';
+
+let db = fire.firestore()
 
 const emails = [
   {
@@ -33,10 +36,24 @@ const emails = [
 export class Messaging extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {}
+    this.state = {messages: []}
+  }
+
+  componentDidMount(props) {
+    db.collection("Messages").where("Organisation", "==", Router.query.organisation)
+    .get().then((messagesSnapshot) => {
+      var messages = []
+      messagesSnapshot.forEach((messDoc) => {
+        var mess = messDoc.data()
+        mess._id = messDoc.id
+        messages.push(mess)
+      })
+      this.setState({messages: messages})
+    })
   }
 
   render() {
+    console.log(this.state.messages)
     return (
       <App>
         <Dialog
@@ -111,12 +128,12 @@ export class Messaging extends React.Component {
                   Your messages
                 </div>
                 {
-                  emails.map((email) => (
+                  this.state.messages.map((email) => (
                     <ListItem
                       leftIcon={email.type === 'Email' ? <Email/> : <SMS/>}
                       style={{paddingBottom: 10, borderBottom: '1px solid #DBDBDB'}}
-                      primaryText={<span style={{fontWeight: 700, color: '#000AB2'}}>{email.subject}</span>}
-                      secondaryText={email.date.toLocaleString('en-gb',
+                      primaryText={<span style={{fontWeight: 700, color: '#000AB2'}}>{email.Subject}</span>}
+                      secondaryText={email.Date && email.Date.toLocaleString('en-gb',
                         {weekday: 'long', month: 'long', day: 'numeric'})}
                         />
                   ))

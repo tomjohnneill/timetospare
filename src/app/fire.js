@@ -7,7 +7,7 @@ import "firebase/functions"
 
 var config = {
   apiKey: "AIzaSyC-me9B_zYX8s9SPICGngukj_4dJAVKomE",
-  authDomain: "timetospare.org.uk",
+  authDomain: "whosin-next.firebaseapp.com",
   projectId: "whosin-next",
 };
 

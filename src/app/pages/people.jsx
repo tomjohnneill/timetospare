@@ -18,13 +18,46 @@ import ReactTable from "react-table";
 
 let db = fire.firestore()
 
+let functions = fire.functions('us-central1')
+
 export class People extends React.Component {
   constructor(props) {
     super(props);
     this.state = {}
+    console.log(this.props)
+    if (this.props.members) {
+      this.state = {members: this.props.members}
+    }
+  }
+
+  static async getInitialProps({req, pathname, query}) {
+    console.log(req)
+    console.log('called initial props')
+    const res =  fetch(`https://us-central1-whosin-next.cloudfunctions.net/users-getMemberDetails?organisation=${query.organisation}`, {
+        method: 'GET'
+      })
+      .then(response => {
+        if (response.status == 200) {
+          return response.json()
+        } else {
+
+          throw new Error('Unauthorized')
+        }
+      })
+      .then((memberArray) => {
+        console.log(memberArray)
+        if (memberArray) {
+          return ({members: memberArray})
+        }
+
+      })
+      .catch(err => console.log(err.message))
+    return res
+
   }
 
   componentDidMount (props) {
+    console.log(this.state)
     this.setState({organisation: Router.query.organisation})
     if (Router.query.organisation) {
       var data = []
@@ -158,8 +191,7 @@ export class People extends React.Component {
                     // By default a custom 'onClick' handler will override this functionality.
                     // If you want to fire the original onClick handler, call the
                     // 'handleOriginal' function.
-                    Router.push(`/member?member=${rowInfo.original._id}&organisation=${Router.query.organisation}`,
-                       `/member/${rowInfo.original._id}?organisation=${Router.query.organisation}`)
+                    Router.push(`/member?member=${rowInfo.original._id}&organisation=${Router.query.organisation}&name=${rowInfo.original['Full Name']}`)
                     if (handleOriginal) {
                       handleOriginal();
                     }

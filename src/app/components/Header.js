@@ -8,6 +8,8 @@ import FlatButton from 'material-ui/FlatButton';
 import AppBar from 'material-ui/AppBar';
 import RaisedButton from 'material-ui/RaisedButton';
 import Popover from 'material-ui/Popover';
+import Subheader from 'material-ui/Subheader';
+import Divider from 'material-ui/Divider';
 import Avatar from 'material-ui/Avatar';
 import IconButton from 'material-ui/IconButton';
 import MediaQuery from 'react-responsive';
@@ -125,11 +127,24 @@ export default class Header extends React.Component {
 
   componentDidMount(props) {
     this.setState({path: Router.asPath})
+    fire.auth().onIdTokenChanged(user => {
+      if (user) {
+        user.getIdToken().then(token => {
+          document.cookie = `__session=${token};max-age=3600`;
+        });
+      } else {
+        document.cookie = '__session=;max-age=0';
+      }
+    });
+
 
     fire.auth().onAuthStateChanged((user) => {
       if (user === null) {
         this.setState({loading: false})
       } else {
+        user.getIdToken().then(token => {
+          document.cookie = `__session=${token};max-age=3600`;
+        });
         db.collection("User").doc(fire.auth().currentUser.uid).get().then((data) => {
           this.setState({user: data.data(), userPicture: data.data().Picture, loading: false})
         })
@@ -418,6 +433,7 @@ export default class Header extends React.Component {
                                targetOrigin={{horizontal: 'left', vertical: 'top'}}
                                onRequestClose={this.handlePopoverClose}>
                                <Menu style={{width: 150}}>
+
                                  <Link href='/profile' prefetch>
                                    <MenuItem primaryText="Profile" />
                                   </Link>
@@ -524,20 +540,30 @@ export default class Header extends React.Component {
                 Time to Spare
               </span>
             </div>
+            {
+              this.state.organisation ?
+              <div>
 
+              <Link prefetch href={`/project-calendar?organisation=${this.state.organisation}`}>
+                <MenuItem primaryText="Project Calendar" />
+               </Link>
+               <Link prefetch href={`/people?organisation=${this.state.organisation}`}>
+                 <MenuItem primaryText="People" />
+               </Link>
+               <Link prefetch href={`/messaging?organisation=${this.state.organisation}`}>
+                 <MenuItem primaryText="Messaging"/>
+               </Link>
+               <Divider/>
+             </div>
+             :
+             null
+            }
             <Link href='/projects'>
               <MenuItem onClick={() => this.goToAndClose('/projects')}>Projects</MenuItem>
-            </Link>
-            <Link href='/groups'>
-              <MenuItem onClick={() => this.goToAndClose('/groups')}>Groups</MenuItem>
             </Link>
             <Link href='/create-other' >
               <MenuItem onClick={this.handleCreateProject}>Start an organisation</MenuItem>
             </Link>
-            <MenuItem onClick={this.handleSignOut}>
-              Sign out</MenuItem>
-              <MenuItem onClick={this.setModal}
-                primaryText="Log in" />
           </Drawer>
 
       </div>

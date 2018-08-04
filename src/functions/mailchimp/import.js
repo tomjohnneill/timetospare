@@ -9,10 +9,10 @@ var querystring = require('querystring');
 
 const CLIENT_ID = functions.config().mailchimp.client_id;
 const CLIENT_SECRET = functions.config().mailchimp.client_secret;
-const SITE = `https://timetospare.org.uk`
+const SITE = `https://timetospare.com`
 
 
-const getListOfLists = functions.https.onRequest((req, res) => {
+const getListOfLists = functions.region('europe-west1').https.onRequest((req, res) => {
   cors(req, res, () => {
     const tokenId = req.get('Authorization').split('Bearer ')[1];
     return admin.auth().verifyIdToken(tokenId)
@@ -41,7 +41,7 @@ const getListOfLists = functions.https.onRequest((req, res) => {
   })
 });
 
-const getContacts = functions.https.onRequest((req, res) => {
+const getContacts = functions.region('europe-west1').https.onRequest((req, res) => {
   cors(req, res, () => {
     const tokenId = req.get('Authorization').split('Bearer ')[1];
     return admin.auth().verifyIdToken(tokenId)
