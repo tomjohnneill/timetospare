@@ -192,6 +192,7 @@ class Index extends React.Component {
 
 
   render() {
+    console.log(this.props)
     var isMobile = mobile(this.props.userAgent)
     return (
       <App>

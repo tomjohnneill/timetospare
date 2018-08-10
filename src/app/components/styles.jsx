@@ -28,3 +28,9 @@ export const iconButtonStyles = {
     padding: 0
   }
 }
+
+export const radioButtonStyles = {
+  radioButton: {
+    marginBottom: 16,
+  },
+}

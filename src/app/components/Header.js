@@ -10,6 +10,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import Popover from 'material-ui/Popover';
 import Subheader from 'material-ui/Subheader';
 import Divider from 'material-ui/Divider';
+import DataLink from 'data-prefetch-link'
 import Avatar from 'material-ui/Avatar';
 import IconButton from 'material-ui/IconButton';
 import MediaQuery from 'react-responsive';
@@ -357,7 +358,7 @@ export default class Header extends React.Component {
                                            Calendar
                                          </div>
                                        </Link>
-                                       <Link prefetch href={`/people?organisation=${this.state.organisation}`}>
+                                       <DataLink prefetch withData href={`/people?organisation=${this.state.organisation}`}>
                                          <div
                                            className='header-category'
                                            style={
@@ -368,7 +369,7 @@ export default class Header extends React.Component {
                                            >
                                            People
                                          </div>
-                                       </Link>
+                                       </DataLink>
                                        <Link prefetch href={`/messaging?organisation=${this.state.organisation}`}>
                                          <div
                                            className='header-category'

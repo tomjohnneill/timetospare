@@ -1,12 +1,12 @@
-import React from 'react'
-import App from '../components/App.js';
+import React from 'react';
 import withMui from '../components/hocs/withMui.js';
-import fire from '../fire';
+import App from '../components/App.js';
+import Router from 'next/router';
+import fire from '../fire.js';
 import MediaQuery from 'react-responsive';
 import ContentInbox from 'material-ui/svg-icons/content/inbox';
 import Email from 'material-ui/svg-icons/communication/email';
 import {List, ListItem} from 'material-ui/List';
-import Router from 'next/router';
 import Add from 'material-ui/svg-icons/content/add';
 import Avatar from 'material-ui/Avatar';
 import Dialog from 'material-ui/Dialog';
@@ -32,18 +32,16 @@ const modules = {
     ]
   }
 
-export class Member extends React.Component {
+
+export class UserTag extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {member: {}, interactions: [], note: ''}
-    if (typeof window !== 'undefined') {
-      this.ReactQuill = require('react-quill')
-    }
+    this.state = {}
   }
 
   updateData = () => {
     db.collection("Interactions")
-    .where("Member", "==", Router.query.member)
+    .where("tags", "array-contains", Router.query.tag)
     .where("Organisation", "==", Router.query.organisation)
     .orderBy("Date", 'desc').get()
     .then((intSnapshot) => {
@@ -53,39 +51,6 @@ export class Member extends React.Component {
       })
       this.setState({interactions: data})
     })
-  }
-
-  componentDidMount(props) {
-    fire.auth().onAuthStateChanged((user) => {
-      if (user === null) {
-
-      } else {
-        fire.auth().currentUser.getIdToken()
-        .then((token) =>
-          fetch(`https://us-central1-whosin-next.cloudfunctions.net/users-getOneMember?organisation=${Router.query.organisation}&member=${Router.query.member}`, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json',
-              'Authorization': 'Bearer ' + token
-            },
-          })
-          .then(response => response.json())
-          .then((memberArray) => {
-            console.log(memberArray)
-            if (memberArray) {
-              this.setState({member: memberArray})
-            }
-
-          })
-        )
-      }
-    })
-    console.log(Router.query)
-    this.updateData()
-  }
-
-  noteMarkup(note) {
-    return {__html: note}
   }
 
   renderInteraction = (int) => {
@@ -158,90 +123,43 @@ export class Member extends React.Component {
     }
   }
 
-  handleNoteChange = (value) => {
-    this.setState({note: value})
-  }
+  componentDidMount(props) {
+    fire.auth().onAuthStateChanged((user) => {
+      if (user === null) {
 
-  handleSaveNote = () => {
-    this.setState({takeNote: false})
-    var data = {
-      Organisation: Router.query.organisation,
-      Member: Router.query.member,
-      Date: new Date(),
-      Type: 'Note',
-      Details : {
-        Note: this.state.note
+      } else {
+        fire.auth().currentUser.getIdToken()
+        .then((token) =>
+          fetch(`https://us-central1-whosin-next.cloudfunctions.net/users-getOneMember?organisation=${Router.query.organisation}&member=${Router.query.member}`, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': 'Bearer ' + token
+            },
+          })
+          .then(response => response.json())
+          .then((memberArray) => {
+            console.log(memberArray)
+            if (memberArray) {
+              this.setState({member: memberArray})
+            }
+
+          })
+        )
       }
-    }
-    db.collection("Interactions").add(data)
-    .then(() => {
-      this.updateData()
-      this.setState({note: null})
     })
+    console.log(Router.query)
+    this.updateData()
   }
 
-  handleTagAdded = (tag) => {
-    var tags = this.state.member.tags
-    var member = this.state.member
-    if (tags) {
-      tags.push(tag)
-    }
-    member.tags = tags
-    this.setState({member: member})
+  noteMarkup(note) {
+    return {__html: note}
   }
 
   render() {
-    const ReactQuill = this.ReactQuill
-    console.log(this.state)
-    if (this.state.interactions[0]) {
-
-      console.log(this.renderInteraction(this.state.interactions[0]))
-    }
     return (
       <div>
         <App>
-          <AddTag
-            selection={[this.state.member]}
-            text={`Tag ${decodeURIComponent(this.props.url.query.name)}`}
-            organisation={this.props.url.query.organisation}
-            open={this.state.tagOpen}
-            onTagAdded={this.handleTagAdded}
-            onRequestClose={() => this.setState({tagOpen:false})}/>
-          <Dialog
-            open={this.state.new}
-            onRequestClose={() => this.setState({new:false})}>
-            <List style={{backgroundColor: 'white', borderRadius: 4}}>
-
-              <ListItem
-                style={{display: 'flex', height: 80, alignItems: 'center'}}
-                primaryText="Add a note"
-                onClick={()=> this.setState({new: false, takeNote: true})}
-                leftAvatar={<Avatar backgroundColor={'#000AB2'} icon={<NoteIcon/>}></Avatar>}
-
-              />
-              <Divider/>
-              <ListItem
-                style={{display: 'flex', height: 80, alignItems: 'center'}}
-                primaryText="Leave project feedback"
-                onClick={() => Router.push(`/csv-upload?organisation=${this.state.organisation}`,
-                      `/csv-upload/${this.state.organisation}`)}
-                leftAvatar={<Avatar  icon={<ReviewIcon/>}></Avatar>}
-
-
-              />
-              <Divider/>
-              <ListItem
-                style={{display: 'flex', height: 80, alignItems: 'center'}}
-                primaryText={<span>Contact {this.state.member['Full Name'] ? this.state.member['Full Name'] : decodeURIComponent(this.props.url.query.name)}</span>}
-                onClick={() => Router.push(`/csv-upload?organisation=${this.state.organisation}`,
-                      `/csv-upload/${this.state.organisation}`)}
-                leftAvatar={<Avatar backgroundColor={'#FFCB00'} icon={<Email/>}></Avatar>}
-
-              />
-
-            </List>
-          </Dialog>
-
           <div
             style={{ paddingTop: 20, paddingBottom: 20, justifyContent: 'center',
               display: 'flex', borderBottom: '1px solid #DBDBDB'}}>
@@ -250,7 +168,7 @@ export class Member extends React.Component {
                 <div style={{textAlign: 'left'}}>
 
               <div style={{fontWeight: 200, fontSize: '40px'}}>
-                {this.state.member['Full Name'] ? this.state.member['Full Name'] : decodeURIComponent(this.props.url.query.name)}
+                {decodeURIComponent(this.props.url.query.tag)}
               </div>
             </div>
             <RaisedButton label='Add new interaction'
@@ -264,10 +182,11 @@ export class Member extends React.Component {
           </div>
 
           </div>
+
           <div style={{width: '100%', display: 'flex', justifyContent: 'center', paddingTop: 20, minHeight: '100vh'}}>
             <div style={{textAlign: 'left', padding: 20, width: 350}}>
               <div style={{fontWeight: 200, fontSize: '20px', paddingBottom: 20}}>
-                Member details
+                Tag Members
               </div>
               <div style={{boxSizing: 'border-box',
               border: '1px solid #DBDBDB', borderRadius: 2}}>
@@ -275,65 +194,22 @@ export class Member extends React.Component {
                   primaryText='Details'
                   leftIcon={<Add/>}
                   primaryTogglesNestedList={true}
-                  nestedItems={
-                    [<div>
 
-                        {
-                          Object.keys(this.state.member).map((key) => {
-                            if (key !== '_id' && key !== 'tags') {
-                              return (
-                                <div style={{display: 'flex', overflowX: 'hidden', borderBottom: '1px solid #DBDBDB'}}>
-                                  <div style={{flex: 3, padding: '5px 5px 5px 15px'}}>
-                                    <b>{key}</b>
-                                  </div>
-                                  <div style={{flex: 7, padding: 5}}>
-                                    <i>{this.state.member[key]}</i>
-                                  </div>
-                                </div>
-                              )
-                            }
-                          })
-                        }
-
-
-                    </div>]
-
-                  }
                    style={{ borderBottom: '1px solid #DBDBDB'}}/>
 
-                   <ListItem
-                     primaryText='Tags'
-                     leftIcon={<Add/>}
-                     primaryTogglesNestedList={true}
-                     nestedItems={
-                       [<div>
-                         {this.state.member && this.state.member.tags ? this.state.member.tags.map((tag) => (
-                         <Chip
-                           onClick={() => Router.push(`/user-tag?tag=${tag}&organisation=${Router.query.organisation}`)}
-                           style={{margin:6, cursor: 'pointer'}}
-                           onRequestDelete={() => this.handleDeleteTag(tag)}
-                           >{tag}
-                         </Chip>
-                       )) : null}
-                       </div>,
-                       <div style={{padding: 6}}>
-                         <RaisedButton label='Add new tag'
-                           secondary={true}
-                           icon={<Add/>}
-                           onClick={() => this.setState({tagOpen: true})}
-                           style={buttonStyles.smallStyle}
-                           labelStyle={buttonStyles.smallLabel}/>
-                       </div>]
 
-                     }
-
-                      style={{ borderBottom: '1px solid #DBDBDB'}}/>
 
               </div>
             </div>
 
-            <div style={{maxWidth: 700, width: '100%', boxSizing: 'border-box', padding: 20}}>
-
+            <div style={{maxWidth: 700,textAlign: 'left',  width: '100%', boxSizing: 'border-box', padding: 20}}>
+              <div style={{fontWeight: 200, fontSize: '20px', paddingBottom: 20}}>
+                  Key info
+                </div>
+              <div style={{display: 'flex', padding: 40, backgroundColor: '#DBDBDB',
+              marginBottom: 20}}>
+                This is going to be mega
+              </div>
               <div style={{textAlign: 'left'}}>
 
                 <div style={{padding: '00px 0px'}}>
@@ -380,7 +256,7 @@ export class Member extends React.Component {
                 {
                   <div>
 
-                    {this.state.interactions.length > 0 ?
+                    {this.state.interactions && this.state.interactions.length > 0 ?
                       this.state.interactions.map((int) => (
                       this.renderInteraction(int)
                     ))
@@ -395,10 +271,11 @@ export class Member extends React.Component {
               </div>
             </div>
           </div>
+
         </App>
       </div>
     )
   }
 }
 
-export default withMui(Member)
+export default withMui(UserTag)

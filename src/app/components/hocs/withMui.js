@@ -2,6 +2,7 @@ import React from "react"
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import { withRouter } from 'next/router'
+var cookie = require('cookie');
 
 var injectTapEventPlugin = require("react-tap-event-plugin");
 try {
@@ -34,6 +35,11 @@ export default function(NextPage) {
     static async getInitialProps(ctx) {
       const {req} = ctx;
       const userAgent = req ? req.headers['user-agent'] : navigator.userAgent;
+      var cookies = {}
+      if (req && req.headers && req.headers.cookie) {
+        cookies = cookie.parse(req.headers.cookie)
+      }
+      const __session = cookies.__session
       let pageProps = {};
       if (NextPage.getInitialProps) {
         pageProps = await NextPage.getInitialProps(ctx);
@@ -41,7 +47,8 @@ export default function(NextPage) {
 
       return {
         ...pageProps,
-        userAgent
+        userAgent,
+        __session,
       }
 
     }

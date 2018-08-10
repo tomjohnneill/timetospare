@@ -3,7 +3,7 @@ import { mars } from "./worlds/mars"
 import { jupiter } from "./worlds/jupiter"
 import { mailchimpAuth } from "./mailchimp/auth"
 import {getListOfLists, getContacts} from './mailchimp/import.js';
-import {addMember, getMemberDetails, getOneMember, getMemberInListEurope} from './users/members.js';
+import {addMember, getMemberDetails, getOneMember, getMemberInListEurope, addTagToMembers} from './users/members.js';
 import {sendCustomEmail, receiveReply} from './messaging/emails.js';
 import {sendCustomSMS} from './messaging/sms.js';
 
@@ -37,7 +37,8 @@ const users = {
   addMember,
   getMemberDetails,
   getOneMember,
-  getMemberInListEurope
+  getMemberInListEurope,
+  addTagToMembers
 }
 
 const messaging = {

@@ -9,16 +9,40 @@ import Add from 'material-ui/svg-icons/content/add';
 import Divider from 'material-ui/Divider'
 import Avatar from 'material-ui/Avatar';
 import Dialog from 'material-ui/Dialog';
+import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton';
+import FlatButton from 'material-ui/FlatButton';
 import CommunicationChatBubble from 'material-ui/svg-icons/av/play-arrow';
-import {buttonStyles} from '../components/styles.jsx';
+import {buttonStyles, radioButtonStyles, textFieldStyles} from '../components/styles.jsx';
 import {CSVLink} from 'react-csv';
+import DropDownMenu from 'material-ui/DropDownMenu';
+import MenuItem from 'material-ui/MenuItem';
 import {List, ListItem} from 'material-ui/List';
 import 'react-table/react-table.css'
 import ReactTable from "react-table";
+import {Tag} from '../components/icons.jsx';
+import AddTag from '../components/addTag.jsx';
+import TextField from 'material-ui/TextField';
+
 
 let db = fire.firestore()
 
+
 let functions = fire.functions('us-central1')
+
+const getColumnsFromMembers = (members) => {
+  var rawKeys = []
+  var columns = []
+  members.forEach((member) => {
+    var keys = Object.keys(member)
+    keys.forEach((key) => {
+      if (!rawKeys.includes(key) && key !== '_id' && key !== 'tags') {
+        rawKeys.push(key)
+        columns.push({id: key, Header: key, accessor: key})
+      }
+     })
+  })
+  return columns
+}
 
 export class People extends React.Component {
   constructor(props) {
@@ -30,35 +54,37 @@ export class People extends React.Component {
     }
   }
 
+
+
   static async getInitialProps({req, pathname, query}) {
     console.log(req)
     console.log('called initial props')
-    const res =  fetch(`https://us-central1-whosin-next.cloudfunctions.net/users-getMemberDetails?organisation=${query.organisation}`, {
-        method: 'GET'
-      })
-      .then(response => {
-        if (response.status == 200) {
-          return response.json()
-        } else {
-
-          throw new Error('Unauthorized')
-        }
-      })
-      .then((memberArray) => {
-        console.log(memberArray)
-        if (memberArray) {
-          return ({members: memberArray})
-        }
-
-      })
-      .catch(err => console.log(err.message))
-    return res
-
+    if (fire.auth().currentUser) {
+      const res = fire.auth().currentUser.getIdToken()
+      .then((token) =>
+        fetch(`https://us-central1-whosin-next.cloudfunctions.net/users-getMemberDetails?organisation=${query.organisation}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+        }))
+        .then(response => response.json())
+        .then((memberArray) => {
+          console.log(memberArray)
+          if (memberArray) {
+          return({members: memberArray, columns: getColumnsFromMembers(memberArray)})
+          }
+        })
+        .catch(err => console.log(err.message))
+        return res
+      }
   }
 
   componentDidMount (props) {
+    Router.prefetch('/member')
     console.log(this.state)
-    this.setState({organisation: Router.query.organisation})
+    this.setState({organisation: Router.query.organisation, tagType: 'existing'})
     if (Router.query.organisation) {
       var data = []
       var columns = []
@@ -66,6 +92,10 @@ export class People extends React.Component {
         if (user === null) {
 
         } else {
+          db.collection("Charity").doc(Router.query.organisation).get()
+          .then((doc) => {
+            this.setState({organisation: doc.data()})
+          })
           fire.auth().currentUser.getIdToken()
           .then((token) =>
             fetch(`https://us-central1-whosin-next.cloudfunctions.net/users-getMemberDetails?organisation=${Router.query.organisation}`, {
@@ -79,28 +109,14 @@ export class People extends React.Component {
             .then((memberArray) => {
               console.log(memberArray)
               if (memberArray) {
-                this.setState({data: memberArray})
+                this.setState({data: memberArray, columns: getColumnsFromMembers(memberArray)})
               }
 
             })
           )
         }
       })
-      db.collection("Charity").doc(Router.query.organisation).get().then((doc) => {
-        var lists = doc.data().lists
-        console.log(lists)
-        Object.keys(lists).forEach((key) => {
-          db.collection("Lists").doc(key).get().then((listDoc) => {
-            console.log(listDoc.data())
-            if (listDoc.data().Columns) {
-              listDoc.data().Columns.forEach((column) => {
-                columns.push({id: column.name, Header: column.name, accessor: column.name})
-              })
-              this.setState({columns: columns})
-            }
-          })
-        })
-      })
+
     }
   }
 
@@ -111,7 +127,19 @@ export class People extends React.Component {
     response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}`
   }
 
+  handleSaveSelection = (records) => {
+    console.log(this.state.filtered)
+    var selection = this.selectTable.getResolvedState().sortedData
+    this.setState({selection: selection, tagDialog: true})
+
+  }
+
+
+
   render() {
+    console.log(this.state)
+    const currentRecords = this.selectTable && this.selectTable.getResolvedState().sortedData;
+
     return (
       <div>
         <App>
@@ -139,6 +167,13 @@ export class People extends React.Component {
 
             </List>
           </Dialog>
+
+          <AddTag
+            selection={this.state.selection}
+            organisation={this.props.url.query.organisation}
+            open={this.state.tagDialog}
+            onRequestClose={() => this.setState({tagDialog:false})}/>
+
           <div style={{padding: 50}}>
             <div style={{width: '100%', paddingBottom: 20,
               display: 'flex', justifyContent: 'space-between'}}>
@@ -146,6 +181,20 @@ export class People extends React.Component {
                 Your people
               </div>
               <div style={{display: 'flex'}}>
+                {
+                  this.state.filtered && this.state.filtered.length > 0?
+                  <RaisedButton
+                    secondary={true}
+                    onClick={() => this.handleSaveSelection(currentRecords)}
+                    style={buttonStyles.smallSize}
+                    icon={<Tag style={{height: 15}}/>}
+                    labelStyle={buttonStyles.smallLabel}
+                    label='Save this selection'/>
+                  :
+                  null
+                }
+
+                <div style={{width: 20}}/>
                 {typeof window !== 'undefined' ?
                 <CSVLink
                   filename={"my-volunteers.csv"}
@@ -199,6 +248,10 @@ export class People extends React.Component {
                 };
               }}
               defaultPageSize={10}
+              onFilteredChange={(filtered) =>this.setState({filtered: filtered})}
+              ref={(r) => {
+                this.selectTable = r;
+              }}
               className='-highlight -striped'
               data={this.state.data}
               columns={this.state.columns}
