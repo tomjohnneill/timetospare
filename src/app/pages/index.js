@@ -96,33 +96,40 @@ class Index extends React.Component {
     Router.prefetch('/signup')
   }
 
-  static async getInitialProps() {
-    const res = await db.collection("Project").get()
-    .then((querySnapshot) => {
-      let upcoming = []
-      let successful = []
-      let projects = []
-      querySnapshot.forEach((doc) => {
-        var hit = doc.data()
-        hit._id = doc.id
-        projects.push(hit)
-        if (hit['End Time'] && new Date(hit['End Time']) > new Date()) {
-          upcoming.push(hit)
-        } else if
-          (hit['Deadline'] && new Date(hit['Deadline']) > new Date()) {
-            upcoming.push(hit)
-          }
-          else {
-          successful.push(hit)
-        }
+  static async getInitialProps(ctx) {
+    console.log(ctx)
+    if(ctx && ctx.req && ctx.__session) {
+      ctx.res.writeHead(301, {Location: `/organisation`})
+      ctx.res.end()
+     } else {
+       const res = await db.collection("Project").get()
+       .then((querySnapshot) => {
+         let upcoming = []
+         let successful = []
+         let projects = []
+         querySnapshot.forEach((doc) => {
+           var hit = doc.data()
+           hit._id = doc.id
+           projects.push(hit)
+           if (hit['End Time'] && new Date(hit['End Time']) > new Date()) {
+             upcoming.push(hit)
+           } else if
+             (hit['Deadline'] && new Date(hit['Deadline']) > new Date()) {
+               upcoming.push(hit)
+             }
+             else {
+             successful.push(hit)
+           }
 
 
-      })
-      return({projects: projects,
-        upcoming: upcoming, successful: successful,
-        loading: false});
-    })
-    return res
+         })
+         return({projects: projects,
+           upcoming: upcoming, successful: successful,
+           loading: false});
+       })
+       return res
+     }
+
 
 /*
     const client = algoliasearch('52RYQZ0NQK', 'b10f7cdebfc189fc6f889dbd0d3ffec2');
@@ -192,7 +199,7 @@ class Index extends React.Component {
 
 
   render() {
-    console.log(this.props)
+
     var isMobile = mobile(this.props.userAgent)
     return (
       <App>

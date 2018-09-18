@@ -13,6 +13,7 @@ import {grey500} from 'material-ui/styles/colors';
 import {changeImageAddress} from '../components/desktopproject.jsx';
 import Snackbar from 'material-ui/Snackbar';
 import App from "../components/App"
+import CircularProgress from 'material-ui/CircularProgress';
 import fire from '../fire';
 import CloudUpload from 'material-ui/svg-icons/file/cloud-upload';
 import withMui from '../components/hocs/withMui';
@@ -204,7 +205,7 @@ export class CharityPhotoUpload extends React.Component {
                     :
                     this.state.uploadComplete  ?
                     <div style={{position: 'relative', height: '100%', width: '100%'}}>
-                      <img src={imageUrl}
+                      <img src={this.state.imageUrl}
                 style={{padding: 16, boxSizing: 'border-box', position: 'relative', width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px'}}/>
                 {this.state.dropzoneHover ?
                   <RaisedButton label='Change Photo'

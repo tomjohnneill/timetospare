@@ -2,6 +2,7 @@ import React from 'react';
 import withMui from '../components/hocs/withMui.js';
 import App from '../components/App.js';
 import Router from 'next/router';
+import Link from "next/link"
 import fire from '../fire.js';
 import MediaQuery from 'react-responsive';
 import ContentInbox from 'material-ui/svg-icons/content/inbox';
@@ -15,7 +16,7 @@ import FlatButton from 'material-ui/FlatButton';
 import ArrowRight from 'material-ui/svg-icons/navigation/arrow-forward';
 import Divider from 'material-ui/Divider'
 import {buttonStyles} from '../components/styles.jsx';
-import 'react-quill/dist/quill.snow.css';
+import AddNote from '../components/addNote.jsx';
 import {ReviewIcon, NoteIcon} from '../components/icons.jsx';
 import AddTag from '../components/addTag.jsx';
 import Chip from 'material-ui/Chip';
@@ -32,11 +33,22 @@ const modules = {
     ]
   }
 
+const styles = {
+  chip: {
+    margin: 4,
+    color: 'white',
+    fontWeight: 700,
+    borderRadius: 6
+  }
+}
+
+var randomColor = require('randomcolor')
+
 
 export class UserTag extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {}
+    this.state = {tagOpen: false}
   }
 
   updateData = () => {
@@ -47,18 +59,44 @@ export class UserTag extends React.Component {
     .then((intSnapshot) => {
       var data = []
       intSnapshot.forEach((intDoc) => {
-        data.push(intDoc.data())
+        var elem = intDoc.data()
+        elem._id = intDoc.id
+        data.push(elem)
       })
       this.setState({interactions: data})
     })
   }
 
+  handleSaveNote = (note) => {
+    var memberIds = []
+    console.log('saving note')
+    console.log(note)
+    this.setState({takeNote: false})
+    let data = {
+      Organisation: Router.query.organisation,
+      Members: this.state.memberIds,
+      Date: new Date(),
+      Type: 'Note',
+      tags: [Router.query.tag],
+      Details : {
+        Note: note
+      }
+    }
+    console.log(data)
+    db.collection("Interactions").add(data)
+
+    .then(() => {
+      this.updateData()
+    })
+
+  }
+
   renderInteraction = (int) => {
-    console.log(int)
+
     switch(int.Type) {
 
       case "Invited":
-      console.log(int.Type)
+
         return (
           <div>
             <ListItem
@@ -100,7 +138,7 @@ export class UserTag extends React.Component {
         break;
       case "Note":
         return (
-          <div>
+          <div onClick={() => this.setState({tagOpen: true, tags: int.tags, int: int._id})}>
             <ListItem
               className='email-interaction'
               style={{marginBottom: 10, borderLeft: '3px solid rgb(253,216,53)', backgroundColor: 'rgb(255,249,196)'}}
@@ -128,24 +166,22 @@ export class UserTag extends React.Component {
       if (user === null) {
 
       } else {
-        fire.auth().currentUser.getIdToken()
-        .then((token) =>
-          fetch(`https://us-central1-whosin-next.cloudfunctions.net/users-getOneMember?organisation=${Router.query.organisation}&member=${Router.query.member}`, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json',
-              'Authorization': 'Bearer ' + token
-            },
-          })
-          .then(response => response.json())
-          .then((memberArray) => {
-            console.log(memberArray)
-            if (memberArray) {
-              this.setState({member: memberArray})
-            }
-
-          })
-        )
+        db.collection("PersonalData")
+        .where("tags", "array-contains", Router.query.tag)
+        .where("organisation", "==", Router.query.organisation)
+        .get()
+        .then((querySnapshot) => {
+            var data = []
+            var ids = []
+            querySnapshot.forEach((doc) => {
+              var elem = doc.data()
+              elem._id = doc.id
+              data.push(elem)
+              ids.push(elem._id)
+            })
+            console.log(data)
+            this.setState({members: data, memberIds: ids})
+        })
       }
     })
     console.log(Router.query)
@@ -160,22 +196,73 @@ export class UserTag extends React.Component {
     return (
       <div>
         <App>
+          <Dialog
+            open={this.state.new}
+            onRequestClose={() => this.setState({new:false})}>
+            <List style={{backgroundColor: 'white', borderRadius: 4}}>
+
+              <ListItem
+                style={{display: 'flex', height: 80, alignItems: 'center'}}
+                primaryText="Add a note"
+                onClick={()=> this.setState({new: false, takeNote: true})}
+                leftAvatar={<Avatar backgroundColor={'#000AB2'} icon={<NoteIcon/>}></Avatar>}
+
+              />
+              <Divider/>
+              <ListItem
+                style={{display: 'flex', height: 80, alignItems: 'center'}}
+                primaryText="Leave project feedback"
+                onClick={() => Router.push(`/csv-upload?organisation=${this.state.organisation}`,
+                      `/csv-upload/${this.state.organisation}`)}
+                leftAvatar={<Avatar  icon={<ReviewIcon/>}></Avatar>}
+
+
+              />
+              <Divider/>
+              <ListItem
+                style={{display: 'flex', height: 80, alignItems: 'center'}}
+                primaryText={<span>Contact everyone in this tag</span>}
+                onClick={() => Router.push(`/csv-upload?organisation=${this.state.organisation}`,
+                      `/csv-upload/${this.state.organisation}`)}
+                leftAvatar={<Avatar backgroundColor={'#FFCB00'} icon={<Email/>}></Avatar>}
+
+              />
+
+            </List>
+          </Dialog>
+
+
+          <AddTag
+            selection={[this.state.memberData]}
+            text={`Add new tag`}
+            organisation={this.props.url.query.organisation}
+            open={this.state.tagOpen}
+            edit
+            type='interaction'
+            interaction={this.state.int}
+            tags={this.state.tags}
+            onTagAdded={this.handleTagAdded}
+            onRequestClose={() => this.setState({tagOpen:false})}/>
           <div
             style={{ paddingTop: 20, paddingBottom: 20, justifyContent: 'center',
-              display: 'flex', borderBottom: '1px solid #DBDBDB'}}>
+              fontWeight: 700,
+              display: 'flex'}}>
               <div style={{display: 'flex', maxWidth: 1050, width: '100%',
                 justifyContent: 'space-between', alignItems: 'center'}}>
                 <div style={{textAlign: 'left'}}>
 
-              <div style={{fontWeight: 200, fontSize: '40px'}}>
+              <div style={{fontWeight: 700, fontSize: '40px', paddingBottom: 10,
+                borderBottom: '4px solid #000AB2'
+              }}>
                 {decodeURIComponent(this.props.url.query.tag)}
               </div>
             </div>
             <RaisedButton label='Add new interaction'
               style={buttonStyles.smallSize}
               labelStyle={buttonStyles.smallLabel}
-              icon={<Add/>}
               onClick={() => this.setState({new: true})}
+              icon={<Add/>}
+
               primary={true}
               />
 
@@ -189,12 +276,28 @@ export class UserTag extends React.Component {
                 Tag Members
               </div>
               <div style={{boxSizing: 'border-box',
-              border: '1px solid #DBDBDB', borderRadius: 2}}>
+                  border: '1px solid #DBDBDB', borderRadius: 2}}>
                 <ListItem
-                  primaryText='Details'
-                  leftIcon={<Add/>}
-                  primaryTogglesNestedList={true}
+                  primaryText='Members'
 
+                  initiallyOpen={true}
+                  primaryTogglesNestedList={true}
+                  nestedItems = {
+                    [<div style={{display: 'flex', flexWrap: 'wrap'}}>
+                    {this.state.members ? this.state.members.map((member) => (
+                      <Link href={`/member?organisation=${Router.query.organisation}&member=${member._id}`}>
+                        <Chip
+                          style={styles.chip}
+
+                          backgroundColor={randomColor({luminosity: 'light'})}>
+                          {member['Full Name']}
+                        </Chip>
+                      </Link>
+                    )) :
+                  null}
+                    </div>
+                  ]
+                  }
                    style={{ borderBottom: '1px solid #DBDBDB'}}/>
 
 
@@ -218,35 +321,10 @@ export class UserTag extends React.Component {
                     </div>
                   {
                     this.state.takeNote ?
-                    <div style={{padding: 10, marginBottom: 10, borderLeft: '3px solid rgb(253,216,53)', backgroundColor: 'rgb(255,249,196)'}}>
-                      <h2 style={{margin:0, marginBottom: 6}}>Type your note</h2>
-                      <ReactQuill
-                        style={{fontFamily: 'Nunito', backgroundColor: 'white'}}
-                        modules={modules}
-                        toolbar={{fontName: 'Nunito'}}
-                        onChange={this.handleNoteChange}
-                        value={this.state.note}
-
-                           />
-                         <div style={{display: 'flex', justifyContent: 'space-between', paddingTop: 10}}>
-                           <div style={{flex: 1}}/>
-                           <div style={{display: 'flex'}}>
-                             <FlatButton
-                               style={buttonStyles.smallSize}
-                               labelStyle={buttonStyles.smallLabel}
-                               label='Cancel'
-                               onClick={() => this.setState({takeNote: false})}
-                               />
-                             <div style={{width: 20}}/>
-                             <RaisedButton
-                               style={buttonStyles.smallSize}
-                               labelStyle={buttonStyles.smallLabel}
-                               label='Save'
-                               onClick={this.handleSaveNote}
-                               primary={true}/>
-                           </div>
-                        </div>
-                     </div>
+                    <AddNote
+                      handleCancelNote={() => this.setState({takeNote: false})}
+                      handleSaveNote={this.handleSaveNote}
+                      />
                        :
                        <div >
 

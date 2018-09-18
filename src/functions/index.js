@@ -3,9 +3,10 @@ import { mars } from "./worlds/mars"
 import { jupiter } from "./worlds/jupiter"
 import { mailchimpAuth } from "./mailchimp/auth"
 import {getListOfLists, getContacts} from './mailchimp/import.js';
-import {addMember, getMemberDetails, getOneMember, getMemberInListEurope, addTagToMembers} from './users/members.js';
+import {addMember, getMemberDetails, getOneMember, getMemberInListEurope, addTagToMembers, makeNewUserAdmin} from './users/members.js';
 import {sendCustomEmail, receiveReply} from './messaging/emails.js';
 import {sendCustomSMS} from './messaging/sms.js';
+import {sendInviteEmail} from './transactional/signup.js';
 
 /*
 Namespace application services with function groups.
@@ -38,7 +39,8 @@ const users = {
   getMemberDetails,
   getOneMember,
   getMemberInListEurope,
-  addTagToMembers
+  addTagToMembers,
+  makeNewUserAdmin
 }
 
 const messaging = {
@@ -47,4 +49,8 @@ const messaging = {
   receiveReply
 }
 
-export { app, greetings, mailchimp, users, messaging }
+const transactional = {
+  sendInviteEmail
+}
+
+export { app, greetings, mailchimp, users, messaging, transactional }

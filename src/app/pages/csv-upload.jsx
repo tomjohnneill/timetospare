@@ -14,6 +14,7 @@ import fire from '../fire';
 import Breadcrumbs from '../components/onboarding/breadcrumbs.jsx';
 import withMui from '../components/hocs/withMui';
 import {buttonStyles} from '../components/styles.jsx';
+import * as firebase from 'firebase';
 
 let db = fire.firestore()
 
@@ -40,16 +41,18 @@ function parseExcelPaste(str) {
     return row.split('\t')});
 }
 
+var standardColumns = ["Email", "Full Name", "Address", "Phone"]
+
 class UploadList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       grid: [
-        [{value:  1}, {value:  3}],
-        [{value:  2}, {value:  4}],
-        [{value:  1}, {value:  3}],
+        [{value:  ''}, {value:  ''}, {value: ''}],
+        [{value:  ''}, {value:  ''}, {value: ''}],
+        [{value:  ''}, {value:  ''}, {value: ''}],
       ],
-      columns: [{name: 'Email'}, {name: "Full Name"}],
+      columns: [{name: 'Email'}, {name: "Full Name"}, {name: "Custom Column 1"}],
       listName: 'Volunteers'
     }
   }
@@ -100,14 +103,66 @@ class UploadList extends React.Component {
     this.setState({selected: columns[position - 1], newColumn: false})
   }
 
+  processMemberData = (organisationId, data, columns, listId, emailPosition) => {
+    var batch = db.batch();
+    var memberCollection = db.collection("PersonalData")
+    var data = data
+    var memberIds = []
+    var columns = columns
+    var batchPromises = []
+    data.forEach((row) => {
+      if (row[emailPosition] !== '') {
+        var member = {}
+        try {
+          for (var j = 0; j < row.length; j++) {
+            if (columns[j].name) {
+              member[columns[j].name] = row[j].value
+            }
+          }
+          member.organisation = organisationId
+          // Write a cloud function to run on every new data upload, check if member exists and write memberId over it
+
+          let checkExists = db.collection("PersonalData").where("Email", "==", member.Email)
+          .where("Organisation", "==", organisationId)
+          .limit(1).get().then((snapshot) => {
+            if (snapshot.size > 0) {
+              let ref
+              snapshot.forEach((docRef) => {
+                ref = docRef.id
+              })
+              return ref
+            } else {
+              return false
+            }
+          })
+          .then((loc) => {
+            console.log(loc)
+            if (loc) {
+              batch.set(db.collection("PersonalData").doc(loc), member, {merge: true})
+            } else {
+              batch.set(db.collection("PersonalData").doc(), member, {merge: true})
+            }
+          })
+          batchPromises.push(checkExists)
+        }
+        catch(err) {
+          console.log(err)
+        }
+      }
+    })
+    Promise.all(batchPromises)
+    .then(() => {batch.commit().then(function () {
+      return true
+    })})
+  }
+
   handleImportContacts = () => {
     var emailColumn = this.state.columnNames.filter(name => (name.name === "Email"))
     var emailColumnPosition = this.state.columnNames.indexOf(emailColumn[0])
-    console.log(emailColumnPosition)
     var data = this.state.grid
     var error = false
     for (var i = 0; i < data.length; i++) {
-      if (!validateEmail(data[i][emailColumnPosition].value)) {
+      if (data[i][emailColumnPosition].value !== '' && !validateEmail(data[i][emailColumnPosition].value)) {
         alert("Some of the records in the email field don't look like emails")
         error = true
         break;
@@ -115,57 +170,52 @@ class UploadList extends React.Component {
     }
     if (!error) {
       var batch = db.batch();
-      var collRef = db.collection("Lists").doc()
-      var columns = this.state.columns
-      var Pending = {}
-      console.log(columns)
-      var emailPosition = columns.findIndex(x => x.name=="Email")
-      data.forEach((row) => {
-        Pending[encodeEmail(row[emailPosition].value)] = true
+      var collRef = db.collection("Charity").doc(Router.query.organisation)
+      console.log(this.state.columns)
+      var customColumns = this.getExistingColumns(this.state.columns)
+      console.log(customColumns)
+      customColumns.forEach((column) => {
+        batch.update(collRef, {"Columns": firebase.firestore.FieldValue.arrayUnion(column)})
       })
-      console.log(collRef)
-      collRef.set({
-        Organisation: Router.query.organisation,
-        Pending: Pending,
-        Columns: columns,
-        Name: this.state.listName
-        // set admins in here
-      }).then(() => {
-        db.collection("Charity").doc(Router.query.organisation).update({
-        ['lists.' + collRef.id] : true
-      })
-    })
-      .then(() => {
-        console.log('got past charity bit')
-        fire.auth().currentUser.getIdToken()
-        .then((token) =>
-        fetch(`https://us-central1-whosin-next.cloudfunctions.net/users-addMember?organisation=${Router.query.organisation}`, {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-          body: JSON.stringify({
-            data: data,
-            columns: columns,
-            listId: collRef.id
-          })
-        })
-        .then(response => response.json())
-        .then(data => {
-          console.log(data)
-          if (Router.query.onboarding)
-          { Router.push(`/volunteer-preview?organisation=${Router.query.organisation}`,
-                `/volunteer-preview/${Router.query.organisation}`)
-              } else {
-                Router.push(`/people?organisation=${Router.query.organisation}`)
-              }
+      batch.commit()
+      .then(() =>
+        this.processMemberData(Router.query.organisation, data, this.state.columns, collRef.id, emailColumnPosition)
+      )
+      .then(data => {
+        console.log(data)
+        if (Router.query.onboarding)
+        { Router.push(`/volunteer-preview?organisation=${Router.query.organisation}`,
+              `/volunteer-preview/${Router.query.organisation}`)
+            } else {
+              Router.push(`/people?organisation=${Router.query.organisation}`)
+            }
         }
-        )
-        )
-      })
+      )
     }
 
+  }
+
+  getExistingColumns = (lists) => {
+    var keys = []
+    lists.forEach((item) => {
+      if (typeof item === 'object') {
+        if (!standardColumns.includes(item.name)) {
+          keys.push(item.name)
+        }
+      } else {
+        if (!standardColumns.includes(item)) {
+          keys.push(item)
+        }
+      }
+    })
+    console.log(lists)
+    lists
+    Object.keys(lists).forEach((key) => {
+      if (typeof lists[key] !== 'object' && !standardColumns.includes(key)) {
+        keys.push(key)
+      }
+    })
+    return keys
   }
 
   handleChangeName = (e, nv) => {
@@ -173,9 +223,21 @@ class UploadList extends React.Component {
     this.setState({listName: nv})
   }
 
+  componentDidMount(props) {
+    if (Router.query.organisation) {
+      db.collection("Charity").doc(Router.query.organisation).get()
+      .then((doc) => {
+        var elem = doc.data()
+        console.log(elem)
+        if (elem.Columns) {
+          this.setState({existingColumns: this.getExistingColumns(elem.Columns)})
+        }
+      })
+    }
+  }
+
   render() {
-    console.log(this.props.url.query)
-    console.log(this.state.columnNames)
+
     var columns = [{name: 'Email'}, {name: "Full Name"}]
     return (
       <div style={{textAlign: 'left '}}>
@@ -188,11 +250,13 @@ class UploadList extends React.Component {
 
             <div style={{display: 'flex',  flexDirection: 'column',
               justifyContent: 'left', padding: '20px 50px 50px 50px'}}>
-              <h2 style={{textAlign: 'left', marginLeft: 5}}>Import your volunteer list</h2>
-              <p style={{marginLeft: 5, marginTop: 0}}>
-                Copy and paste directly from the spreadsheet. Include any extra details you want to store
-              </p>
+              <h2 style={{textAlign: 'left', marginLeft: 5}}>Import your contact list</h2>
+
               {!this.state.clicked ?
+                <div>
+                <p style={{marginLeft: 5, marginTop: 0}}>
+                  Copy and paste directly from the spreadsheet. Include any extra details you want to store
+                </p>
                 <div style={{display: 'flex'}}>
                   <div style={{maxWidth: '80vw',  maxHeight: '80vh', overflow: 'auto', marginLeft: 5}}>
                     <ReactDataSheet
@@ -261,22 +325,10 @@ class UploadList extends React.Component {
                     Custom columns...
                   </div>
                 </div>
+                </div>
               :
               <div>
-                <div style={{padding: 5, marginBottom: 10}}>
-                  <p style={{fontWeight: 700, margin: 0, marginBottom: 5}}>Name this list</p>
-                  <TextField
-                    inputStyle={{borderRadius: '2px', border: '1px solid #aaa',
-                      paddingLeft: '12px',  boxSizing: 'border-box'}}
-                    underlineShow={false}
-                    hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
-                    onChange={this.handleChangeName}
-                    style={{
-                      backgroundColor: 'rgb(255,255,255)',
-                      height: '40px'
-                    }}
-                    value={this.state.listName}/>
-                </div>
+
                 <div style={{display: 'flex', maxWidth: '90vw', overflow: 'auto'}}>
                   {this.state.columns.map((item) => (
                     <div style={{width: 275, minWidth: 275, margin: 5,
@@ -301,22 +353,23 @@ class UploadList extends React.Component {
                             value={item.name}
                             onChange={(e, index, value) => this.handleChange(e, index, value, item)}
                           >
-                            <MenuItem
-                              disabled={this.state.columnNames &&
-                                this.state.columnNames.filter(column => (column.name === "Email")).length > 0}
-                              value={"Email"} primaryText="Email" />
-                            <MenuItem value={"Full Name"}
-                              disabled={this.state.columnNames &&
-                                this.state.columnNames.filter(column => (column.name === "Full Name")).length > 0}
-                              primaryText="Full Name" />
-                            <MenuItem value={"Address"}
-                              disabled={this.state.columnNames &&
-                                this.state.columnNames.filter(column => (column.name === "Address")).length > 0}
-                              primaryText="Address" />
-                            <MenuItem value={"Phone"}
-                              disabled={this.state.columnNames &&
-                                this.state.columnNames.filter(column => (column.name === "Phone")).length > 0}
-                              primaryText="Phone" />
+
+                            {standardColumns.map((column) => (
+                              <MenuItem
+                                disabled={this.state.columnNames &&
+                                  this.state.columnNames.filter(column => (column.name === column)).length > 0}
+                                value={column} primaryText={column} />
+                            ))}
+                            {
+                              this.state.existingColumns ? this.state.existingColumns.map((column) => (
+                                <MenuItem value={column}
+                                  disabled={this.state.columnNames &&
+                                    this.state.columnNames.filter(column => (column.name === column)).length > 0}
+                                  primaryText={column}/>
+                              ))
+                              :
+                              null
+                            }
                             <Divider/>
                             <MenuItem value={"New"} primaryText="Create New Column"/>
                           </SelectField>

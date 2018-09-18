@@ -40,6 +40,7 @@ export default function(NextPage) {
         cookies = cookie.parse(req.headers.cookie)
       }
       const __session = cookies.__session
+      ctx.__session = __session
       let pageProps = {};
       if (NextPage.getInitialProps) {
         pageProps = await NextPage.getInitialProps(ctx);

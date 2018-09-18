@@ -6,6 +6,8 @@ import FlatButton from 'material-ui/FlatButton';
 import {buttonStyles, radioButtonStyles, textFieldStyles} from './styles.jsx';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import RaisedButton from 'material-ui/RaisedButton';
+import Link from 'next/link';
+import Chip from 'material-ui/Chip';
 import MenuItem from 'material-ui/MenuItem';
 import fire from '../fire.js';
 import * as firebase from 'firebase';
@@ -27,27 +29,52 @@ export default class AddTag extends React.Component {
   }
 
   handleSaveTag = () => {
-    var sfDocRef = db.collection("Charity").doc(this.props.organisation)
-    db.runTransaction((transaction) =>
-      transaction.get(sfDocRef)
-        .then((sfDoc) => {
-          if (!sfDoc.exists) {
-              throw "Document does not exist!";
-          } else {
-            return transaction.update(sfDocRef, {"tags": firebase.firestore.FieldValue.arrayUnion(this.state.tag)});
+    if (this.props.type && this.props.type === 'interaction') {
+      db.collection("Interactions").doc(this.props.interaction).
+      update("tags", firebase.firestore.FieldValue.arrayUnion(this.state.tag))
+    } else {
+      var sfDocRef = db.collection("Charity").doc(this.props.organisation)
+      db.runTransaction((transaction) =>
+        transaction.get(sfDocRef)
+          .then((sfDoc) => {
+            if (!sfDoc.exists) {
+                throw "Document does not exist!";
+            } else {
+              return transaction.update(sfDocRef, {"tags": firebase.firestore.FieldValue.arrayUnion(this.state.tag)});
+            }
+          })
+        )
+        .then(() => {
+          var promiseArray = []
+          this.props.selection.forEach((member) => {
+            console.log(member)
+            var docRef = db.collection("PersonalData").doc(member._original ? member._original._id : member._id)
+            var promise = db.runTransaction((transaction) =>
+                transaction.get(docRef)
+                .then((doc) => {
+                  if (!doc.exists) {
+                    throw "Document does not exist!";
+                  } else {
+                    return transaction.update(docRef, {'tags': firebase.firestore.FieldValue.arrayUnion(this.state.tag)});
+                  }
+                })
+              )
+              promiseArray.push(promise)
+            })
+            return Promise.all(promiseArray)
+        })
+        .then(() => {
+          this.props.onRequestClose()
+          if (this.props.onTagAdded) {
+             this.props.onTagAdded(this.state.tag)
           }
         })
-      )
-      .then(() => {
-        this.props.onRequestClose()
-      })
-    let functions = fire.functions('europe-west1')
-    var addTagToMembers = functions.httpsCallable('users-addTagToMembers')
-    addTagToMembers({tag: this.state.tag, members: this.props.selection, orgId: this.props.organisation})
-    this.setState({tagUpdated: true})
-    if (this.props.onTagAdded) {
-       this.props.onTagAdded(this.state.tag)
     }
+
+  }
+
+  handleDeleteTag = (tag) => {
+    db.collection("Interactions").doc(this.props.interaction).update("tags", firebase.firestore.FieldValue.arrayRemove(tag))
   }
 
   handleWriteTag = (e, nv) => {
@@ -62,6 +89,33 @@ export default class AddTag extends React.Component {
           open={this.props.open}
           contentStyle={{maxWidth: 600}}
           onRequestClose={this.props.onRequestClose}>
+
+          {
+            this.props.edit && this.props.tags ?
+              <div>
+                <div style={{width: '100%', boxSizing: 'border-box', padding: '20px 0px', fontSize: '30px'
+                , textAlign: 'left'}}>
+                Current tags
+                </div>
+                {
+                  this.props.tags ? this.props.tags.map((tag) => (
+                    <Link href={`/tag?tag=${tag}&organisation=${this.props.organisation}`}>
+                      <Chip
+                        style={{margin:6, cursor: 'pointer'}}
+                        onRequestDelete={() => this.handleDeleteTag(tag)}
+                        >{tag}
+                      </Chip>
+                    </Link>
+                  ))
+                  :
+                  null
+                }
+              </div>
+            :
+            null
+          }
+
+
           <div style={{width: '100%', boxSizing: 'border-box', padding: '20px 0px', fontSize: '30px'
           , textAlign: 'left'}}>
             {this.props.text ? this.props.text : `Tag these ${this.props.selection && this.props.selection.length} people`}

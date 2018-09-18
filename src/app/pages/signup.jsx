@@ -40,8 +40,9 @@ const styles = {
 export class SignupModal extends React.Component {
   constructor(props) {
     super(props)
-    console.log(this.props)
+
     this.state = {type: this.props.type ? this.props.type : 'signup', loading: false, pwned: null,
+      email: this.props.url.query.email ? this.props.url.query.email : '',
       forgotPassword: false, sendPasswordClicked: false}
   }
 
@@ -269,10 +270,23 @@ export class SignupModal extends React.Component {
 
 
                   <div style={{fontSize: '36px', fontWeight: 700}}>
-                    Get started with a free account
+                    {
+                      this.props.url.query.organisation ?
+                      <div>
+                        Join {decodeURIComponent(this.props.url.query.organisation)} on Time to Spare
+                      </div>
+                      :
+                      <div>
+                        Get started with a free account
+                      </div>
+                    }
                   </div>
                   <p style={{fontSize: '18px', marginBottom: 6}}>
-                    Engage your volunteers. Save yourself time. Do it all with Time to Spare.
+                    {this.props.url.query.organisation ?
+                      `${this.props.url.query.organisation} have invited you to join their organisation on Time to Spare.`
+                      :
+                     "Engage your volunteers. Save yourself time. Do it all with Time to Spare."
+                   }
                   </p>
                   <p style={{fontSize: '18px', marginTop: 0}}>
                     Already have an account? <b onTouchTap={this.handleSwitchType} style={{color: '#000AB2'}}>Log in</b>

@@ -59,26 +59,7 @@ export class People extends React.Component {
   static async getInitialProps({req, pathname, query}) {
     console.log(req)
     console.log('called initial props')
-    if (fire.auth().currentUser) {
-      const res = fire.auth().currentUser.getIdToken()
-      .then((token) =>
-        fetch(`https://us-central1-whosin-next.cloudfunctions.net/users-getMemberDetails?organisation=${query.organisation}`, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-        }))
-        .then(response => response.json())
-        .then((memberArray) => {
-          console.log(memberArray)
-          if (memberArray) {
-          return({members: memberArray, columns: getColumnsFromMembers(memberArray)})
-          }
-        })
-        .catch(err => console.log(err.message))
-        return res
-      }
+
   }
 
   componentDidMount (props) {
@@ -86,36 +67,23 @@ export class People extends React.Component {
     console.log(this.state)
     this.setState({organisation: Router.query.organisation, tagType: 'existing'})
     if (Router.query.organisation) {
-      var data = []
-      var columns = []
-      fire.auth().onAuthStateChanged((user) => {
-        if (user === null) {
 
-        } else {
-          db.collection("Charity").doc(Router.query.organisation).get()
-          .then((doc) => {
-            this.setState({organisation: doc.data()})
-          })
-          fire.auth().currentUser.getIdToken()
-          .then((token) =>
-            fetch(`https://us-central1-whosin-next.cloudfunctions.net/users-getMemberDetails?organisation=${Router.query.organisation}`, {
-              method: 'GET',
-              headers: {
-                'Accept': 'application/json',
-                'Authorization': 'Bearer ' + token
-              },
-            })
-            .then(response => response.json())
-            .then((memberArray) => {
-              console.log(memberArray)
-              if (memberArray) {
-                this.setState({data: memberArray, columns: getColumnsFromMembers(memberArray)})
-              }
-
-            })
-          )
-        }
+      db.collection("PersonalData").where("organisation", "==", Router.query.organisation)
+      .get().then((querySnapshot) => {
+        var data = []
+        querySnapshot.forEach((member) => {
+          var elem = member.data()
+          elem._id = member.id
+          delete elem.organisation
+          if (elem.lists) {
+            delete elem.lists
+          }
+          data.push(elem)
+        })
+        console.log(data)
+        this.setState({data: data, columns: getColumnsFromMembers(data)})
       })
+
 
     }
   }

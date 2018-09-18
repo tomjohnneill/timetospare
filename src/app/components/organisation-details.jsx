@@ -14,6 +14,7 @@ import DocumentTitle from 'react-document-title';
 import {CharityPhotoUpload} from '../pages/editcharity.jsx';
 import Dialog from 'material-ui/Dialog';
 import fire from '../fire';
+import {buttonStyles} from './styles.jsx';
 
 var algoliasearch = require('algoliasearch/lite')
 
@@ -472,10 +473,8 @@ export default class OrganisationDetails extends React.Component {
             disabled={this.state.submitting}
             onTouchTap={this.handleSubmit}
             fullWidth={true}
-            style={{height: '36px', marginTop: '16px', boxShadow: ''}} primary={true} overlayStyle={{height: '36px'}}
-            buttonStyle={{height: '36px'}}
-             labelStyle={{height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  letterSpacing: '0.6px', fontWeight: 'bold'}}
+            style={buttonStyles.bigSize} primary={true}
+             labelStyle={buttonStyles.bigLabel}
             />
           <div style={{height: 50}}/>
         </div>

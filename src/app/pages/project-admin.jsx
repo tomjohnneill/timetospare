@@ -107,10 +107,7 @@ export class ProjectAdmin extends React.Component {
       var project = projectDoc.data()
       this.setState({project: projectDoc.data()})
       var members = []
-      project.Members.forEach((member) => {
-        let memberData = this.getOneMemberData(member._id, Router.query.organisation)
-        members.push(memberData)
-      })
+
       this.setState({members: members})
     })
   }

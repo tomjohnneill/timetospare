@@ -10,6 +10,41 @@ var bodyParser = require('body-parser');
 
 var FieldValue = admin.firestore.FieldValue
 
+const makeNewUserAdmin = functions.firestore
+    .document('User/{userId}')
+    .onCreate((snap, context) => {
+
+      const newValue = snap.data();
+      if (newValue.Email) {
+        return db.collection("Charity").where("PendingAdmins", "array-contains", newValue.Email)
+        .get()
+        .then((querySnapshot) => {
+          if (querySnapshot.size > 0) {
+            querySnapshot.forEach((orgDoc) => {
+
+              // Check if already exists
+
+              db.collection("PersonalData").add({
+                User: context.params.userId,
+                Name: newValue.Name,
+                Email: newValue.Email,
+                Organisation: orgDoc.id
+              }).then(() =>
+                db.collection("Charity").doc(orgDoc.id).update({
+                  "PendingAdmins": FieldValue.arrayRemove(newValue.Email),
+                  ["Admin." + context.params.userId] : true
+                })
+              )
+
+
+            })
+          }
+        })
+      }
+
+    });
+
+
 const addMember = functions.https.onRequest((req, res) => {
   cors(req, res, () => {
     const tokenId = req.get('Authorization').split('Bearer ')[1];
@@ -311,4 +346,4 @@ const addTagToMembers = functions.region('europe-west1').https.onCall((data, con
     .catch(err => console.log(err))
 })
 
-export {addMember, getMemberDetails, getOneMember, getMemberInListEurope, addTagToMembers}
+export {addMember, getMemberDetails, getOneMember, getMemberInListEurope, addTagToMembers, makeNewUserAdmin}

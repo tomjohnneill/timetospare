@@ -7,6 +7,7 @@ import ContentInbox from 'material-ui/svg-icons/content/inbox';
 import Email from 'material-ui/svg-icons/communication/email';
 import {List, ListItem} from 'material-ui/List';
 import Router from 'next/router';
+import Link from 'next/link'
 import Add from 'material-ui/svg-icons/content/add';
 import Avatar from 'material-ui/Avatar';
 import Dialog from 'material-ui/Dialog';
@@ -15,27 +16,33 @@ import FlatButton from 'material-ui/FlatButton';
 import ArrowRight from 'material-ui/svg-icons/navigation/arrow-forward';
 import Divider from 'material-ui/Divider'
 import {buttonStyles} from '../components/styles.jsx';
+import AddNote from '../components/addNote.jsx';
 import 'react-quill/dist/quill.snow.css';
 import {ReviewIcon, NoteIcon} from '../components/icons.jsx';
 import AddTag from '../components/addTag.jsx';
 import Chip from 'material-ui/Chip';
+import * as firebase from 'firebase';
 
 let db = fire.firestore()
+var randomColor = require('randomcolor')
 
-const modules = {
-    toolbar: [
-      [{ 'header': [1, 2, false] }],
-      ['bold', 'italic', 'underline','strike'],
-      [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
-      ['link', 'image'],
-      ['clean']
-    ]
+const styles = {
+  chip: {
+    margin: 0,
+    height: 25,
+    lineHeight: '25px'
+  },
+  chipLabel: {
+    lineHeight: '25px'
   }
+}
+
+
 
 export class Member extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {member: {}, interactions: [], note: ''}
+    this.state = {member: {}, interactions: [], note: '', memberData: {}}
     if (typeof window !== 'undefined') {
       this.ReactQuill = require('react-quill')
     }
@@ -47,15 +54,46 @@ export class Member extends React.Component {
     .where("Organisation", "==", Router.query.organisation)
     .orderBy("Date", 'desc').get()
     .then((intSnapshot) => {
-      var data = []
+      var data = this.state.interactions ? this.state.interactions : []
       intSnapshot.forEach((intDoc) => {
         data.push(intDoc.data())
       })
       this.setState({interactions: data})
     })
+
+    db.collection("Interactions")
+    .where("Members", "array-contains", Router.query.member)
+    .where("Organisation", "==", Router.query.organisation)
+    .orderBy("Date", 'desc').get()
+    .then((intSnapshot) => {
+      var data = this.state.interactions ? this.state.interactions : []
+      intSnapshot.forEach((intDoc) => {
+        data.push(intDoc.data())
+      })
+      this.setState({interactions: data})
+    })
+
+    db.collection("PersonalData").doc(Router.query.member).get()
+    .then((doc) => {
+      var elem = doc.data()
+      elem._id = doc.id
+      const rawData = Object.create(elem)
+      this.setState({memberData: rawData, member: elem})
+    })
   }
 
   componentDidMount(props) {
+    db.collection("PersonalData").doc(Router.query.member).get()
+    .then((doc) => {
+      var elem = doc.data()
+      elem._id = doc.id
+      const rawData = Object.create(elem)
+      console.log(rawData)
+      this.setState({memberData: rawData})
+
+      this.setState({member: elem})
+    })
+    /*
     fire.auth().onAuthStateChanged((user) => {
       if (user === null) {
 
@@ -65,7 +103,7 @@ export class Member extends React.Component {
           fetch(`https://us-central1-whosin-next.cloudfunctions.net/users-getOneMember?organisation=${Router.query.organisation}&member=${Router.query.member}`, {
             method: 'GET',
             headers: {
-              'Accept': 'application/json',
+                'Accept': 'application/json',
               'Authorization': 'Bearer ' + token
             },
           })
@@ -80,6 +118,7 @@ export class Member extends React.Component {
         )
       }
     })
+    */
     console.log(Router.query)
     this.updateData()
   }
@@ -162,21 +201,22 @@ export class Member extends React.Component {
     this.setState({note: value})
   }
 
-  handleSaveNote = () => {
+  handleSaveNote = (note) => {
     this.setState({takeNote: false})
     var data = {
       Organisation: Router.query.organisation,
-      Member: Router.query.member,
+      Members: [Router.query.member],
+      Creator: fire.auth().currentUser.uid,
       Date: new Date(),
       Type: 'Note',
+      tags: this.state.member.tags ? this.state.member.tags : [],
       Details : {
-        Note: this.state.note
+        Note: note
       }
     }
     db.collection("Interactions").add(data)
     .then(() => {
       this.updateData()
-      this.setState({note: null})
     })
   }
 
@@ -188,6 +228,14 @@ export class Member extends React.Component {
     }
     member.tags = tags
     this.setState({member: member})
+    this.updateData()
+  }
+
+  handleDeleteTag = (tag) => {
+    db.collection("PersonalData").doc(Router.query.member).update("tags", firebase.firestore.FieldValue.arrayRemove(tag))
+    .then(() => {
+      this.updateData()
+    })
   }
 
   render() {
@@ -201,12 +249,14 @@ export class Member extends React.Component {
       <div>
         <App>
           <AddTag
-            selection={[this.state.member]}
+            selection={[this.state.memberData]}
             text={`Tag ${decodeURIComponent(this.props.url.query.name)}`}
             organisation={this.props.url.query.organisation}
             open={this.state.tagOpen}
             onTagAdded={this.handleTagAdded}
             onRequestClose={() => this.setState({tagOpen:false})}/>
+
+
           <Dialog
             open={this.state.new}
             onRequestClose={() => this.setState({new:false})}>
@@ -244,12 +294,14 @@ export class Member extends React.Component {
 
           <div
             style={{ paddingTop: 20, paddingBottom: 20, justifyContent: 'center',
-              display: 'flex', borderBottom: '1px solid #DBDBDB'}}>
+              display: 'flex'}}>
               <div style={{display: 'flex', maxWidth: 1050, width: '100%',
                 justifyContent: 'space-between', alignItems: 'center'}}>
                 <div style={{textAlign: 'left'}}>
 
-              <div style={{fontWeight: 200, fontSize: '40px'}}>
+                  <div style={{fontWeight: 700, fontSize: '40px', paddingBottom: 10,
+                    borderBottom: '4px solid #000AB2'
+                  }}>
                 {this.state.member['Full Name'] ? this.state.member['Full Name'] : decodeURIComponent(this.props.url.query.name)}
               </div>
             </div>
@@ -274,20 +326,29 @@ export class Member extends React.Component {
                 <ListItem
                   primaryText='Details'
                   leftIcon={<Add/>}
+                  initiallyOpen={true}
                   primaryTogglesNestedList={true}
                   nestedItems={
                     [<div>
 
                         {
                           Object.keys(this.state.member).map((key) => {
-                            if (key !== '_id' && key !== 'tags') {
+                            if (key !== '_id' && key !== 'tags' && typeof this.state.member[key] !== 'object') {
                               return (
-                                <div style={{display: 'flex', overflowX: 'hidden', borderBottom: '1px solid #DBDBDB'}}>
-                                  <div style={{flex: 3, padding: '5px 5px 5px 15px'}}>
+                                <div style={{display: 'flex', overflowX: 'hidden', alignItems: 'center',
+                                   borderBottom: '1px solid #DBDBDB'}}>
+                                  <div style={{flex: 3, padding: '5px 5px 5px 15px', alignItems: 'center'}}>
                                     <b>{key}</b>
                                   </div>
                                   <div style={{flex: 7, padding: 5}}>
-                                    <i>{this.state.member[key]}</i>
+                                    <Chip
+                                      backgroundColor={randomColor({luminosity: 'light'})}
+                                      style={styles.chip}
+                                      labelStyle={styles.chipLabel}
+                                      >
+                                      {this.state.member[key]}
+                                    </Chip>
+
                                   </div>
                                 </div>
                               )
@@ -304,16 +365,19 @@ export class Member extends React.Component {
                    <ListItem
                      primaryText='Tags'
                      leftIcon={<Add/>}
+                     initiallyOpen={true}
                      primaryTogglesNestedList={true}
                      nestedItems={
                        [<div>
-                         {this.state.member && this.state.member.tags ? this.state.member.tags.map((tag) => (
+                         {this.state.memberData && this.state.memberData.tags ? this.state.memberData.tags.map((tag) => (
+                           <Link prefetch href={`/tag?tag=${tag}&organisation=${Router.query.organisation}`}>
                          <Chip
-                           onClick={() => Router.push(`/user-tag?tag=${tag}&organisation=${Router.query.organisation}`)}
+
                            style={{margin:6, cursor: 'pointer'}}
                            onRequestDelete={() => this.handleDeleteTag(tag)}
                            >{tag}
                          </Chip>
+                         </Link>
                        )) : null}
                        </div>,
                        <div style={{padding: 6}}>
@@ -342,35 +406,12 @@ export class Member extends React.Component {
                     </div>
                   {
                     this.state.takeNote ?
-                    <div style={{padding: 10, marginBottom: 10, borderLeft: '3px solid rgb(253,216,53)', backgroundColor: 'rgb(255,249,196)'}}>
-                      <h2 style={{margin:0, marginBottom: 6}}>Type your note</h2>
-                      <ReactQuill
-                        style={{fontFamily: 'Nunito', backgroundColor: 'white'}}
-                        modules={modules}
-                        toolbar={{fontName: 'Nunito'}}
-                        onChange={this.handleNoteChange}
-                        value={this.state.note}
+                    <AddNote
+                      handleCancelNote={() => this.setState({takeNote: false})}
+                      handleSaveNote={this.handleSaveNote}
+                      />
 
-                           />
-                         <div style={{display: 'flex', justifyContent: 'space-between', paddingTop: 10}}>
-                           <div style={{flex: 1}}/>
-                           <div style={{display: 'flex'}}>
-                             <FlatButton
-                               style={buttonStyles.smallSize}
-                               labelStyle={buttonStyles.smallLabel}
-                               label='Cancel'
-                               onClick={() => this.setState({takeNote: false})}
-                               />
-                             <div style={{width: 20}}/>
-                             <RaisedButton
-                               style={buttonStyles.smallSize}
-                               labelStyle={buttonStyles.smallLabel}
-                               label='Save'
-                               onClick={this.handleSaveNote}
-                               primary={true}/>
-                           </div>
-                        </div>
-                     </div>
+
                        :
                        <div >
 
