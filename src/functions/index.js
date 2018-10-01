@@ -7,6 +7,7 @@ import {addMember, getMemberDetails, getOneMember, getMemberInListEurope, addTag
 import {sendCustomEmail, receiveReply} from './messaging/emails.js';
 import {sendCustomSMS} from './messaging/sms.js';
 import {sendInviteEmail} from './transactional/signup.js';
+import {outlookAuth,scrapeOutlookEmails} from './integrations/outlook.js';
 
 /*
 Namespace application services with function groups.
@@ -53,4 +54,9 @@ const transactional = {
   sendInviteEmail
 }
 
-export { app, greetings, mailchimp, users, messaging, transactional }
+const integrations = {
+  outlookAuth,
+  scrapeOutlookEmails
+}
+
+export { app, greetings, mailchimp, users, messaging, transactional, integrations}

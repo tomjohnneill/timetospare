@@ -16,6 +16,7 @@ import TextField from 'material-ui/TextField';
 import RegisterInterest from '../components/registerinterest.jsx';
 import Subheader from 'material-ui/Subheader';
 import withMui from '../components/hocs/withMui';
+import {Network, GDPR} from '../components/icons.jsx';
 
 let mobile = require('is-mobile');
 
@@ -207,19 +208,19 @@ class Index extends React.Component {
           values={{deviceWidth: isMobile ? 600 : 1400}}
           minDeviceWidth={700}>
           <img
-                  style={{height: '70vh',objectPosition: '50% 0%', width: '100%',
+                  style={{height: '80vh',objectPosition: '70% 80%', width: '120%', marginLeft: '-20%',
                    objectFit: 'cover', position: 'relative', marginTop: '-51px'}}
-                  src={'https://images.unsplash.com/photo-1472289065668-ce650ac443d2?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=cdff4c62302fd44491d4850202323d11&auto=format&fit=crop&w=1050&q=80'}/>
+                  src={'https://images.unsplash.com/photo-1530220616-3f1c5a86e6cb?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=29d3687e117dd607197b051ac2009473&auto=format&fit=crop&w=1191&q=80'}/>
                 <div style={{position: 'absolute',top:'-51px',  height: '80%', width: '100%',
                 flexDirection: 'column',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',paddingRight: '20px', boxSizing: 'border-box', paddingLeft: 80}}>
                   <div style={{width: '600px', paddingLeft: 200}}>
                     <h2 style={{textAlign: 'left', color: 'black', fontSize: '48px',
-                  marginBottom: 15}}>Do good, better.</h2>
+                  marginBottom: 15}}>Save yourself time</h2>
 
 
                   <p style={{fontSize: '20px', marginTop: 25, color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
-                    All the tools you need to better engage your volunteers.
+                    Organise all your contacts, events, projects and relationships.
                   </p>
                   {
                     !fire.auth().currentUser ?
@@ -246,25 +247,22 @@ class Index extends React.Component {
                     style={{height: '70vh',objectPosition: '50% 60%', width: '100%',
                      objectFit: 'cover', position: 'relative', marginTop: '-51px'}}
                     src={'https://images.unsplash.com/photo-1492999104346-cabaa757be8f?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=e0e3f3e765bde2f5094873747a695c85&auto=format&fit=crop&w=1051&q=80'}/>
-                  <div style={{position: 'absolute',top:'-51px',  height: '80%', width: '100%',
-                  flexDirection: 'column',
-                    display: 'flex', justifyContent: 'center',paddingRight: '20px', boxSizing: 'border-box', paddingLeft: 80}}>
+                  <div style={{position: 'absolute',top:'-51px',  height: '100%', width: '100%',
+                   alignItems: 'center',
+                    display: 'flex', paddingRight: '20px', boxSizing: 'border-box'
+                    , paddingLeft: 150}}>
                     <div style={{width: '600px'}}>
                       <h2 style={{textAlign: 'left', color: 'black', fontSize: '48px',
-                    marginBottom: 15}}>Inspire your volunteers</h2>
-
+                    marginBottom: 15}}>Manage all your contacts</h2>
 
                     <p style={{fontSize: '20px', marginTop: 25, color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
-                      Let them see all the great projects your organisation does. Let them sign up to extra if they have time to spare.
+                      Keep a better track of who you’ve contacted recently.
                       <br/>
                       <br/>
-                      Let volunteers create groups, and come with their friends.
+                      Record your insight on what worked and what didn’t.
                       <br/>
                       <br/>
-                      But you're in control, if a project is sensitive, you can restrict who can see it.
-
-
-
+                      Share your knowledge across your team.
 
                     </p>
 
@@ -274,24 +272,27 @@ class Index extends React.Component {
                 </div>
 
 
-                <div style={{position: 'relative'}}>
-                  <img
-                      style={{height: '70vh',objectPosition: '50% 100%', width: '100%',
-                       objectFit: 'cover', position: 'relative', marginTop: '-51px'}}
-                      src={'https://images.unsplash.com/photo-1530220616-3f1c5a86e6cb?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=29d3687e117dd607197b051ac2009473&auto=format&fit=crop&w=1191&q=80'}/>
-                    <div style={{position: 'absolute',top:'-51px',  height: '80%', width: '100%',
-                    flexDirection: 'column', alignItems: 'flex-end',
-                      display: 'flex', justifyContent: 'center',paddingRight: '20px', boxSizing: 'border-box', paddingLeft: 80}}>
-                      <div style={{width: '600px', paddingRight: 100}}>
+                <div style={{position: 'relative', backgroundColor: '#FFCB00',
+                  display: 'flex', alignItems: 'center'}}>
+
+                    <div style={{ width: '100%', height: '70vh', alignItems: 'center',
+                      display: 'flex', justifyContent: 'center',paddingRight: '80px',
+                       boxSizing: 'border-box', paddingLeft: 80}}>
+
+                        <GDPR style={{height: '60%', paddingRight: 200}} color='black'/>
+
+                      <div style={{width: '600px', paddingRight: 150}}>
                         <h2 style={{textAlign: 'left', color: 'black', fontSize: '48px',
-                      marginBottom: 15}}>Save yourself time</h2>
+                            marginBottom: 15}}>
+                          Resolve your GDPR problems
+                        </h2>
 
 
                       <p style={{fontSize: '20px', marginTop: 25, color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
-                        Don't waste hours on boring admin. Save your time for the things that make a real difference.
+                        Your volunteers and contacts can see all their personal data. They can keep it up to date, and request for it to be deleted, all in one place.
                         <br/>
                         <br/>
-                        We do reminder emails, calendar, and invite management all for you.
+                        If anyone makes a ‘subject access request’, resolve it by sending one link.
                       </p>
 
                       </div>
@@ -299,28 +300,29 @@ class Index extends React.Component {
                     </div>
                   </div>
 
-                  <div style={{position: 'relative', color: 'white'}}>
-                    <img
-                        style={{height: '70vh',objectPosition: '50% 60%', width: '100%',
-                         objectFit: 'cover', position: 'relative', marginTop: '-51px'}}
-                        src={'https://images.unsplash.com/photo-1517728848779-e95acb6ac40f?ixlib=rb-0.3.5&s=66620169dac15962f051322abe54d4b6&auto=format&fit=crop&w=1050&q=80'}/>
-                      <div style={{position: 'absolute',top:'-51px',  height: '80%', width: '100%',
-                      flexDirection: 'column',
-                        display: 'flex', justifyContent: 'center',paddingRight: '20px', boxSizing: 'border-box', paddingLeft: 80}}>
-                        <div style={{width: '600px'}}>
+                  <div style={{position: 'relative', color: 'white', backgroundColor: '#000AB2',
+                    display: 'flex', alignItems: 'center'}}>
+
+                      <div style={{ width: '100%', height: '70vh', alignItems: 'center',
+                        display: 'flex', justifyContent: 'center',paddingRight: '80px',
+                         boxSizing: 'border-box', paddingLeft: 80}}>
+                        <div style={{width: '800px'}}>
                           <h2 style={{textAlign: 'left',fontSize: '48px',
-                        marginBottom: 15}}>Do better together</h2>
+                        marginBottom: 15}}>Join a growing network of organisations, volunteers and funders</h2>
 
 
                         <p style={{fontSize: '20px', marginTop: 25,fontWeight: 'lighter', textAlign: 'left'}}>
-                          Receive feedback to help you improve your projects.<br/><br/>
-                          Help your volunteers showcase their effort.
+                          Add your organisation and your volunteers to a network of people working together to improve their communities. <br/><br/>
+                          Showcase your projects, inspire your volunteers and demonstrate your impact to the world at large.
 
                         </p>
 
                         </div>
 
+                          <Network style={{height: '80%'}} color='white'/>
+
                       </div>
+
                     </div>
                   </MediaQuery>
 

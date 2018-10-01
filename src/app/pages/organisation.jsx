@@ -11,6 +11,7 @@ import Link from 'next/link';
 import Chip from 'material-ui/Chip';
 import Email from 'material-ui/svg-icons/communication/email';
 import {buttonStyles, chipStyles} from '../components/styles.jsx';
+import OutlookIntegrate from '../components/outlook/integrate.jsx';
 
 var randomColor = require('randomcolor')
 let db = fire.firestore()
@@ -138,7 +139,7 @@ export class Organisation extends React.Component {
     return (
       <div>
         <App>
-          <div style={{width: '100%', display: 'flex', justifyContent: 'center', height: '100vh', paddingTop: 20}}>
+          <div style={{width: '100%', display: 'flex', justifyContent: 'center', minHeight: '100vh', paddingBottom: 50, paddingTop: 20}}>
             <div style={{textAlign: 'left'}}>
               {
                 this.state.organisation ?
@@ -147,6 +148,22 @@ export class Organisation extends React.Component {
                   <p style={{borderBottom: '1px solid #DBDBDB', paddingBottom: 20}}>
                      Welcome back to your Time to Spare dashboard. Have a look around to see how we can help today.
                   </p>
+                  {
+                    this.props.url.query.access_token ?
+                    null :
+                    <div>
+                      <h2 style={{paddingTop: 25, fontStyle: 'italic'}}>Tasks</h2>
+                        <div style={{backgroundColor: 'rgb(255,249,196)', padding: 10, borderRadius: 4,
+                          display: 'flex', alignItems: 'center',
+                            margin: 10, border: '1px solid rgb(253, 216, 53)'}}>
+                            <img src='https://upload.wikimedia.org/wikipedia/commons/0/0b/Microsoft_Outlook_2013_logo.svg'
+                              style={{height: 30, paddingRight: 20}}/>
+                            <span style={{flex: 1}}>Get emails from outlook</span>
+                            <OutlookIntegrate/>
+                        </div>
+                    </div>
+                  }
+
                   <h2 style={{paddingTop: 25, fontStyle: 'italic'}}>Your options</h2>
                   <div style={{display: 'flex', flexWrap: 'wrap', alignItems: 'center'}}>
                     <Options style={{height: 120, width: 120}}

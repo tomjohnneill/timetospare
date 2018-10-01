@@ -15,13 +15,20 @@ import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
 import ArrowRight from 'material-ui/svg-icons/navigation/arrow-forward';
 import Divider from 'material-ui/Divider'
-import {buttonStyles} from '../components/styles.jsx';
+import {buttonStyles, iconButtonStyles} from '../components/styles.jsx';
 import AddNote from '../components/addNote.jsx';
 import 'react-quill/dist/quill.snow.css';
-import {ReviewIcon, NoteIcon} from '../components/icons.jsx';
+import IconButton from 'material-ui/IconButton';
+import {ReviewIcon, NoteIcon, AvatarIcon, Tag} from '../components/icons.jsx';
 import AddTag from '../components/addTag.jsx';
 import Chip from 'material-ui/Chip';
 import * as firebase from 'firebase';
+import Popover from 'material-ui/Popover';
+import Menu from 'material-ui/Menu';
+import MenuItem from 'material-ui/MenuItem';
+import MoreVert from 'material-ui/svg-icons/navigation/more-vert'
+import Delete from 'material-ui/svg-icons/action/delete'
+import Close from 'material-ui/svg-icons/navigation/close'
 
 let db = fire.firestore()
 var randomColor = require('randomcolor')
@@ -49,6 +56,7 @@ export class Member extends React.Component {
   }
 
   updateData = () => {
+    this.setState({interactions: []})
     db.collection("Interactions")
     .where("Member", "==", Router.query.member)
     .where("Organisation", "==", Router.query.organisation)
@@ -56,7 +64,9 @@ export class Member extends React.Component {
     .then((intSnapshot) => {
       var data = this.state.interactions ? this.state.interactions : []
       intSnapshot.forEach((intDoc) => {
-        data.push(intDoc.data())
+        var elem = intDoc.data()
+        elem._id = intDoc.id
+        data.push(elem)
       })
       this.setState({interactions: data})
     })
@@ -68,7 +78,9 @@ export class Member extends React.Component {
     .then((intSnapshot) => {
       var data = this.state.interactions ? this.state.interactions : []
       intSnapshot.forEach((intDoc) => {
-        data.push(intDoc.data())
+        var elem = intDoc.data()
+        elem._id = intDoc.id
+        data.push(elem)
       })
       this.setState({interactions: data})
     })
@@ -127,6 +139,22 @@ export class Member extends React.Component {
     return {__html: note}
   }
 
+  handleOptionsClick = (event, int) => {
+    console.log('clicked')
+    console.log(int)
+    this.setState({
+      optionsOpen: true,
+      targetedInt: int,
+      anchorEl: event.currentTarget,
+    });
+  }
+
+  handleOptionsRequestClose = () => {
+    this.setState({
+      optionsOpen: false,
+    });
+  };
+
   renderInteraction = (int) => {
     console.log(int)
     switch(int.Type) {
@@ -151,6 +179,10 @@ export class Member extends React.Component {
               className='email-interaction'
               style={{marginBottom: 10, borderLeft: '3px solid #DBDBDB', backgroundColor: 'rgb(249, 249, 249)'}}
               primaryText={<span>Received your email: <b>{int.Details ? int.Details.Subject : ""}</b></span>}
+              rightIcon={<IconButton
+                tooltip='Options'
+                onClick={(e) => this.handleOptionsClick(e, int)}
+                style={iconButtonStyles.button}><MoreVert /></IconButton>}
               secondaryText={int.Date.toLocaleString('en-gb',
                 {weekday: 'long', month: 'long', day: 'numeric'})}
                leftIcon={<Email />} />
@@ -161,6 +193,10 @@ export class Member extends React.Component {
         return (
           <div>
             <ListItem
+              rightIcon={<IconButton
+                tooltip='Options'
+                onClick={(e) => this.handleOptionsClick(e, int)}
+                style={iconButtonStyles.button}><MoreVert /></IconButton>}
               className='email-interaction'
               style={{marginBottom: 10, borderLeft: '3px solid #DBDBDB', backgroundColor: 'rgb(249, 249, 249)'}}
               primaryText={<span>Replied to your email: <b>{int.Details ? int.Details.Subject : ""}</b>
@@ -181,6 +217,10 @@ export class Member extends React.Component {
               primaryText={<div>
                 <div className='story-text' dangerouslySetInnerHTML={this.noteMarkup(int.Details ? int.Details.Note : null)}/>
               </div>}
+              rightIcon={<IconButton
+                tooltip='Options'
+                onClick={(e) => this.handleOptionsClick(e, int)}
+                style={iconButtonStyles.button}><MoreVert /></IconButton>}
               secondaryText={int.Date.toLocaleString('en-gb',
                 {weekday: 'long', month: 'long', day: 'numeric'})}
                leftIcon={<NoteIcon fill={'black'}/>} />
@@ -238,6 +278,14 @@ export class Member extends React.Component {
     })
   }
 
+  handleDeleteInteraction = (int) => {
+    db.collection("Interactions").doc(int._id).delete()
+    .then(() => {
+      this.setState({deleteOpen: false, interactions: []})
+      this.updateData()
+    })
+  }
+
   render() {
     const ReactQuill = this.ReactQuill
     console.log(this.state)
@@ -248,6 +296,24 @@ export class Member extends React.Component {
     return (
       <div>
         <App>
+          <Popover
+            open={this.state.optionsOpen}
+            anchorEl={this.state.anchorEl}
+            anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+            targetOrigin={{horizontal: 'left', vertical: 'top'}}
+            onRequestClose={this.handleOptionsRequestClose}
+          >
+            <Menu style={{textAlign: 'left'}}>
+              <MenuItem primaryText="Tags" onClick={() => alert('work in progress')}
+                  leftIcon={<Tag style={{height: 25}}/>} />
+              <MenuItem
+                onClick={() => this.setState({deleteOpen: true, optionsOpen: false})}
+                primaryText="Completely delete" leftIcon={<Delete/>} />
+              <MenuItem
+                onClick={() => this.setState({deleteOpen: true, optionsOpen: false})}
+                primaryText="Remove from this member" leftIcon={<Close/>} />
+            </Menu>
+          </Popover>
           <AddTag
             selection={[this.state.memberData]}
             text={`Tag ${decodeURIComponent(this.props.url.query.name)}`}
@@ -256,7 +322,30 @@ export class Member extends React.Component {
             onTagAdded={this.handleTagAdded}
             onRequestClose={() => this.setState({tagOpen:false})}/>
 
+          <Dialog
+            open={this.state.deleteOpen}
+            actions={[
 
+              <FlatButton
+                label='Cancel'
+                style={buttonStyles.smallSize}
+                labelStyle={buttonStyles.smallLabel}
+                onClick={() => this.setState({deleteOpen: false, optionsOpen: false})}
+                />,
+                <RaisedButton
+                  style={buttonStyles.smallSize}
+                  labelStyle={buttonStyles.smallLabel}
+                  icon={<Delete/>}
+                  label='Delete interaction'
+                  onClick={() => this.handleDeleteInteraction(this.state.targetedInt)}
+                  primary={true}/>
+            ]}
+            onRequestClose={() => this.setState({deleteOpen:false})}>
+            <h2 style={{textAlign: 'left'}}>Are you sure you want to delete this?</h2>
+            <div style={{textAlign: 'left'}}>
+              {this.state.targetedInt ? this.renderInteraction(this.state.targetedInt) : null}
+            </div>
+          </Dialog>
           <Dialog
             open={this.state.new}
             onRequestClose={() => this.setState({new:false})}>
@@ -300,8 +389,9 @@ export class Member extends React.Component {
                 <div style={{textAlign: 'left'}}>
 
                   <div style={{fontWeight: 700, fontSize: '40px', paddingBottom: 10,
-                    borderBottom: '4px solid #000AB2'
+                    borderBottom: '4px solid #000AB2', display: 'flex', alignItems: 'center'
                   }}>
+                  <AvatarIcon style={{height: 60, paddingRight: 15}} color='#484848'/>
                 {this.state.member['Full Name'] ? this.state.member['Full Name'] : decodeURIComponent(this.props.url.query.name)}
               </div>
             </div>

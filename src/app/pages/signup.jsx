@@ -80,8 +80,13 @@ export class SignupModal extends React.Component {
             )
               .then(data =>
                 {
-                  Router.push('/create-other')
-                  this.setState({type: 'phone', createdClicked: false})
+                  if (Router.query.organisation && Router.query.orgId) {
+                    window.location.href = 'https://timetospare.com/organisation'
+                  } else {
+                    Router.push('/create-other')
+                  }
+
+
                 })
               .catch(error => console.log('Error', error))
             } else {

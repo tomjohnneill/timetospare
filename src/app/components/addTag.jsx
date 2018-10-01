@@ -97,8 +97,10 @@ export default class AddTag extends React.Component {
                 , textAlign: 'left'}}>
                 Current tags
                 </div>
+                <div style={{display: 'flex', flexWrap: 'wrap'}}>
                 {
                   this.props.tags ? this.props.tags.map((tag) => (
+
                     <Link href={`/tag?tag=${tag}&organisation=${this.props.organisation}`}>
                       <Chip
                         style={{margin:6, cursor: 'pointer'}}
@@ -110,6 +112,7 @@ export default class AddTag extends React.Component {
                   :
                   null
                 }
+                </div>
               </div>
             :
             null

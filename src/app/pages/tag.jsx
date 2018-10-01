@@ -15,11 +15,18 @@ import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
 import ArrowRight from 'material-ui/svg-icons/navigation/arrow-forward';
 import Divider from 'material-ui/Divider'
-import {buttonStyles} from '../components/styles.jsx';
+import {buttonStyles, iconButtonStyles} from '../components/styles.jsx';
 import AddNote from '../components/addNote.jsx';
-import {ReviewIcon, NoteIcon} from '../components/icons.jsx';
+import {ReviewIcon, NoteIcon, Tag} from '../components/icons.jsx';
 import AddTag from '../components/addTag.jsx';
 import Chip from 'material-ui/Chip';
+import Popover from 'material-ui/Popover';
+import Menu from 'material-ui/Menu';
+import MenuItem from 'material-ui/MenuItem';
+import MoreVert from 'material-ui/svg-icons/navigation/more-vert'
+import Delete from 'material-ui/svg-icons/action/delete'
+import Close from 'material-ui/svg-icons/navigation/close'
+import IconButton from 'material-ui/IconButton';
 
 let db = fire.firestore()
 
@@ -48,7 +55,7 @@ var randomColor = require('randomcolor')
 export class UserTag extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {tagOpen: false}
+    this.state = {tagOpen: false, interactionUsers: {}}
   }
 
   updateData = () => {
@@ -58,14 +65,57 @@ export class UserTag extends React.Component {
     .orderBy("Date", 'desc').get()
     .then((intSnapshot) => {
       var data = []
+      var promises = []
       intSnapshot.forEach((intDoc) => {
         var elem = intDoc.data()
         elem._id = intDoc.id
         data.push(elem)
+        if (elem.Members) {
+          elem.Members.forEach((member) => {
+            promises.push(db.collection("PersonalData").doc(member)
+              .get().then((dataDoc) => {
+                let userData = dataDoc.data()
+                userData.color = randomColor({luminosity: 'light'})
+                let interactionUsers = this.state.interactionUsers
+                interactionUsers[member] = userData
+                this.setState({interactionUsers: interactionUsers})
+              })
+            )
+          })
+        }
+
+
+
       })
+      Promise.all(promises).then(() => this.setState({membersLoaded: true}))
       this.setState({interactions: data})
     })
   }
+
+  handleOptionsClick = (event, int) => {
+    console.log('clicked')
+    console.log(int)
+    this.setState({
+      optionsOpen: true,
+      targetedInt: int,
+      anchorEl: event.currentTarget,
+    });
+  }
+
+  handleOptionsRequestClose = () => {
+    this.setState({
+      optionsOpen: false,
+    });
+  };
+
+
+    handleDeleteInteraction = (int) => {
+      db.collection("Interactions").doc(int._id).delete()
+      .then(() => {
+        this.setState({deleteOpen: false, interactions: []})
+        this.updateData()
+      })
+    }
 
   handleSaveNote = (note) => {
     var memberIds = []
@@ -110,14 +160,34 @@ export class UserTag extends React.Component {
         break;
       case "Email":
         return (
-          <div>
+          <div style={{borderLeft: '3px solid #DBDBDB', backgroundColor: 'rgb(249, 249, 249)', paddingBottom: 10, marginBottom: 10}}>
             <ListItem
               className='email-interaction'
-              style={{marginBottom: 10, borderLeft: '3px solid #DBDBDB', backgroundColor: 'rgb(249, 249, 249)'}}
+              style={{marginBottom: 5 }}
+              rightIcon={<IconButton
+                tooltip='Options'
+                onClick={(e) => this.handleOptionsClick(e, int)}
+                style={iconButtonStyles.button}><MoreVert /></IconButton>}
               primaryText={<span>Received your email: <b>{int.Details ? int.Details.Subject : ""}</b></span>}
               secondaryText={int.Date.toLocaleString('en-gb',
                 {weekday: 'long', month: 'long', day: 'numeric'})}
                leftIcon={<Email />} />
+             <div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
+               {
+                 int.Members && this.state.membersLoaded
+                  ? int.Members.map((user) => (
+                    <Link  prefetch href={`/member?organisation=${Router.query.organisation}&member=${user}`}>
+                       <Chip
+                         style={styles.chip}
+                         backgroundColor={this.state.interactionUsers[user].color}>
+                         {this.state.interactionUsers[user]['Full Name']}
+                       </Chip>
+                    </Link>
+                 ))
+                 :
+                 null
+               }
+             </div>
           </div>
         )
         break;
@@ -125,6 +195,10 @@ export class UserTag extends React.Component {
         return (
           <div>
             <ListItem
+              rightIcon={<IconButton
+                tooltip='Options'
+                onClick={(e) => this.handleOptionsClick(e, int)}
+                style={iconButtonStyles.button}><MoreVert /></IconButton>}
               className='email-interaction'
               style={{marginBottom: 10, borderLeft: '3px solid #DBDBDB', backgroundColor: 'rgb(249, 249, 249)'}}
               primaryText={<span>Replied to your email: <b>{int.Details ? int.Details.Subject : ""}</b>
@@ -138,16 +212,39 @@ export class UserTag extends React.Component {
         break;
       case "Note":
         return (
-          <div onClick={() => this.setState({tagOpen: true, tags: int.tags, int: int._id})}>
+          <div
+            style={{borderLeft: '3px solid rgb(253,216,53)', backgroundColor: 'rgb(255,249,196)', paddingBottom: 10, marginBottom: 10}}
+            >
             <ListItem
+              rightIcon={<IconButton
+                tooltip='Options'
+                onClick={(e) => this.handleOptionsClick(e, int)}
+                style={iconButtonStyles.button}><MoreVert /></IconButton>}
+
               className='email-interaction'
-              style={{marginBottom: 10, borderLeft: '3px solid rgb(253,216,53)', backgroundColor: 'rgb(255,249,196)'}}
+              style={{marginBottom: 10,  backgroundColor: 'rgb(255,249,196)'}}
               primaryText={<div>
                 <div className='story-text' dangerouslySetInnerHTML={this.noteMarkup(int.Details ? int.Details.Note : null)}/>
               </div>}
               secondaryText={int.Date.toLocaleString('en-gb',
                 {weekday: 'long', month: 'long', day: 'numeric'})}
                leftIcon={<NoteIcon fill={'black'}/>} />
+               <div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
+                 {
+                   int.Members && this.state.membersLoaded
+                    ? int.Members.map((user) => (
+                      <Link  prefetch href={`/member?organisation=${Router.query.organisation}&member=${user}`}>
+                         <Chip
+                           style={styles.chip}
+                           backgroundColor={this.state.interactionUsers[user].color}>
+                           {this.state.interactionUsers[user]['Full Name']}
+                         </Chip>
+                      </Link>
+                   ))
+                   :
+                   null
+                 }
+               </div>
           </div>
         )
         break;
@@ -196,6 +293,50 @@ export class UserTag extends React.Component {
     return (
       <div>
         <App>
+          <Dialog
+            open={this.state.deleteOpen}
+            actions={[
+
+              <FlatButton
+                label='Cancel'
+                style={buttonStyles.smallSize}
+                labelStyle={buttonStyles.smallLabel}
+                onClick={() => this.setState({deleteOpen: false, optionsOpen: false})}
+                />,
+                <RaisedButton
+                  style={buttonStyles.smallSize}
+                  labelStyle={buttonStyles.smallLabel}
+                  icon={<Delete/>}
+                  label='Delete interaction'
+                  onClick={() => this.handleDeleteInteraction(this.state.targetedInt)}
+                  primary={true}/>
+            ]}
+            onRequestClose={() => this.setState({deleteOpen:false})}>
+            <h2 style={{textAlign: 'left'}}>Are you sure you want to delete this?</h2>
+            <div style={{textAlign: 'left'}}>
+              {this.state.targetedInt ? this.renderInteraction(this.state.targetedInt) : null}
+            </div>
+          </Dialog>
+          <Popover
+            open={this.state.optionsOpen}
+            anchorEl={this.state.anchorEl}
+            anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+            targetOrigin={{horizontal: 'left', vertical: 'top'}}
+            onRequestClose={this.handleOptionsRequestClose}
+          >
+            <Menu style={{textAlign: 'left'}}>
+              <MenuItem primaryText="Tags"
+                onClick={() => this.setState({tagOpen: true, optionsOpen: false,
+                  tags: this.state.targetedInt.tags, int: this.state.targetedInt._id})}
+                  leftIcon={<Tag style={{height: 25}}/>} />
+              <MenuItem
+                onClick={() => this.setState({deleteOpen: true, optionsOpen: false})}
+                primaryText="Completely delete" leftIcon={<Delete/>} />
+              <MenuItem
+                onClick={() => this.setState({deleteOpen: true, optionsOpen: false})}
+                primaryText="Remove from this tag" leftIcon={<Close/>} />
+            </Menu>
+          </Popover>
           <Dialog
             open={this.state.new}
             onRequestClose={() => this.setState({new:false})}>
@@ -252,8 +393,9 @@ export class UserTag extends React.Component {
                 <div style={{textAlign: 'left'}}>
 
               <div style={{fontWeight: 700, fontSize: '40px', paddingBottom: 10,
-                borderBottom: '4px solid #000AB2'
+                borderBottom: '4px solid #000AB2', display: 'flex', alignItems: 'center'
               }}>
+                <Tag style={{height: 30, paddingRight: 15}} color='#484848'/>
                 {decodeURIComponent(this.props.url.query.tag)}
               </div>
             </div>
@@ -285,7 +427,7 @@ export class UserTag extends React.Component {
                   nestedItems = {
                     [<div style={{display: 'flex', flexWrap: 'wrap'}}>
                     {this.state.members ? this.state.members.map((member) => (
-                      <Link href={`/member?organisation=${Router.query.organisation}&member=${member._id}`}>
+                      <Link prefetch href={`/member?organisation=${Router.query.organisation}&member=${member._id}`}>
                         <Chip
                           style={styles.chip}
 
@@ -311,7 +453,7 @@ export class UserTag extends React.Component {
                 </div>
               <div style={{display: 'flex', padding: 40, backgroundColor: '#DBDBDB',
               marginBottom: 20}}>
-                This is going to be mega
+                This is going to be summary statistics
               </div>
               <div style={{textAlign: 'left'}}>
 
