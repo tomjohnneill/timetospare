@@ -11,7 +11,10 @@ import fire from '../fire';
 import {buttonStyles, iconButtonStyles} from './styles.jsx';
 import Close from 'material-ui/svg-icons/navigation/close'
 import * as math from 'mathjs'
+import Refresh from 'material-ui/svg-icons/navigation/refresh';
+import {NameTag} from './icons.jsx';
 import Phone from 'material-ui/svg-icons/communication/phone';
+import Person from 'material-ui/svg-icons/social/person';
 import EmailIcon from 'material-ui/svg-icons/communication/email';
 import OrganisationsIcon from 'material-ui/svg-icons/communication/business';
 import RolesIcon from 'material-ui/svg-icons/action/supervisor-account';
@@ -30,6 +33,7 @@ var colors = {
   Email: '#03a9f4',
   Postcode: '#f44336',
   Roles: '#ff9800',
+  "Full Name": '#3f51b5',
   Organisations: '#64dd17',
   Phone: '#c51162'
 }
@@ -37,9 +41,27 @@ var colors = {
 var icons = {
   Email: <EmailIcon color='white'/>,
   Postcode: <Home color='white'/>,
+"Full Name": <Person color='white'/>,
   Roles: <RolesIcon color='white'/>,
   Organisations: <OrganisationsIcon color='white'/>,
   Phone: <Phone color='white'/>
+}
+
+export const styles = {
+  nextContainer : {
+    position: 'fixed',
+    bottom: 0,
+    height: 80,
+    zIndex: 5,
+    display: 'flex',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingRight: 100,
+    boxSizing: 'border-box',
+    left: 0
+  }
 }
 
 export default class DataValidation extends React.Component {
@@ -156,7 +178,7 @@ export default class DataValidation extends React.Component {
     })
     this.setState({checks: checks, stage:'validation', removals: []})
 
-
+    window.scrollTo(0, 0)
   }
 
   removeUnselectedColumns = () => {
@@ -184,6 +206,9 @@ export default class DataValidation extends React.Component {
     this.setState({columns: columns})
 
     this.setState({grid: newGrid, colHeaders: columnsHeaders})
+    localStorage.setItem('grid', JSON.stringify(newGrid))
+    localStorage.setItem('colHeaders', JSON.stringify(columnsHeaders))
+    localStorage.setItem('columns', JSON.stringify(columns))
   }
 
   lookForStrangeData = (column) => {
@@ -385,6 +410,7 @@ export default class DataValidation extends React.Component {
     console.log(data)
     this.setState({grid: data, columns: columns, stage: 'deduplication'})
     console.log(this.state)
+    window.scrollTo(0, 0)
   }
 
   renderCorrectStage = () => {
@@ -408,10 +434,10 @@ export default class DataValidation extends React.Component {
         return (
           <div>
             <h2 style={{textAlign: 'left', paddingLeft: 100}}>
-              We think some of your data looks a bit unusual. You can change it here if you agree.
+              Some of your data looks a bit unusual. You can change it here if you need to.
             </h2>
             {typeof window !== 'undefined' && HotTable ?
-              <div id="hot-app">
+              <div id="hot-app" style={{zIndex: 8}}>
                 <HotTable
                   renderer={this.groupingRenderer.bind(this)}
                   data={tableRows} colHeaders={true}
@@ -424,12 +450,34 @@ export default class DataValidation extends React.Component {
                   rowHeaders={true} width="100%" height="600" stretchH="all" />
               </div>
               : null}
-              <RaisedButton label='Next'
-                primary={true}
-                style={buttonStyles.smallSize}
-                labelStyle={buttonStyles.smallLabel}
-                onClick={() => this.setState({stage: 'highlight-columns'})}
-                />
+              <div style={styles.nextContainer}>
+                <FlatButton label='Back'
+                  style={buttonStyles.smallSize}
+                  labelStyle={buttonStyles.smallLabel}
+                  onClick={() => {
+                    this.setState({stage: null})
+                    window.scrollTo(0, 0)
+                  }}
+                  />
+                <RaisedButton label='Re-check data'
+                    secondary={true}
+                    icon={<Refresh/>}
+                    style={buttonStyles.smallSize}
+                    labelStyle={buttonStyles.smallLabel}
+                    onClick={this.checkAllData}
+                    />
+                  <div style={{width: 10}}/>
+                <RaisedButton label='Next'
+                  primary={true}
+                  style={buttonStyles.smallSize}
+                  labelStyle={buttonStyles.smallLabel}
+                  onClick={() => {
+                    this.setState({stage: 'highlight-columns'})
+                    localStorage.setItem('grid', JSON.parse(this.state.grid))
+                    window.scrollTo(0, 0)
+                  }}
+                  />
+              </div>
           </div>
         )
         break;
@@ -438,6 +486,7 @@ export default class DataValidation extends React.Component {
         return  <OrganisationUpload
             columns={this.state.columns}
             data={this.state.grid}
+            goBack={() => this.setState({stage: 'highlight-columns'})}
             updateDataAndColumns={this.updateFromChild}
           />
         break;
@@ -445,6 +494,7 @@ export default class DataValidation extends React.Component {
       case 'deduplication': {
         return  <Deduplication
             data={this.state.grid}
+            goBack={() => this.setState({stage: 'org-upload'})}
           />
         break;
       }
@@ -455,7 +505,7 @@ export default class DataValidation extends React.Component {
               We need your help to categorise a few of these columns
             </h2>
 
-            <div >
+            <div style={{marginBottom: 10}}>
               <p>Drag and drop the icons onto the right columns</p>
               <DragDropContainer
                 onDrop={this.handleDrop}
@@ -469,6 +519,20 @@ export default class DataValidation extends React.Component {
                    color: 'white', fontWeight: 700, margin: 10}}>
                    <EmailIcon color='white'/>
                   Email
+                </div>
+              </DragDropContainer>
+              <DragDropContainer
+                onDrop={this.handleDrop}
+                targetKey="foo"
+                dragData={{data: 'Full Name'}}
+                 >
+                 <div style={{height: 60, display: 'flex',
+                   flexDirection: 'column', alignItems: 'center',
+                    justifyContent: 'center',
+                   width: 120, backgroundColor: colors['Full Name'],
+                   color: 'white', fontWeight: 700, margin: 10}}>
+                   <Person color='white'/>
+                  Full Name
                 </div>
               </DragDropContainer>
 
@@ -581,13 +645,22 @@ export default class DataValidation extends React.Component {
                 ))
               }
             </div>
-            <RaisedButton label='Next'
-              primary={true}
-              style={buttonStyles.smallSize}
-              labelStyle={buttonStyles.smallLabel}
-              onClick={this.getOrgUpload}
-              />
-
+            <div style={styles.nextContainer}>
+              <FlatButton label='Back'
+                style={buttonStyles.smallSize}
+                labelStyle={buttonStyles.smallLabel}
+                onClick={() => {
+                  this.setState({stage: 'validation'})
+                  window.scrollTo(0, 0)
+                }}
+                />
+              <RaisedButton label='Next'
+                primary={true}
+                style={buttonStyles.smallSize}
+                labelStyle={buttonStyles.smallLabel}
+                onClick={this.getOrgUpload}
+                />
+            </div>
           </div>
         )
       }
@@ -617,7 +690,7 @@ export default class DataValidation extends React.Component {
                         {item.name.includes('Custom Column') ? 'Unnamed' : item.name}
                       </div>
 
-                      <div style={{display: 'flex', paddingBottom: 6, height: 104,
+                      <div style={{display: 'flex',  height: 66,
                           boxSizing: 'border-box', alignItems: 'center'}}>
                         {
                           this.state.columns.indexOf(item) !== 0 ?
@@ -644,7 +717,7 @@ export default class DataValidation extends React.Component {
                       </div>
                     </div>
                     :
-                    <div style={{height: 138, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <div style={{height: 100, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                       <div style={{textAlign: 'center', fontWeight: 700}}>
                         {item.name.includes('Custom Column') ? 'Unnamed' : item.name}
                         {item.selected === false ?
@@ -685,12 +758,14 @@ export default class DataValidation extends React.Component {
               ))}
 
             </div>
-            <RaisedButton label='Next'
-              primary={true}
-              style={buttonStyles.smallSize}
-              labelStyle={buttonStyles.smallLabel}
-              onClick={this.checkAllData}
-              />
+            <div style={styles.nextContainer}>
+              <RaisedButton label='Next'
+                primary={true}
+                style={buttonStyles.smallSize}
+                labelStyle={buttonStyles.smallLabel}
+                onClick={this.checkAllData}
+                />
+            </div>
           </div>
         )
       }
@@ -707,6 +782,7 @@ export default class DataValidation extends React.Component {
       }
     })
     this.setState({stage: 'org-upload', columns: columns})
+    window.scrollTo(0, 0)
   }
 
   render() {

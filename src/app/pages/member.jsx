@@ -18,14 +18,16 @@ import Divider from 'material-ui/Divider'
 import {buttonStyles, iconButtonStyles} from '../components/styles.jsx';
 import AddNote from '../components/addNote.jsx';
 import 'react-quill/dist/quill.snow.css';
+import Warning from 'material-ui/svg-icons/alert/warning';
 import IconButton from 'material-ui/IconButton';
-import {ReviewIcon, NoteIcon, AvatarIcon, Tag} from '../components/icons.jsx';
+import {ReviewIcon, NoteIcon, AvatarIcon, Tag, Pin} from '../components/icons.jsx';
 import AddTag from '../components/addTag.jsx';
 import Chip from 'material-ui/Chip';
 import * as firebase from 'firebase';
 import Popover from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
+import EventIcon from 'material-ui/svg-icons/action/event';
 import MoreVert from 'material-ui/svg-icons/navigation/more-vert'
 import Delete from 'material-ui/svg-icons/action/delete'
 import Close from 'material-ui/svg-icons/navigation/close'
@@ -56,7 +58,7 @@ export class Member extends React.Component {
   }
 
   updateData = () => {
-    this.setState({interactions: []})
+    this.setState({interactions: [], pinned: []})
     db.collection("Interactions")
     .where("Member", "==", Router.query.member)
     .where("Organisation", "==", Router.query.organisation)
@@ -83,6 +85,21 @@ export class Member extends React.Component {
         data.push(elem)
       })
       this.setState({interactions: data})
+    })
+
+    db.collection("Interactions")
+    .where("Members", "array-contains", Router.query.member)
+    .where("Organisation", "==", Router.query.organisation)
+    .where("Pinned", "==", true)
+    .orderBy("Date", 'desc').get()
+    .then((pinSnapshot) => {
+      var pinnedData = this.state.pinned ? this.state.pinned : []
+      pinSnapshot.forEach((pinDoc) => {
+        var elem = pinDoc.data()
+        elem._id = pinDoc.id
+        pinnedData.push(elem)
+      })
+      this.setState({pinned: pinnedData})
     })
 
     db.collection("PersonalData").doc(Router.query.member).get()
@@ -131,7 +148,6 @@ export class Member extends React.Component {
       }
     })
     */
-    console.log(Router.query)
     this.updateData()
   }
 
@@ -158,13 +174,37 @@ export class Member extends React.Component {
   renderInteraction = (int) => {
     console.log(int)
     switch(int.Type) {
+      case "Event":
+        return (
+          <div
+            style={{borderLeft: '3px solid #e91e63', backgroundColor: '#f9c8d9',  marginBottom: 10}}
+            >
+            <ListItem
+              id={int._id}
+              rightIcon={<IconButton
+                tooltip='Options'
+                onClick={(e) => this.handleOptionsClick(e, int)}
+                style={iconButtonStyles.button}><MoreVert /></IconButton>
+              }
+              className='email-interaction'
+              style={{marginBottom: 10,  backgroundColor: '#f9c8d9'}}
+              primaryText={<div>
+                <div className='story-text' dangerouslySetInnerHTML={this.noteMarkup(int.Details ? int.Details.Note : null)}/>
+              </div>}
+              primaryTogglesNestedList={true}
 
+              secondaryText={int.Date.toLocaleString('en-gb',
+                {weekday: 'long', month: 'long', day: 'numeric'})}
+              leftIcon={int.Pinned ? <Warning color='red'/> : <EventIcon color={'black'}/>} />
+
+          </div>
+        )
       case "Invited":
       console.log(int.Type)
         return (
           <div>
             <ListItem
-
+              id={int._id}
               primaryText={`Invited to ${int.Details ? int.Details.Name : ""}`}
               secondaryText={int.Date.toLocaleString('en-gb',
                 {weekday: 'long', month: 'long', day: 'numeric'})}
@@ -176,6 +216,7 @@ export class Member extends React.Component {
         return (
           <div>
             <ListItem
+              id={int._id}
               className='email-interaction'
               style={{marginBottom: 10, borderLeft: '3px solid #DBDBDB', backgroundColor: 'rgb(249, 249, 249)'}}
               primaryText={<span>Received your email: <b>{int.Details ? int.Details.Subject : ""}</b></span>}
@@ -193,6 +234,7 @@ export class Member extends React.Component {
         return (
           <div>
             <ListItem
+              id={int._id}
               rightIcon={<IconButton
                 tooltip='Options'
                 onClick={(e) => this.handleOptionsClick(e, int)}
@@ -212,6 +254,7 @@ export class Member extends React.Component {
         return (
           <div>
             <ListItem
+              id={int._id}
               className='email-interaction'
               style={{marginBottom: 10, borderLeft: '3px solid rgb(253,216,53)', backgroundColor: 'rgb(255,249,196)'}}
               primaryText={<div>
@@ -223,13 +266,14 @@ export class Member extends React.Component {
                 style={iconButtonStyles.button}><MoreVert /></IconButton>}
               secondaryText={int.Date.toLocaleString('en-gb',
                 {weekday: 'long', month: 'long', day: 'numeric'})}
-               leftIcon={<NoteIcon fill={'black'}/>} />
+               leftIcon={int.Pinned ? <Warning color='red'/> : <NoteIcon style={{height: 36, width: 36, marginLeft: 6, marginTop: 6}} fill={'black'}/>} />
           </div>
         )
         break;
       default:
         return (
           <ListItem primaryText="Other"
+            id={int._id}
             secondaryText={int.Date.toLocaleString('en-gb',
               {weekday: 'long', month: 'long', day: 'numeric'})}
              leftIcon={<ContentInbox />} />
@@ -286,6 +330,15 @@ export class Member extends React.Component {
     })
   }
 
+
+  handlePin = () => {
+    db.collection("Interactions").doc(this.state.targetedInt._id).update({Pinned: true})
+    .then(() => {
+      this.setState({optionsOpen: false, interactions: []})
+      this.updateData()
+    })
+  }
+
   render() {
     const ReactQuill = this.ReactQuill
     console.log(this.state)
@@ -312,6 +365,9 @@ export class Member extends React.Component {
               <MenuItem
                 onClick={() => this.setState({deleteOpen: true, optionsOpen: false})}
                 primaryText="Remove from this member" leftIcon={<Close/>} />
+              <MenuItem
+                onClick={this.handlePin}
+                primaryText="Pin this" leftIcon={<Pin/>} />
             </Menu>
           </Popover>
           <AddTag
@@ -453,6 +509,37 @@ export class Member extends React.Component {
                    style={{ borderBottom: '1px solid #DBDBDB'}}/>
 
                    <ListItem
+                     primaryText='Organisations'
+                     leftIcon={<Add/>}
+                     initiallyOpen={true}
+                     primaryTogglesNestedList={true}
+                     nestedItems={
+                       [<div>
+                         {this.state.memberData && this.state.memberData.Organisations ?
+                           this.state.memberData.Organisations.map((tag) => (
+                           <Link prefetch href={`/organisation?targetorganisation=${tag}&organisation=${Router.query.organisation}`}>
+                         <Chip
+
+                           style={{margin:6, cursor: 'pointer'}}
+                           onRequestDelete={() => this.handleDeleteTag(tag)}
+                           >{tag}
+                         </Chip>
+                         </Link>
+                       )) : null}
+                       </div>,
+                       <div style={{padding: 6}}>
+                         <RaisedButton label='Add new organisation'
+                           primary={true}
+                           disabled={true}
+                           icon={<Add/>}
+                           onClick={() => this.setState({tagOpen: true})}
+                           style={buttonStyles.smallStyle}
+                           labelStyle={buttonStyles.smallLabel}/>
+                       </div>]
+
+                     }
+                      style={{ borderBottom: '1px solid #DBDBDB'}}/>
+                   <ListItem
                      primaryText='Tags'
                      leftIcon={<Add/>}
                      initiallyOpen={true}
@@ -480,8 +567,9 @@ export class Member extends React.Component {
                        </div>]
 
                      }
-
                       style={{ borderBottom: '1px solid #DBDBDB'}}/>
+
+
 
               </div>
             </div>
@@ -491,6 +579,20 @@ export class Member extends React.Component {
               <div style={{textAlign: 'left'}}>
 
                 <div style={{padding: '00px 0px'}}>
+                  {this.state.pinned && this.state.pinned.length > 0 ?
+                    <div style={{marginBottom: 20}}>
+                      <div style={{fontWeight: 200, fontSize: '20px', paddingBottom: 20}}>
+                          Important info
+                        </div>
+                      {this.state.pinned.map((int) => (
+                      this.renderInteraction(int)
+                    ))}
+
+                    </div>
+
+                  :
+                  null
+                }
                   <div style={{fontWeight: 200, fontSize: '20px', paddingBottom: 20}}>
                       Your interactions
                     </div>
@@ -511,9 +613,10 @@ export class Member extends React.Component {
                 {
                   <div>
 
+
                     {this.state.interactions.length > 0 ?
                       this.state.interactions.map((int) => (
-                      this.renderInteraction(int)
+                      int.Pinned ? null : this.renderInteraction(int)
                     ))
                       :
                       <div style={{display: 'flex', padding: 50, alignItems: 'center', justifyContent: 'center'

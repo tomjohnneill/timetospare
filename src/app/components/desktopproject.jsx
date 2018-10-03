@@ -836,27 +836,7 @@
                 objectPosition: this.state.project.imageY ? `50% ${this.state.project.imageY}`  : '50% 50%'
               , objectFit: 'cover'}}/>
 
-              {
-                // Only show the number of people box if this a one-off event
-                this.props.subProjects ?
-                null
-                :
 
-              <div style={{position: 'absolute', right: 200, boxSizing: 'border-box',
-                borderRadius: '50%',
-                  border: '3px solid #000AB2', fontWeight: 700
-                , height: 150, width: 150, display: 'flex',
-                alignItems: 'center', justifyContent: 'center',
-                background: `linear-gradient( 0deg, #000AB2, #000AB2 ${this.state.project['People Pledged'] === undefined ? 0 : (this.state.project['People Pledged']/this.state.project['Target People'] * 100)}%,
-                white ${this.state.project['People Pledged'] === undefined ? 0 : (this.state.project['People Pledged']/this.state.project['Target People'] * 100)}%, white 100%)`,
-                top: 375, zIndex: 3}}>
-                <span style={{backgroundColor: 'rgba(255,255,255,1)', padding: 4, borderRadius: 4}}>
-                  { this.state.project['People Pledged'] === undefined ?
-                    0 :
-                    this.state.project['People Pledged']}/{this.state.project['Target People']} people
-                </span>
-              </div>
-            }
 
             <div className='join-container' style={{width: '100%'}}>
               <div >
@@ -899,11 +879,7 @@
                   label="I can't come anymore" onTouchTap={this.handleUnJoin} />
               }
 
-              {this.props.subProjects ?
-                null
-                :
-                  <Suggest projectId={this.props.project._id}/>
-                }
+
                 </div>
                 <div>
 
@@ -930,18 +906,7 @@
 
 
 
-                  {this.state.dropzoneHover && fire.auth().currentUser &&
-                    (this.state.project.Admin && this.state.project.Admin[fire.auth().currentUser.uid]
-                    || this.state.project.Creator === fire.auth().currentUser.uid)  ?
-                      <RaisedButton label='Change Crop'
-                        style={{padding: 0, position: 'absolute', top: 'calc(50% - 20px)', right: 'calc(50% - 98px)', height: 40, zIndex: 10}}
-                        labelStyle={{fontWeight: 700}}
-                        onClick={() => {localStorage.setItem('project-image', this.state.project['Featured Image'])
-                          Router.push(`/crop-edit?project=${this.state.project._id}`, `${Router.asPath}/crop-edit`)}}
-                        secondary={true}
-                        />
-                      :
-                      null}
+
 
 
 

@@ -12,7 +12,23 @@ import {buttonStyles} from './styles.jsx';
 import * as math from 'mathjs'
 import * as firebase from 'firebase';
 import 'handsontable/dist/handsontable.full.css';
+import {styles} from './data-validation'
 
+function arraysEqual(a, b) {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (a.length != b.length) return false;
+
+  // If you don't care about the order of the elements inside
+  // the array, you should sort both arrays here.
+  // Please note that calling sort on an array will modify that array.
+  // you might want to clone your array first.
+
+  for (var i = 0; i < a.length; ++i) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
 
 export default class Deduplication extends React.Component {
   constructor(props) {
@@ -36,6 +52,7 @@ export default class Deduplication extends React.Component {
       this.setState({shouldRemount: true})
     }
     console.log(this.props.columns)
+    this.findDuplicates(this.props.data)
   }
 
 
@@ -58,17 +75,44 @@ export default class Deduplication extends React.Component {
     return rowData
   }
 
+  deleteEmptyColumns = (data) => {
+    var tempEmptyColumns = {}
+    data.forEach((row) => {
+      for (var i = 0; i < row.length; i++) {
+        if (row[i].length === 0) {
+          tempEmptyColumns[i] = true
+        } else {
+          tempEmptyColumns[i] = false
+        }
+      }
+    })
+    var fullColumns = []
+    Object.keys(tempEmptyColumns).forEach((key) => {
+      if (!tempEmptyColumns[key]) {
+        fullColumns.push(key)
+      }
+    })
+    fullColumns = fullColumns.sort(function(a,b){ return a-b; });
+    var newData = data.slice()
+    var finishedData = []
+    newData.forEach((row) => {
+      var newRow = []
+      for (var j = 0; j < fullColumns.length; j++) {
+        newRow.push(row[fullColumns[j]])
+      }
+      finishedData.push(newRow)
+    })
+    return finishedData
+  }
+
   getGridFromIndices = (indices) => {
     var data = []
     indices.forEach((index) => {
-
       var row = this.props.data.slice(index, index + 1)
-
       var rowGrid = this.convertRowToGrid(row)
-      console.log(rowGrid)
       data.push(rowGrid)
     })
-    return data
+    return this.deleteEmptyColumns(data)
   }
 
   runThroughOneField = (data, oldSymm, columnName, column) => {
@@ -104,8 +148,27 @@ export default class Deduplication extends React.Component {
     return symm
   }
 
-  findDuplicates = (data) => {
+  highlightObvious = (duplicateGroup) => {
+    var rowNamesMatch = true
+    var baseName = null
+    duplicateGroup.forEach((index) => {
+      var dataRow = this.props.data[index]
 
+      if (!baseName) {
+        console.log(dataRow['Full Name'])
+        baseName = dataRow['Full Name']
+      } else {
+        console.log(baseName, dataRow['Full Name'])
+        if (!arraysEqual(baseName, dataRow['Full Name'])) {
+          console.log('no match')
+          rowNamesMatch = false
+        }
+      }
+    })
+    return rowNamesMatch
+  }
+
+  findDuplicates = (data) => {
     var postcodes = []
     var emails = []
     var phoneNos = []
@@ -123,15 +186,9 @@ export default class Deduplication extends React.Component {
         phoneNos[row.Phone] = phoneCount + 1
       }
     })
-    console.log(postcodes)
-    console.log(emails)
-    console.log(phoneNos)
     var symmDuplicates = {}
-
     var emailDuplicates = this.runThroughOneField(data, symmDuplicates, 'Email', emails)
     var phoneDuplicates = this.runThroughOneField(data, emailDuplicates, 'Phone', phoneNos)
-    console.log(phoneDuplicates)
-
     var duplicateArray = []
     var struckOffKeys = {}
     Object.keys(phoneDuplicates).forEach((key) => {
@@ -146,7 +203,6 @@ export default class Deduplication extends React.Component {
         duplicateArray.push(duplicateGroup)
       }
     })
-    console.log(duplicateArray)
     this.setState({duplicates: duplicateArray})
   }
 
@@ -156,13 +212,22 @@ export default class Deduplication extends React.Component {
       <div style={{display: 'flex'}}>
 
         {typeof window !== 'undefined' && HotTable ?
-          <div id="org-hot-app" style={{padding: 30, boxSizing: 'border-box',
+          <div style={{padding: 30, boxSizing: 'border-box',
+            maxWidth: '100%',
              minWidth: '300px'}}>
+             <h2 style={{textAlign: 'left', fontWeight: 200}}>We found
+               <b style={{color: '#000AB2' }}> {this.state.duplicates.length}</b> potential duplicate groups</h2>
              {
                this.state.duplicates ?
                this.state.duplicates.map((group) => (
-                 <div>
-                  {this.getGridFromIndices(group).map((item) => (<p>{item.toString()}</p>))}
+                 <div style={{width: "100%", overflowX: 'scroll'}}>
+                   <table width="100%" style={{backgroundColor: this.highlightObvious(group) ? 'yellow' : null}} >
+                     {this.getGridFromIndices(group).map((item) => (
+                       <tr style={{width: '100vw', overflowX: 'scroll'}}>
+                         {item.map((elem) => <td style={{padding: 2, border: '1px solid #DBDBDB'}}>{elem}</td>)}
+                       </tr>
+                     ))}
+                  </table>
                   <div style={{height: 30}}/>
                  </div>
                ))
@@ -171,15 +236,24 @@ export default class Deduplication extends React.Component {
              }
           </div>
           : null}
-          <div style={{flex: 1}}>
 
-            <RaisedButton
+          <div style={styles.nextContainer}>
+            <FlatButton label='Back'
               style={buttonStyles.smallSize}
               labelStyle={buttonStyles.smallLabel}
-              primary={true}
-              onClick={() => this.findDuplicates(this.props.data)}
-              label='Look for these organisations'/>
-          </div>
+              onClick={() => {
+                this.props.goBack()
+                window.scrollTo(0, 0)
+              }}
+              />
+          <RaisedButton
+            style={buttonStyles.smallSize}
+            labelStyle={buttonStyles.smallLabel}
+            primary={true}
+            disabled={true}
+
+            label='Next'/>
+        </div>
       </div>
     )
   }

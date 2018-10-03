@@ -81,7 +81,7 @@ export class SignupModal extends React.Component {
               .then(data =>
                 {
                   if (Router.query.organisation && Router.query.orgId) {
-                    window.location.href = 'https://timetospare.com/organisation'
+                    window.location.href = 'https://timetospare.com/dashboard'
                   } else {
                     Router.push('/create-other')
                   }

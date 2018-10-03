@@ -274,7 +274,7 @@ export default class Header extends React.Component {
   handleCreateProject = (e) => {
     e.preventDefault()
     if (this.state.organisation) {
-      Router.push('/organisation')
+      Router.push('/dashboard')
     }
     else {
       Router.push('/signup')
@@ -334,11 +334,11 @@ export default class Header extends React.Component {
                                    {
                                      this.state.organisation ?
                                      <div style={{display: 'flex', height: '100%', fontWeight: 'normal', alignItems: 'center'}}>
-                                       <Link prefetch href={`/organisation`}>
+                                       <Link prefetch href={`/dashboard`}>
                                          <div
                                            className='header-category'
                                            style={
-                                             this.props.router.pathname.includes('/organisation') ?
+                                             this.props.router.pathname.includes('/dashboard') ?
                                              style.selectedCategory :
                                              style.category}
 
@@ -370,16 +370,16 @@ export default class Header extends React.Component {
                                            People
                                          </div>
                                        </DataLink>
-                                       <Link prefetch href={`/messaging?organisation=${this.state.organisation}`}>
+                                       <Link prefetch href={`/organisations?organisation=${this.state.organisation}`}>
                                          <div
                                            className='header-category'
                                            style={
-                                             this.props.router.pathname.includes('messaging') ?
+                                             this.props.router.pathname.includes('organisations') ?
                                              style.selectedCategory :
                                              style.category}
 
                                            >
-                                           Messaging
+                                           Organisations
                                          </div>
                                        </Link>
                                      </div>

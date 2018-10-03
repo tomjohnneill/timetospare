@@ -12,6 +12,7 @@ import {buttonStyles} from './styles.jsx';
 import * as math from 'mathjs'
 import * as firebase from 'firebase';
 import 'handsontable/dist/handsontable.full.css';
+import {styles} from './data-validation';
 
 function uniq(a) {
     var seen = {};
@@ -132,6 +133,15 @@ export default class OrganisationUpload extends React.Component {
           </div>
           : null}
           <div style={{height: 20}}/>
+          <div style={styles.nextContainer}>
+            <FlatButton label='Back'
+              style={buttonStyles.smallSize}
+              labelStyle={buttonStyles.smallLabel}
+              onClick={() => {
+                this.props.goBack()
+                window.scrollTo(0, 0)
+              }}
+              />
           <RaisedButton
             style={buttonStyles.smallSize}
             labelStyle={buttonStyles.smallLabel}
@@ -139,6 +149,7 @@ export default class OrganisationUpload extends React.Component {
             disabled={!this.state.uniqueOrgs}
             onClick={this.lookUpOrgs}
             label='Next'/>
+        </div>
       </div>
     )
   }

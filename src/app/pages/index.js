@@ -100,7 +100,7 @@ class Index extends React.Component {
   static async getInitialProps(ctx) {
     console.log(ctx)
     if(ctx && ctx.req && ctx.__session) {
-      ctx.res.writeHead(301, {Location: `/organisation`})
+      ctx.res.writeHead(301, {Location: `/dashboard`})
       ctx.res.end()
      } else {
        const res = await db.collection("Project").get()

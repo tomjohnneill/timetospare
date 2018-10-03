@@ -178,9 +178,9 @@ export class AdminAccounts extends React.Component {
                           />
                       </div>
                       <div style={{padding: 5}}>
-                        <FlatButton label='Remove'
+                        <RaisedButton label='Remove'
                           onClick={() => this.removePendingAdmin(user)}
-                          backgroundColor='#DC143C'
+                          secondary={true}
                           style={buttonStyles.smallSize}
                           labelStyle={buttonStyles.smallLabel}
                           />
@@ -222,9 +222,9 @@ export class AdminAccounts extends React.Component {
                             />
                         </div>
                         <div style={{padding: 5}}>
-                          <FlatButton label='Remove'
+                          <RaisedButton label='Remove'
+                            secondary={true}
 
-                            backgroundColor='#DC143C'
                             style={buttonStyles.smallSize}
                             labelStyle={buttonStyles.smallLabel}
                             />

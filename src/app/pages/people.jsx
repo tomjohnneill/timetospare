@@ -8,6 +8,7 @@ import FileDownload from 'material-ui/svg-icons/file/file-download';
 import Add from 'material-ui/svg-icons/content/add';
 import Divider from 'material-ui/Divider'
 import Avatar from 'material-ui/Avatar';
+import Link from 'next/link'
 import Dialog from 'material-ui/Dialog';
 import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton';
 import FlatButton from 'material-ui/FlatButton';
@@ -124,14 +125,15 @@ export class People extends React.Component {
                 rightIcon={<CommunicationChatBubble />}
               />
               <Divider/>
-              <ListItem
-                style={{display: 'flex', height: 80, alignItems: 'center'}}
-                primaryText="Copy and paste from a spreadsheet"
-                onClick={() => Router.push(`/csv-upload?organisation=${this.state.organisation}`,
-                      `/csv-upload/${this.state.organisation}`)}
-                leftAvatar={<Avatar src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTuLVCgqTLxBFELkcZJ1b7_xsV7mOVQxcVVmAp-tFD2dYBhLDG7YQ" />}
-                rightIcon={<CommunicationChatBubble />}
-              />
+              <Link href={`/upload-data?organisation=${this.state.organisation}`} prefetch>
+                <ListItem
+                  style={{display: 'flex', height: 80, alignItems: 'center'}}
+                  primaryText="Import from csv"
+                  
+                  leftAvatar={<Avatar src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTuLVCgqTLxBFELkcZJ1b7_xsV7mOVQxcVVmAp-tFD2dYBhLDG7YQ" />}
+                  rightIcon={<CommunicationChatBubble />}
+                />
+              </Link>
 
             </List>
           </Dialog>

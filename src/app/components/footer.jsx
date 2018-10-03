@@ -67,7 +67,7 @@ const styles = {
     fontsize: '20px'
   },
   button: {
-    fontFamily: 'Permanent Marker',
+    fontFamily: 'Pacifico',
     fontSize: '18px'
   }
 }
@@ -111,7 +111,7 @@ export default class Footer extends React.Component {
             marginTop: 50, paddingLeft: '100px', paddingRight: '100px', display: 'flex'}}>
             <div style={{width: '100%', display: 'flex', justifyContent: 'center'}} className='footer-data'>
               <div style={{flex: 3, maxWidth: 400}}>
-                <div style={{fontSize: '24px', fontFamily: 'Permanent Marker', color: '#000AB2'}}>
+                <div style={{fontSize: '24px', fontFamily: 'Pacifico', color: '#000AB2'}}>
                   Time to Spare
                 </div>
                 <div style={{paddingTop: 10, paddingBottom: '20px', textAlign: 'left', fontWeight: 700}}>

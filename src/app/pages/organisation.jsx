@@ -1,306 +1,662 @@
-import React from 'react'
-import withMui from '../components/hocs/withMui.js'
+import React from 'react';
+import withMui from '../components/hocs/withMui.js';
 import App from '../components/App.js';
-import fire from '../fire';
-import {Options} from '../components/icons.jsx';
-import RaisedButton from 'material-ui/RaisedButton';
-import CalendarIcon from 'material-ui/svg-icons/action/date-range';
-import People from 'material-ui/svg-icons/social/people';
 import Router from 'next/router';
-import Link from 'next/link';
-import Chip from 'material-ui/Chip';
+import Link from "next/link"
+import fire from '../fire.js';
+import MediaQuery from 'react-responsive';
+import ContentInbox from 'material-ui/svg-icons/content/inbox';
 import Email from 'material-ui/svg-icons/communication/email';
-import {buttonStyles, chipStyles} from '../components/styles.jsx';
-import OutlookIntegrate from '../components/outlook/integrate.jsx';
+import {List, ListItem} from 'material-ui/List';
+import Add from 'material-ui/svg-icons/content/add';
+import Avatar from 'material-ui/Avatar';
+import OrganisationsIcon from 'material-ui/svg-icons/communication/business';
+import Dialog from 'material-ui/Dialog';
+import RaisedButton from 'material-ui/RaisedButton';
+import FlatButton from 'material-ui/FlatButton';
+import ArrowRight from 'material-ui/svg-icons/navigation/arrow-forward';
+import Divider from 'material-ui/Divider'
+import {buttonStyles, iconButtonStyles} from '../components/styles.jsx';
+import AddNote from '../components/addNote.jsx';
+import {ReviewIcon, NoteIcon, Tag, Pin} from '../components/icons.jsx';
+import AddTag from '../components/addTag.jsx';
+import Chip from 'material-ui/Chip';
+import EventIcon from 'material-ui/svg-icons/action/event';
+import Popover from 'material-ui/Popover';
+import Menu from 'material-ui/Menu';
+import Warning from 'material-ui/svg-icons/alert/warning';
+import MenuItem from 'material-ui/MenuItem';
+import MoreVert from 'material-ui/svg-icons/navigation/more-vert'
+import Delete from 'material-ui/svg-icons/action/delete'
+import Close from 'material-ui/svg-icons/navigation/close'
+import IconButton from 'material-ui/IconButton';
 
-var randomColor = require('randomcolor')
 let db = fire.firestore()
 
-const styles = {
-  box: {
-    height: 140,
-    width: 200,
-    padding: 10,
-    border: '1px solid #DBDBDB',
-    borderRadius: 4,
-    display: 'flex',
-    alignItems: 'top',
-    margin: 10
-  },
-  leftIcon: {
-    width: 60,
-    paddingRight: 10
-  },
-  textBox: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-end',
+const _MS_PER_DAY = 1000 * 60 * 60 * 24;
 
-  },
-  text: {
-    marginTop: 0,
-    height: 150
-  },
-  tableHeader : {
-    backgroundColor: '#F5F5F5',
-    padding: 6
-  },
-  tableRow : {
-    borderBottom: '1px solid #DBDBDB',
-    padding: 6,
-    boxSizing: 'border-box',
-    height: 38,
-    display: 'flex',
-    alignItems: 'center'
+// a and b are javascript Date objects
+function dateDiffInDays(a, b) {
+  // Discard the time and time-zone information.
+  const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+  const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
+
+  return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+}
+
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function convertToReadableTime(days) {
+  if (days < 1) {
+    return `today`
+  }
+  else if (days < 2) {
+    return '1 day ago'
+  }
+  else if (days < 7) {
+    return `${days} days ago`
+  } else if (days < 56) {
+    return `${Math.ceil(days/7)} weeks ago`
+  } else {
+    return `${Math.ceil(days/ 365.25*12)} months ago`
   }
 }
+
+const modules = {
+    toolbar: [
+      [{ 'header': [1, 2, false] }],
+      ['bold', 'italic', 'underline','strike'],
+      [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+      ['link', 'image'],
+      ['clean']
+    ]
+  }
+
+const styles = {
+  chip: {
+    margin: 4,
+    color: 'white',
+    fontWeight: 700,
+    borderRadius: 10
+  },
+  chipLabel: {
+    lineHeight: '28px'
+  }
+}
+
+var randomColor = require('randomcolor')
+
 
 export class Organisation extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {user: {}}
+    this.state = {tagOpen: false, interactionUsers: {}}
   }
 
-  getData = (uid) => {
-    db.collection("Charity").where("Admin." + uid, "==", true).get()
-    .then((snapshot) => {
-      if (snapshot.size > 0) {
-        var admins
-        snapshot.forEach((doc) => {
-          if (doc.data().Admin) {
-            admins = doc.data().Admin
-          }
-          this.setState({organisation: doc.data(), orgId: doc.id})
-        })
-        return admins
+  updateData = () => {
+    this.setState({interactions: [], pinned: []})
+    db.collection("Interactions")
+    .where("Organisations", "array-contains", Router.query.targetorganisation)
+    .where("Pinned", "==", true)
+    .orderBy("Date", 'desc').get()
+    .then((pinSnapshot) => {
+      var pinnedData = this.state.pinned ? this.state.pinned : []
+      pinSnapshot.forEach((pinDoc) => {
+        var elem = pinDoc.data()
+        elem._id = pinDoc.id
+        pinnedData.push(elem)
+      })
+      this.setState({pinned: pinnedData})
+    })
+
+    db.collection("Interactions")
+    .where("Organisations", "array-contains", Router.query.targetorganisation)
+    .orderBy("Date", 'desc').get()
+    .then((intSnapshot) => {
+      var data = []
+      var promises = []
+      intSnapshot.forEach((intDoc) => {
+        var elem = intDoc.data()
+        elem._id = intDoc.id
+        data.push(elem)
+        if (elem.Members) {
+          elem.Members.forEach((member) => {
+            promises.push(db.collection("PersonalData").doc(member)
+              .get().then((dataDoc) => {
+                let userData = dataDoc.data()
+                userData.color = randomColor({luminosity: 'light'})
+                let interactionUsers = this.state.interactionUsers
+                interactionUsers[member] = userData
+                this.setState({interactionUsers: interactionUsers})
+              })
+            )
+          })
+        }
+
+
+
+      })
+      Promise.all(promises).then(() => this.setState({membersLoaded: true}))
+      this.setState({interactions: data})
+    })
+  }
+
+  handleOptionsClick = (event, int) => {
+
+    this.setState({
+      optionsOpen: true,
+      targetedInt: int,
+      anchorEl: event.currentTarget,
+    });
+  }
+
+  handleOptionsRequestClose = () => {
+    this.setState({
+      optionsOpen: false,
+    });
+  };
+
+
+    handleDeleteInteraction = (int) => {
+      db.collection("Interactions").doc(int._id).delete()
+      .then(() => {
+        this.setState({deleteOpen: false, interactions: []})
+        this.updateData()
+      })
+    }
+
+  handleSaveNote = (note) => {
+    var memberIds = []
+
+    this.setState({takeNote: false})
+    let data = {
+      Organisation: Router.query.organisation,
+      Members: this.state.memberIds,
+      Date: new Date(),
+      Type: 'Note',
+      Organisations: [Router.query.targetorganisation],
+      Details : {
+        Note: note
       }
-    })
-    .then((admins) => {
-      console.log(this.state.orgId)
-      var promiseArray = []
-      Object.keys(admins).forEach((admin) => {
-        promiseArray.push(
-          db.collection("PersonalData")
-          .where("User", "==", admin)
-          .where("Organisation", "==", this.state.orgId).limit(1)
-          .get()
-            .then((userDocSnapshot) =>
-            {
-            var data
-            userDocSnapshot.forEach((userDoc) => {
-              data = userDoc.data()
-            })
-            return data
-            }
-          ))
-        })
+    }
 
-      return Promise.all(promiseArray)
-    })
-    .then((userArray) => {
-      console.log(userArray)
-      this.setState({users: userArray})
+    db.collection("Interactions").add(data)
+
+    .then(() => {
+      this.updateData()
     })
 
-    db.collection("User").doc(uid).get()
-    .then((userDoc) => {
-      this.setState({user: userDoc.data()})
-    })
+  }
+
+  renderInteraction = (int) => {
+
+    switch(int.Type) {
+      case "Event":
+        return (
+          <div
+            style={{borderLeft: '3px solid #e91e63', backgroundColor: '#f9c8d9',  marginBottom: 10}}
+            >
+            <ListItem
+              id={int._id}
+              rightIcon={<IconButton
+                tooltip='Options'
+                onClick={(e) => this.handleOptionsClick(e, int)}
+                style={iconButtonStyles.button}><MoreVert /></IconButton>
+              }
+              className='email-interaction'
+              style={{marginBottom: 10,  backgroundColor: '#f9c8d9'}}
+              primaryText={<div>
+                <div className='story-text' dangerouslySetInnerHTML={this.noteMarkup(int.Details ? int.Details.Note : null)}/>
+              </div>}
+              primaryTogglesNestedList={true}
+              nestedItems={[<div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
+                {
+                  int.Members && this.state.membersLoaded
+                   ? int.Members.map((user) => (
+                     <Link  prefetch href={`/member?organisation=${Router.query.organisation}&member=${user}`}>
+                        <Chip
+                          style={styles.chip}
+                          backgroundColor={this.state.interactionUsers[user] ? this.state.interactionUsers[user].color : null}>
+                           {this.state.interactionUsers[user] ? this.state.interactionUsers['Full Name'] : null}
+                        </Chip>
+                     </Link>
+                  ))
+                  :
+                  null
+                }
+              </div>]}
+              secondaryText={int.Date.toLocaleString('en-gb',
+                {weekday: 'long', month: 'long', day: 'numeric'})}
+              leftIcon={int.Pinned ? <Warning color='red'/> : <EventIcon color={'black'}/>} />
+
+          </div>
+        )
+      case "Invited":
+
+        return (
+          <div>
+            <ListItem
+
+              primaryText={`Invited to ${int.Details ? int.Details.Name : ""}`}
+              secondaryText={int.Date.toLocaleString('en-gb',
+                {weekday: 'long', month: 'long', day: 'numeric'})}
+               leftIcon={<ContentInbox />} />
+          </div>
+        )
+        break;
+      case "Email":
+        return (
+          <div style={{borderLeft: '3px solid #DBDBDB', backgroundColor: 'rgb(249, 249, 249)', paddingBottom: 10, marginBottom: 10}}>
+            <ListItem
+              className='email-interaction'
+              style={{marginBottom: 5 }}
+              rightIcon={<IconButton
+                tooltip='Options'
+                onClick={(e) => this.handleOptionsClick(e, int)}
+                style={iconButtonStyles.button}><MoreVert /></IconButton>}
+              primaryText={<span>Received your email: <b>{int.Details ? int.Details.Subject : ""}</b></span>}
+              secondaryText={int.Date.toLocaleString('en-gb',
+                {weekday: 'long', month: 'long', day: 'numeric'})}
+               leftIcon={<Email />} />
+             <div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
+               {
+                 int.Members && this.state.membersLoaded
+                  ? int.Members.map((user) => (
+                    <Link  prefetch href={`/member?organisation=${Router.query.organisation}&member=${user}`}>
+                       <Chip
+                         style={styles.chip}
+                         backgroundColor={this.state.interactionUsers[user].color}>
+                         {this.state.interactionUsers[user] ? this.state.interactionUsers['Full Name'] : null}
+                       </Chip>
+                    </Link>
+                 ))
+                 :
+                 null
+               }
+             </div>
+          </div>
+        )
+        break;
+      case "Reply":
+        return (
+          <div>
+            <ListItem
+              rightIcon={<IconButton
+                tooltip='Options'
+                onClick={(e) => this.handleOptionsClick(e, int)}
+                style={iconButtonStyles.button}><MoreVert /></IconButton>}
+              className='email-interaction'
+              style={{marginBottom: 10, borderLeft: '3px solid #DBDBDB', backgroundColor: 'rgb(249, 249, 249)'}}
+              primaryText={<span>Replied to your email: <b>{int.Details ? int.Details.Subject : ""}</b>
+            <div className='story-text' dangerouslySetInnerHTML={this.noteMarkup(int.Details ? int.Details.Message : null)}/>
+        </span>}
+              secondaryText={int.Date.toLocaleString('en-gb',
+                {weekday: 'long', month: 'long', day: 'numeric'})}
+               leftIcon={<Email />} />
+          </div>
+        )
+        break;
+      case "Note":
+        return (
+          <div
+            style={{borderLeft: '3px solid rgb(253,216,53)', backgroundColor: 'rgb(255,249,196)',  marginBottom: 10}}
+            >
+            <ListItem
+              id={int._id}
+              rightIcon={<IconButton
+                tooltip='Options'
+                onClick={(e) => this.handleOptionsClick(e, int)}
+                style={iconButtonStyles.button}><MoreVert /></IconButton>}
+
+              className='email-interaction'
+              style={{marginBottom: 10,  backgroundColor: 'rgb(255,249,196)'}}
+              primaryText={<div>
+                <div className='story-text' dangerouslySetInnerHTML={this.noteMarkup(int.Details ? int.Details.Note : null)}/>
+              </div>}
+              primaryTogglesNestedList={true}
+              nestedItems={[<div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
+                {
+                  int.Members && this.state.membersLoaded
+                   ? int.Members.map((user) => (
+                     <Link  prefetch href={`/member?organisation=${Router.query.organisation}&member=${user}`}>
+                        <Chip
+                          style={styles.chip}
+                          backgroundColor={this.state.interactionUsers[user] ? this.state.interactionUsers[user].color : null}>
+                           {this.state.interactionUsers[user] ? this.state.interactionUsers['Full Name'] : null}
+                        </Chip>
+                     </Link>
+                  ))
+                  :
+                  null
+                }
+              </div>]}
+              secondaryText={int.Date.toLocaleString('en-gb',
+                {weekday: 'long', month: 'long', day: 'numeric'})}
+               leftIcon={int.Pinned ? <Warning color='red'/> : <NoteIcon style={{height: 36, width: 36, marginLeft: 6, marginTop: 6}} fill={'black'}/>} />
+
+          </div>
+        )
+        break;
+      default:
+        return (
+          <ListItem primaryText="Other"
+            secondaryText={int.Date.toLocaleString('en-gb',
+              {weekday: 'long', month: 'long', day: 'numeric'})}
+             leftIcon={<ContentInbox />} />
+        )
+    }
   }
 
   componentDidMount(props) {
-    Router.prefetch(`/project-calendar`)
-    Router.prefetch(`/volunteer-preview`)
     fire.auth().onAuthStateChanged((user) => {
-      console.log(user)
       if (user === null) {
-      }
-      else {
-        this.getData(user.uid)
+
+      } else {
+        db.collection("PersonalData")
+        .where("Organisations", "array-contains", Router.query.targetorganisation)
+        .get()
+        .then((querySnapshot) => {
+            var data = []
+            var ids = []
+            querySnapshot.forEach((doc) => {
+              var elem = doc.data()
+              elem._id = doc.id
+              data.push(elem)
+              ids.push(elem._id)
+            })
+            console.log(data)
+            this.setState({members: data, memberIds: ids})
+        })
       }
     })
-    if (fire.auth().currentUser) {
-      this.getData(fire.auth().currentUser.uid)
-    }
+    console.log(this.props.url)
+    this.updateData()
+  }
+
+  noteMarkup(note) {
+    return {__html: note}
+  }
+
+
+  handlePin = () => {
+    var newStatus = this.state.targetedInt ? !this.state.targetedInt.Pinned : true
+    db.collection("Interactions").doc(this.state.targetedInt._id).update({Pinned: newStatus})
+    .then(() => {
+      this.setState({optionsOpen: false, interactions: []})
+      this.updateData()
+    })
   }
 
   render() {
-
-    var today = new Date()
-    var curHr = today.getHours()
-    var timeOfDay
-    if (curHr < 12) {
-      timeOfDay = 'Morning'
-    } else if (curHr < 18) {
-      timeOfDay = 'Afternoon'
-    } else {
-      timeOfDay = 'Evening'
-    }
     return (
       <div>
         <App>
-          <div style={{width: '100%', display: 'flex', justifyContent: 'center', minHeight: '100vh', paddingBottom: 50, paddingTop: 20}}>
+          <Dialog
+            open={this.state.deleteOpen}
+            actions={[
+
+              <FlatButton
+                label='Cancel'
+                style={buttonStyles.smallSize}
+                labelStyle={buttonStyles.smallLabel}
+                onClick={() => this.setState({deleteOpen: false, optionsOpen: false})}
+                />,
+                <RaisedButton
+                  style={buttonStyles.smallSize}
+                  labelStyle={buttonStyles.smallLabel}
+                  icon={<Delete/>}
+                  label='Delete interaction'
+                  onClick={() => this.handleDeleteInteraction(this.state.targetedInt)}
+                  primary={true}/>
+            ]}
+            onRequestClose={() => this.setState({deleteOpen:false})}>
+            <h2 style={{textAlign: 'left'}}>Are you sure you want to delete this?</h2>
             <div style={{textAlign: 'left'}}>
-              {
-                this.state.organisation ?
-                <div>
-                  <h2 style={{fontSize: '40px'}}>Good {timeOfDay}, {this.state.user['Name']}!</h2>
-                  <p style={{borderBottom: '1px solid #DBDBDB', paddingBottom: 20}}>
-                     Welcome back to your Time to Spare dashboard. Have a look around to see how we can help today.
-                  </p>
-                  {
-                    this.props.url.query.access_token ?
-                    null :
-                    <div>
-                      <h2 style={{paddingTop: 25, fontStyle: 'italic'}}>Tasks</h2>
-                        <div style={{backgroundColor: 'rgb(255,249,196)', padding: 10, borderRadius: 4,
-                          display: 'flex', alignItems: 'center',
-                            margin: 10, border: '1px solid rgb(253, 216, 53)'}}>
-                            <img src='https://upload.wikimedia.org/wikipedia/commons/0/0b/Microsoft_Outlook_2013_logo.svg'
-                              style={{height: 30, paddingRight: 20}}/>
-                            <span style={{flex: 1}}>Get emails from outlook</span>
-                            <OutlookIntegrate/>
-                        </div>
+              {this.state.targetedInt ? this.renderInteraction(this.state.targetedInt) : null}
+            </div>
+          </Dialog>
+          <Popover
+            open={this.state.optionsOpen}
+            anchorEl={this.state.anchorEl}
+            anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+            targetOrigin={{horizontal: 'left', vertical: 'top'}}
+            onRequestClose={this.handleOptionsRequestClose}
+          >
+            <Menu style={{textAlign: 'left'}}>
+              <MenuItem primaryText="Tags"
+                onClick={() => this.setState({tagOpen: true, optionsOpen: false,
+                  tags: this.state.targetedInt.tags, int: this.state.targetedInt._id})}
+                  leftIcon={<Tag style={{height: 25}}/>} />
+              <MenuItem
+                onClick={() => this.setState({deleteOpen: true, optionsOpen: false})}
+                primaryText="Completely delete" leftIcon={<Delete/>} />
+              <MenuItem
+                onClick={() => this.setState({deleteOpen: true, optionsOpen: false})}
+                primaryText="Remove from this tag" leftIcon={<Close/>} />
+              <MenuItem
+                onClick={this.handlePin}
+                primaryText={`${this.state.targetedInt && this.state.targetedInt.Pinned ? 'Unpin' : 'Pin'} this`} leftIcon={<Pin/>} />
+            </Menu>
+          </Popover>
+          <Dialog
+            open={this.state.new}
+            onRequestClose={() => this.setState({new:false})}>
+            <List style={{backgroundColor: 'white', borderRadius: 4}}>
+
+              <ListItem
+                style={{display: 'flex', height: 80, alignItems: 'center'}}
+                primaryText="Add a note"
+                onClick={()=> this.setState({new: false, takeNote: true})}
+                leftAvatar={<Avatar backgroundColor={'#000AB2'} icon={<NoteIcon/>}></Avatar>}
+
+              />
+              <Divider/>
+              <ListItem
+                style={{display: 'flex', height: 80, alignItems: 'center'}}
+                primaryText="Leave project feedback"
+                onClick={() => Router.push(`/csv-upload?organisation=${this.state.organisation}`,
+                      `/csv-upload/${this.state.organisation}`)}
+                leftAvatar={<Avatar  icon={<ReviewIcon/>}></Avatar>}
+
+
+              />
+              <Divider/>
+              <ListItem
+                style={{display: 'flex', height: 80, alignItems: 'center'}}
+                primaryText={<span>Contact everyone in this organisation</span>}
+                onClick={() => Router.push(`/csv-upload?organisation=${this.state.organisation}`,
+                      `/csv-upload/${this.state.organisation}`)}
+                leftAvatar={<Avatar backgroundColor={'#FFCB00'} icon={<Email/>}></Avatar>}
+
+              />
+
+            </List>
+          </Dialog>
+
+
+          <AddTag
+            selection={[this.state.memberData]}
+            text={`Add new tag`}
+            organisation={this.props.url.query.organisation}
+            open={this.state.tagOpen}
+            edit
+            type='interaction'
+            interaction={this.state.int}
+            tags={this.state.tags}
+            onTagAdded={this.handleTagAdded}
+            onRequestClose={() => this.setState({tagOpen:false})}/>
+          <div
+            style={{ paddingTop: 20, paddingBottom: 20, justifyContent: 'center',
+              fontWeight: 700,
+              display: 'flex'}}>
+              <div style={{display: 'flex', maxWidth: 1050, width: '100%',
+                justifyContent: 'space-between', alignItems: 'center'}}>
+                <div style={{textAlign: 'left'}}>
+
+              <div style={{fontWeight: 700, fontSize: '40px', paddingBottom: 10,
+                borderBottom: '4px solid #000AB2', display: 'flex', alignItems: 'center'
+              }}>
+                <OrganisationsIcon style={{height: 30, paddingRight: 15}} color='#484848'/>
+                {decodeURIComponent(this.props.url.query.targetorganisation)}
+              </div>
+            </div>
+            <RaisedButton label='Add new interaction'
+              style={buttonStyles.smallSize}
+              labelStyle={buttonStyles.smallLabel}
+              onClick={() => this.setState({new: true})}
+              icon={<Add/>}
+
+              primary={true}
+              />
+
+          </div>
+
+          </div>
+
+          <div style={{width: '100%', display: 'flex', justifyContent: 'center', paddingTop: 20, minHeight: '100vh'}}>
+            <div style={{textAlign: 'left', padding: 20, width: 350}}>
+              <div style={{fontWeight: 200, fontSize: '20px', paddingBottom: 20}}>
+                Organisation Members
+              </div>
+              <div style={{boxSizing: 'border-box',
+                  border: '1px solid #DBDBDB', borderRadius: 2}}>
+                <ListItem
+                  primaryText='Members'
+
+                  initiallyOpen={true}
+                  primaryTogglesNestedList={true}
+                  nestedItems = {
+                    [<div style={{display: 'flex', flexWrap: 'wrap'}}>
+                    {this.state.members ? this.state.members.map((member) => (
+                      <Link prefetch href={`/member?organisation=${Router.query.organisation}&member=${member._id}`}>
+                        <Chip
+                          style={styles.chip}
+
+                          backgroundColor={randomColor({luminosity: 'light'})}>
+                          {member['Full Name']}
+                        </Chip>
+                      </Link>
+                    )) :
+                  null}
                     </div>
+                  ]
                   }
+                   style={{ borderBottom: '1px solid #DBDBDB'}}/>
 
-                  <h2 style={{paddingTop: 25, fontStyle: 'italic'}}>Your options</h2>
-                  <div style={{display: 'flex', flexWrap: 'wrap', alignItems: 'center'}}>
-                    <Options style={{height: 120, width: 120}}
-                      color={'#000AB2'}/>
-                    <span style={styles.box}>
-                      <div style={styles.leftIcon}>
-                        <CalendarIcon/>
-                      </div>
-                      <div style={styles.textBox}>
-                        <p style={styles.text}>
-                          View your calendar, add new projects
-                        </p>
-                        <RaisedButton
-                          primary={true}
-                          labelStyle={buttonStyles.smallLabel}
-                          style={buttonStyles.smallSize}
-                          onClick={() => Router.push(`/project-calendar?organisation=${this.state.orgId}`)}
-                          label='Calendar'/>
-                      </div>
-                    </span>
-                    <span style={styles.box}>
-                      <div style={styles.leftIcon}>
-                        <People/>
-                      </div>
-                      <div style={styles.textBox}>
-                        <p style={styles.text}>
-                          Search through your volunteer database.
-                          Add or change your details.
-                        </p>
-                        <RaisedButton
-                          primary={true}
-                          labelStyle={buttonStyles.smallLabel}
-                          onClick={() => Router.push(`/people?organisation=${this.state.orgId}`)}
-                          style={buttonStyles.smallSize}
-                          label='People'/>
-                      </div>
-                    </span>
-                    <span style={styles.box}>
-                      <div style={styles.leftIcon}>
-                        <Email/>
-                      </div>
-                      <div style={styles.textBox}>
-                        <p style={styles.text}>
-                          Contact your volunteers, or look through your past conversation history.
-                        </p>
-                        <RaisedButton
-                          primary={true}
-                          onClick={() => Router.push(`/messaging?organisation=${this.state.orgId}`)}
-                          labelStyle={buttonStyles.smallLabel}
-                          style={buttonStyles.smallSize}
-                          label='Messaging'/>
-                      </div>
-                    </span>
-                  </div>
+                   <ListItem
+                     primaryText='Roles'
 
-                  <h2 style={{paddingTop: 25, fontStyle: 'italic'}}>Your admins</h2>
-                  <div style={{marginTop: 30}}>
-                    <div style={{width: '100%', textAlign: 'left', display: 'flex'}}>
-                      <div style={{flex: 1}}>
-                        <div style={styles.tableHeader}>
-                          Name
+                     initiallyOpen={true}
+                     primaryTogglesNestedList={true}
+                     nestedItems = {
+                       [<div>
+                           {
+                             this.state.members ?
+                             this.state.members.map((member) => (
+                               member[this.props.url.query.targetorganisation] ?
+                               member[this.props.url.query.targetorganisation].map((role) => (
+                                 <div style={{display: 'flex', overflowX: 'hidden', alignItems: 'center',
+                                    borderBottom: '1px solid #DBDBDB'}}>
+                                   <div style={{flex: 3, padding: '5px 5px 5px 15px', alignItems: 'center'}}>
+                                     <b>{member['Full Name']}</b>
+                                   </div>
+                                   <div style={{flex: 7, padding: 5}}>
+                                     <Chip
+                                       backgroundColor={randomColor({luminosity: 'light'})}
+                                       style={styles.chip}
+                                       labelStyle={styles.chipLabel}
+                                       >
+                                       {role}
+                                     </Chip>
+
+                                   </div>
+                                 </div>
+                               ))
+                               :
+                               null
+                             ))
+                              : null
+                           }
+                       </div>]
+                     }
+                      style={{ borderBottom: '1px solid #DBDBDB'}}/>
+
+
+
+              </div>
+            </div>
+
+            <div style={{maxWidth: 700,textAlign: 'left',  width: '100%', boxSizing: 'border-box', padding: 20}}>
+              <div style={{fontWeight: 200, fontSize: '20px', paddingBottom: 20}}>
+                  Last interaction:
+                </div>
+              <div style={{display: 'flex', padding: 20, textAlign: 'center', width: '100%',
+                boxSizing: 'border-box', justifyContent: 'center',
+                display: 'flex', alignItems: 'center', color: '#000AB2',
+                fontSize: '24px', fontWeight: 700,
+              marginBottom: 20}}>
+                {this.state.interactions && this.state.interactions[0] ?
+                  capitalizeFirstLetter(
+                    convertToReadableTime(dateDiffInDays(new Date(this.state.interactions[0].Date), new Date()))
+                  ):
+                  null
+                }
+              </div>
+              <div style={{textAlign: 'left'}}>
+
+                <div style={{padding: '00px 0px'}}>
+                  {this.state.pinned && this.state.pinned.length > 0 ?
+                    <div style={{marginBottom: 20}}>
+                      <div style={{fontWeight: 200, fontSize: '20px', paddingBottom: 20}}>
+                          Important to be aware of
                         </div>
-                      </div>
+                      {this.state.pinned.map((int) => (
+                      this.renderInteraction(int)
+                    ))}
 
-                      <div style={{flex: 1}}>
-                        <div style={styles.tableHeader}>
-                          Email
-                        </div>
-                        <div>
-
-                        </div>
-                      </div>
-
-                      <div style={{flex: 1}}>
-                        <div style={styles.tableHeader}>
-                          Last logged in
-                        </div>
-
-                      </div>
                     </div>
 
-                      {
-                        this.state.users ?
-                        this.state.users.map((user) => (
-                          <div style={{width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center'}}>
-                            <div style={{flex: 1}}>
-                              <div style={styles.tableRow}>
-                                {user.Name}
-                              </div>
-                            </div>
+                  :
+                  null
+                }
+                  <div style={{fontWeight: 200, fontSize: '20px', paddingBottom: 20}}>
+                      Your interactions
+                    </div>
+                  {
+                    this.state.takeNote ?
+                    <AddNote
+                      handleCancelNote={() => this.setState({takeNote: false})}
+                      handleSaveNote={this.handleSaveNote}
+                      />
 
-                            <div style={{flex: 1}}>
-                              <div style={styles.tableRow}>
-                                <Chip
-                                  backgroundColor={randomColor({luminosity: 'light'})}
-                                  style={chipStyles.chip}
-                                  labelStyle={chipStyles.chipLabel}
-                                  >
-                                  {user.Email}
-                                </Chip>
-                              </div>
-                              <div>
 
-                              </div>
-                            </div>
+                       :
+                       <div >
 
-                            <div style={{flex: 1}}>
-                              <div style={styles.tableRow}>
-                                Last logged in
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                        :
-                        null
-                      }
-
-                    <Link prefetch href={`/admin-accounts?organisation=${this.state.orgId}`}>
-                      <div
-                        style={{width: '100%', display: 'flex', alignItems: 'center',
-                          justifyContent: 'center', padding: 20, boxSizing: 'border-box'}}>
-                        <RaisedButton label='Add/Edit admins'
-                          style={buttonStyles.smallSize}
-                          labelStyle={buttonStyles.smallLabel}
-                          primary={true}
-                          />
-                      </div>
-                    </Link>
-                  </div>
-
+                       </div>
+                  }
                 </div>
-                :
-                null
-              }
+                {
+                  <div>
 
+                    {this.state.interactions && this.state.interactions.length > 0 ?
+                      this.state.interactions.map((int) => (
+                      int.Pinned ? null : this.renderInteraction(int)
+                    ))
+                      :
+                      <div style={{display: 'flex', padding: 50, alignItems: 'center', justifyContent: 'center'
+                      , backgroundColor: '#F5F5F5'}}>
+                        There's nothing here just yet
+                      </div>
+                  }
+                  </div>
+                }
+              </div>
             </div>
           </div>
+
         </App>
       </div>
     )
