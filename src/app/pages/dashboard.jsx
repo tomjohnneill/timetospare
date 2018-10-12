@@ -12,6 +12,7 @@ import Chip from 'material-ui/Chip';
 import Email from 'material-ui/svg-icons/communication/email';
 import {buttonStyles, chipStyles} from '../components/styles.jsx';
 import OutlookIntegrate from '../components/outlook/integrate.jsx';
+import EventbriteIntegrate from '../components/eventbrite/integrate.jsx';
 
 var randomColor = require('randomcolor')
 let db = fire.firestore()
@@ -167,12 +168,13 @@ export class Organisation extends React.Component {
                             <img src='https://pbs.twimg.com/profile_images/1041676563727581184/PZdTbu06.jpg'
                               style={{height: 30, paddingRight: 20}}/>
                             <span style={{flex: 1}}>Get events from Eventbrite</span>
-                            <RaisedButton style={buttonStyles.smallSize}
-                              labelStyle={buttonStyles.smallLabel}
-                              primary={true}
-                              label='Scrape events'
-                              disabled={true}
-                              />
+                            {
+                              this.state.orgId ?
+                              <EventbriteIntegrate organisation={this.state.orgId}/>
+                              :
+                              null
+                            }
+
                         </div>
                     </div>
                   }

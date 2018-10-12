@@ -87,7 +87,7 @@ const checkAgainstMembers = (emails, organisation, uid) => {
     console.log(from, to[0], organisation)
     checks.push(db.collection("PersonalData")
       .where("organisation", "==", organisation)
-      .where("Email", "==", from)
+      .where("Email", "array-contains", from)
       .get()
       .then((querySnapshot) => {
         if (querySnapshot.size > 0) {
@@ -111,7 +111,7 @@ const checkAgainstMembers = (emails, organisation, uid) => {
 
     checks.push(db.collection("PersonalData")
       .where("organisation", "==", organisation)
-      .where("Email", "==", to[0])
+      .where("Email", "array-contains", to[0])
       .get()
       .then((querySnapshot) => {
         if (querySnapshot.size > 0) {

@@ -195,43 +195,43 @@ export class Organisation extends React.Component {
     switch(int.Type) {
       case "Event":
         return (
-          <div
-            style={{borderLeft: '3px solid #e91e63', backgroundColor: '#f9c8d9',  marginBottom: 10}}
-            >
-            <ListItem
-              id={int._id}
-              rightIcon={<IconButton
-                tooltip='Options'
-                onClick={(e) => this.handleOptionsClick(e, int)}
-                style={iconButtonStyles.button}><MoreVert /></IconButton>
-              }
-              className='email-interaction'
-              style={{marginBottom: 10,  backgroundColor: '#f9c8d9'}}
-              primaryText={<div>
-                <div className='story-text' dangerouslySetInnerHTML={this.noteMarkup(int.Details ? int.Details.Note : null)}/>
-              </div>}
-              primaryTogglesNestedList={true}
-              nestedItems={[<div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
-                {
-                  int.Members && this.state.membersLoaded
-                   ? int.Members.map((user) => (
-                     <Link  prefetch href={`/member?organisation=${Router.query.organisation}&member=${user}`}>
-                        <Chip
-                          style={styles.chip}
-                          backgroundColor={this.state.interactionUsers[user] ? this.state.interactionUsers[user].color : null}>
-                           {this.state.interactionUsers[user] ? this.state.interactionUsers['Full Name'] : null}
-                        </Chip>
-                     </Link>
-                  ))
-                  :
-                  null
+          <a href={int.Details ? int.Details.url : null}>
+            <div
+              style={{borderLeft: '3px solid #e91e63', backgroundColor: '#f9c8d9',  marginBottom: 10}}
+              >
+              <ListItem
+                id={int._id}
+                rightIcon={<IconButton
+                  tooltip='Options'
+                  onClick={(e) => this.handleOptionsClick(e, int)}
+                  style={iconButtonStyles.button}><MoreVert /></IconButton>
                 }
-              </div>]}
-              secondaryText={int.Date.toLocaleString('en-gb',
-                {weekday: 'long', month: 'long', day: 'numeric'})}
-              leftIcon={int.Pinned ? <Warning color='red'/> : <EventIcon color={'black'}/>} />
+                className='email-interaction'
+                style={{marginBottom: 10,  backgroundColor: '#f9c8d9'}}
+                primaryText={int.Details ? int.Details.name : null}
+                primaryTogglesNestedList={true}
+                nestedItems={[<div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
+                  {
+                    int.Members && this.state.membersLoaded
+                     ? int.Members.map((user) => (
+                       <Link  prefetch href={`/member?organisation=${Router.query.organisation}&member=${user}`}>
+                          <Chip
+                            style={styles.chip}
+                            backgroundColor={this.state.interactionUsers[user] ? this.state.interactionUsers[user].color : null}>
+                             {this.state.interactionUsers[user] ? this.state.interactionUsers['Full Name'] : null}
+                          </Chip>
+                       </Link>
+                    ))
+                    :
+                    null
+                  }
+                </div>]}
+                secondaryText={int.Date.toLocaleString('en-gb',
+                  {weekday: 'long', month: 'long', day: 'numeric'})}
+                leftIcon={int.Pinned ? <Warning color='red'/> : <EventIcon color={'black'}/>} />
 
-          </div>
+            </div>
+          </a>
         )
       case "Invited":
 

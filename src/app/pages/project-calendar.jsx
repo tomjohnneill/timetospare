@@ -56,7 +56,6 @@ class YourCalendar extends React.Component {
         elem._id = doc.id
         if (elem['Start Time']) {
           data.push(elem)
-          this.setState({events: data})
         }
         db.collection("Project").doc(doc.id).collection("SubProject").get()
         .then((subProjectSnapshot) => {
@@ -68,11 +67,34 @@ class YourCalendar extends React.Component {
               subElem.Location = elem.Location
               subElem.Geopoint = elem.Geopoint
               data.push(subElem)
-              this.setState({events: data})
             })
           }
         })
       })
+      var events = this.state.events ? this.state.events : []
+      events = events.concat(data)
+      this.setState({events: events})
+    })
+  }
+
+  getEventInteractions = () => {
+    db.collection("Interactions").where("Organisation", "==", Router.query.organisation)
+    .where("Type", "==", "Event")
+    .get()
+    .then((querySnapshot) => {
+      var data = []
+      querySnapshot.forEach((doc) => {
+        var elem = doc.data()
+        var date = new Date(elem.Date)
+        elem.Name = elem.Details.name
+        elem['Start Time'] = new Date(elem.Date)
+        elem['End Time'] = new Date(date.setHours(date.getHours() + 4))
+        data.push(elem)
+      })
+      console.log(data)
+      var events = this.state.events ? this.state.events : []
+      events = events.concat(data)
+      this.setState({events: events})
     })
   }
 
@@ -84,11 +106,18 @@ class YourCalendar extends React.Component {
       if (user === null) {
 
       } else {
-        this.getProjects(fire.auth().currentUser.uid)
+        if (!this.state.events) {
+          this.getProjects(fire.auth().currentUser.uid)
+          this.getEventInteractions()
+        }
       }
     })
     if (fire.auth().currentUser) {
-        this.getProjects(fire.auth().currentUser.uid)
+        if (!this.state.events) {
+          this.getProjects(fire.auth().currentUser.uid)
+          this.getEventInteractions()
+        }
+
     }
   }
 

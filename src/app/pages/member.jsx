@@ -188,12 +188,9 @@ export class Member extends React.Component {
               }
               className='email-interaction'
               style={{marginBottom: 10,  backgroundColor: '#f9c8d9'}}
-              primaryText={<div>
-                <div className='story-text' dangerouslySetInnerHTML={this.noteMarkup(int.Details ? int.Details.Note : null)}/>
-              </div>}
+              primaryText={int.Details ? int.Details.name : null}
               primaryTogglesNestedList={true}
-
-              secondaryText={int.Date.toLocaleString('en-gb',
+              secondaryText={new Date(int.Date).toLocaleString('en-gb',
                 {weekday: 'long', month: 'long', day: 'numeric'})}
               leftIcon={int.Pinned ? <Warning color='red'/> : <EventIcon color={'black'}/>} />
 

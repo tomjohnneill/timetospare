@@ -1,10 +1,10 @@
 import React from 'react';
-import MailchimpIntegrate from '../components/mailchimp/integrate.jsx';
-import MailchimpSuccess from '../components/mailchimp/success.jsx';
-import App from '../components/App.js'
+import MailchimpIntegrate from '../../components/mailchimp/integrate.jsx';
+import MailchimpSuccess from '../../components/mailchimp/success.jsx';
+import App from '../../components/App.js'
 import Router from 'next/router'
-import withMui from '../components/hocs/withMui';
-import Breadcrumbs from '../components/onboarding/breadcrumbs.jsx';
+import withMui from '../../components/hocs/withMui';
+import Breadcrumbs from '../../components/onboarding/breadcrumbs.jsx';
 
 class Mailchimp extends React.Component {
   constructor(props) {

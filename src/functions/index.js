@@ -8,6 +8,7 @@ import {sendCustomEmail, receiveReply} from './messaging/emails.js';
 import {sendCustomSMS} from './messaging/sms.js';
 import {sendInviteEmail} from './transactional/signup.js';
 import {outlookAuth,scrapeOutlookEmails} from './integrations/outlook.js';
+import {getEventbriteOrganisations, getEventAttendees} from './integrations/eventbrite.js';
 
 /*
 Namespace application services with function groups.
@@ -56,7 +57,9 @@ const transactional = {
 
 const integrations = {
   outlookAuth,
-  scrapeOutlookEmails
+  scrapeOutlookEmails,
+  getEventbriteOrganisations,
+  getEventAttendees
 }
 
 export { app, greetings, mailchimp, users, messaging, transactional, integrations}

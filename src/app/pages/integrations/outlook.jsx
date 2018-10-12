@@ -1,8 +1,8 @@
 import React from 'react'
-import App from '../components/App.js'
+import App from '../../components/App.js'
 import Router from 'next/router'
-import withMui from '../components/hocs/withMui';
-import OutlookIntegrate from '../components/outlook/integrate';
+import withMui from '../../components/hocs/withMui';
+import OutlookIntegrate from '../../components/outlook/integrate';
 
 export class Outlook extends React.Component {
   constructor(props) {

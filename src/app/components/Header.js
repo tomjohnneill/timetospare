@@ -390,15 +390,7 @@ export default class Header extends React.Component {
 
 
 
-                                   <Link prefetch href='/mission'>
-                                     <div style={{
-                                         paddingLeft: 25, borderLeft: '1px solid #DBDBDB',
-                                       cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
 
-                                       >
-                                       Our Mission
-                                     </div>
-                                   </Link>
                                   <Link prefetch href='/projects'>
                                     <div style={{
                                       cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}

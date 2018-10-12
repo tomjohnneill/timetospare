@@ -85,7 +85,9 @@ export default class OutlookIntegrate extends React.Component {
       if (this.state.orgId) {
         inviteEmail({refresh_token: this.state.user.outlook_refresh_token,
           access_token: this.state.user.outlook_access_token, organisation: this.state.orgId,
-          personalDataId: this.state.personalDataId})
+          personalDataId: this.state.personalDataId}).then((result) => {
+            console.log(result)
+          })
       } else {
         alert("You don't belong to an organisation")
       }
