@@ -9,6 +9,16 @@ export const buttonStyles = {
   }
 }
 
+export const headerStyles = {
+  desktop: {
+    fontSize: '30px',
+    fontWeight: 200,
+    textAlign: 'left',
+    marginBottom: 30,
+    marginTop: 30
+  }
+}
+
 export const textFieldStyles = {
   input: {
     borderRadius: '2px', border: '1px solid #aaa',

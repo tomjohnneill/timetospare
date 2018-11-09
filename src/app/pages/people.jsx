@@ -129,7 +129,7 @@ export class People extends React.Component {
                 <ListItem
                   style={{display: 'flex', height: 80, alignItems: 'center'}}
                   primaryText="Import from csv"
-                  
+
                   leftAvatar={<Avatar src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTuLVCgqTLxBFELkcZJ1b7_xsV7mOVQxcVVmAp-tFD2dYBhLDG7YQ" />}
                   rightIcon={<CommunicationChatBubble />}
                 />

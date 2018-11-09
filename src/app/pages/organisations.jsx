@@ -9,7 +9,7 @@ import App from "../components/App"
 import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
 import AddNote from '../components/addNote.jsx';
-import {buttonStyles} from '../components/styles.jsx';
+import {buttonStyles, headerStyles} from '../components/styles.jsx';
 
 let db = fire.firestore()
 
@@ -294,9 +294,9 @@ class Cards extends Component {
           </div>
         </Dialog>
         <div style={{textAlign: 'left'}} className="card-scene">
-          <h2 style={{fontWeight: 200}}>
+          <div style={headerStyles.desktop}>
             Your linked organisations
-          </h2>
+          </div>
           <Container
             orientation="vertical"
             onDrop={this.onColumnDrop}
@@ -335,21 +335,30 @@ class Cards extends Component {
                           <Draggable key={card.id}>
                             <Link prefetch href={`/organisation?targetorganisation=${card.data}&organisation=${this.props.url.query.organisation}`}>
                               <div style={{position: 'relative', cursor: 'pointer'}} {...card.props}>
-                                <img
-                                  src={card.image}
+                                <div
                                   style={{margin: 10, borderRadius: '50%', cursor: 'pointer',
                                     objectFit: 'cover',
                                     height: 100, width: 100, position: 'relative'}}/>
                                 <div
+                                  className='orgButton'
                                   style={{position: 'absolute', height: 100,
                                     width: '100px',
                                     display: 'flex', alignItems: 'center',
-                                    backgroundColor: 'rgba(255,255,255,0.7)',
-                                    fontWeight: 700, color: 'black', fontSize: '14px',
+                                    backgroundColor: 'white',
+                                    fontWeight: 200, color: 'black', fontSize: '14px',
+                                    border: '1px solid black', padding: 5,
+                                    boxShadow: '0 1px 1px rgba(0,0,0,0.12), 0 1px 1px rgba(0,0,0,0.24)',
                                     borderRadius: '50%', margin: 10,
                                     textAlign: 'center', justifyContent: 'center',
                                    top: 0}}>
-                                   {card.data}
+                                   <div style={{zIndex: 2}}>
+                                     {
+                                       card.data.length < 20 ?
+                                       card.data :
+                                       card.data.slice(0,20) + '...'
+                                     }
+                                   </div>
+
 
                                 </div>
                               </div>

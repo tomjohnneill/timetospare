@@ -140,6 +140,12 @@ export class Organisation extends React.Component {
     return (
       <div>
         <App>
+          <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '0 30% 90% 0%',
+            transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', left: -250,
+             width: '20vw', height: '100vw'}}/>
+             <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '30% 0 0 90%',
+               transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', right: -250,
+                width: '30vw', height: '100vw'}}/>
           <div style={{width: '100%', display: 'flex', justifyContent: 'center', minHeight: '100vh', paddingBottom: 50, paddingTop: 20}}>
             <div style={{textAlign: 'left'}}>
               {

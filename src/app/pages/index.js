@@ -16,6 +16,7 @@ import TextField from 'material-ui/TextField';
 import RegisterInterest from '../components/registerinterest.jsx';
 import Subheader from 'material-ui/Subheader';
 import withMui from '../components/hocs/withMui';
+import Typing from 'react-typing-animation';
 import {Network, GDPR} from '../components/icons.jsx';
 
 let mobile = require('is-mobile');
@@ -46,7 +47,92 @@ const styles = {
   selectedChip: {
     margin: 4
   },
+  curveBox: {
+    width: '110%',
+    height: '50vh',
+    borderColor: '#000 transparent transparent transparent',
+    borderRadius: '50% 50% 30% 5%',
+    backgroundColor: '#FFCB00',
+    transform: 'skewX(-20deg)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: -4
+  },
+  mobileCurveBox: {
+    width: '110%',
+    height: '30vh',
+    borderColor: '#000 transparent transparent transparent',
+    borderRadius: '50% 50% 30% 5%',
+    backgroundColor: '#FFCB00',
+    transform: 'skewX(-20deg)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: -4
+  },
+  miniBuilt: {
+    fontWeight: 200,
+    fontSize: '16px',
+    color: 'rgba(0,0,0,0.5)',
+    textAlign: 'left',
+    width: '100%',
+    display: 'block',
+    textTransform: 'lowercase'
+  },
+  builtHead: {
+    fontWeight: 200,
+    fontSize: '36px',
+    paddingTop: 20,
+    paddingBottom: 20
+  },
+  builtCat: {
+    minWidth: 300,
+    width: '25%',
+    marginTop: 50,
+    textAlign: 'left',
+    paddingBottom: 50
+  },
+  mobileBuiltCat: {
+    width: '100%',
+    boxSizing: 'border-box',
+    paddingLeft: 10,
+    paddingRight: 10,
+    marginTop: 50,
+    borderTop: '1px solid black',
+    paddingTop: 20
+  },
+  easyBox: {
+    padding: 80,
+    marginBottom: 50,
+    flex: 1,
+    boxSizing: 'border-box'
+  },
+  easyHeader: {
+    fontSize: '26px',
+    lineHeight: 1.1,
+    fontWeight: 700,
+    height: 90
+  },
+  builtText: {
+    fontSize: '18px'
+  },
+  integrationLogo: {
+    height: 40, width: 'auto', padding: 20
+  },
+  mobileEasyBox: {
+    padding: 10, marginBottom: 30, marginTop: 20
+  }
 }
+
+const targets = [
+  'charities',
+  'funders',
+  'local authorities',
+  'volunteer managers',
+  'communities',
+  'volunteers'
+]
 
 export function changeImageAddress(file, size) {
   if (file && file.includes('https://d3kkowhate9mma.cloudfront.net')) {
@@ -64,142 +150,40 @@ class Index extends React.Component {
   constructor(props) {
     super(props);
     this.state = {projects: this.props.projects, upcoming: this.props.upcoming,
-      successful: this.props.successful}
+      successful: this.props.successful, targetCount: 0}
 
   }
 
-  getPrivateProjects = (uid) => {
-    db.collection("Project").where("View." + fire.auth().currentUser.uid, "==", true)
-    .get().then((querySnapshot) => {
-      var data = []
-      querySnapshot.forEach((project) => {
-        var elem = project.data()
-        elem._id = project.id
-        data.push(elem)
-      })
-      this.setState({private: data})
-    })
-  }
+
 
   handleImIn = () => {
     Router.push('/signup')
   }
 
-  componentDidMount(props) {
-    if (fire.auth().currentUser) {
-      this.getPrivateProjects(fire.auth().currentUser.uid)
-    }
-    fire.auth().onAuthStateChanged((user) => {
-      if (user !== null) {
-        this.getPrivateProjects(fire.auth().currentUser.uid)
-      }
-    })
-    Router.prefetch('/signup')
-  }
+
 
   static async getInitialProps(ctx) {
     console.log(ctx)
     if(ctx && ctx.req && ctx.__session) {
       ctx.res.writeHead(301, {Location: `/dashboard`})
       ctx.res.end()
-     } else {
-       const res = await db.collection("Project").get()
-       .then((querySnapshot) => {
-         let upcoming = []
-         let successful = []
-         let projects = []
-         querySnapshot.forEach((doc) => {
-           var hit = doc.data()
-           hit._id = doc.id
-           projects.push(hit)
-           if (hit['End Time'] && new Date(hit['End Time']) > new Date()) {
-             upcoming.push(hit)
-           } else if
-             (hit['Deadline'] && new Date(hit['Deadline']) > new Date()) {
-               upcoming.push(hit)
-             }
-             else {
-             successful.push(hit)
-           }
-
-
-         })
-         return({projects: projects,
-           upcoming: upcoming, successful: successful,
-           loading: false});
-       })
-       return res
      }
-
-
-/*
-    const client = algoliasearch('52RYQZ0NQK', 'b10f7cdebfc189fc6f889dbd0d3ffec2');
-    const index = client.initIndex('projects');
-    var query = ''
-    const res = await index
-        .search({
-            query: query,
-            filters: 'Approved:true'
-        })
-        .then(responses => {
-            // Response from Algolia:
-            // https://www.algolia.com/doc/api-reference/api-methods/search/#response-format
-            let upcoming = []
-            let successful = []
-            responses.hits.forEach((hit) => {
-              if (hit['End Time'] && new Date(hit['End Time']) > new Date()) {
-                upcoming.push(hit)
-              } else if
-                (hit['Deadline'] && new Date(hit['Deadline']) > new Date()) {
-                  upcoming.push(hit)
-                }
-                else {
-                successful.push(hit)
-              }
-            })
-            console.log(responses.hits)
-            return({projects: responses.hits,
-              upcoming: upcoming, successful: successful,
-              loading: false});
-        });
-      return {data: res}
-      */
   }
 
-  handleSearch = (e, input) => {
-  const client = algoliasearch('52RYQZ0NQK', 'b10f7cdebfc189fc6f889dbd0d3ffec2');
-  const index = client.initIndex('projects');
-  var query = e.target.value
-  index
-      .search({
-          query: query,
-          filters: 'Approved:true'
-      })
-      .then(responses => {
-          // Response from Algolia:
-          // https://www.algolia.com/doc/api-reference/api-methods/search/#response-format
-          let upcoming = []
-          let successful = []
-          responses.hits.forEach((hit) => {
-            if (hit['End Time'] && new Date(hit['End Time']) > new Date()) {
-              upcoming.push(hit)
-            } else if
-              (hit['Deadline'] && new Date(hit['Deadline']) > new Date()) {
-                upcoming.push(hit)
-              }
-              else {
-              successful.push(hit)
-            }
-          })
-          this.setState({projects: responses.hits,
-            upcoming: upcoming, successful: successful,
-            loading: false});
-      });
-}
+  changeTarget = () => {
 
+    if (this.state.targetCount === targets.length - 1) {
+      this.setState({targetCount: 0})
+    } else {
+      this.setState({targetCount: this.state.targetCount + 1})
+    }
 
+  }
 
   render() {
+    if (typeof window !== 'undefined') {
+      Router.prefetch('/signup')
+    }
 
     var isMobile = mobile(this.props.userAgent)
     return (
@@ -207,25 +191,18 @@ class Index extends React.Component {
         <MediaQuery
           values={{deviceWidth: isMobile ? 600 : 1400}}
           minDeviceWidth={700}>
-          <img
-                  style={{height: '80vh',objectPosition: '70% 80%', width: '120%', marginLeft: '-20%',
-                   objectFit: 'cover', position: 'relative', marginTop: '-51px'}}
-                  src={'https://images.unsplash.com/photo-1530220616-3f1c5a86e6cb?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=29d3687e117dd607197b051ac2009473&auto=format&fit=crop&w=1191&q=80'}/>
-                <div style={{position: 'absolute',top:'-51px',  height: '80%', width: '100%',
-                flexDirection: 'column',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',paddingRight: '20px', boxSizing: 'border-box', paddingLeft: 80}}>
-                  <div style={{width: '600px', paddingLeft: 200}}>
-                    <h2 style={{textAlign: 'left', color: 'black', fontSize: '48px',
-                  marginBottom: 15}}>Save yourself time</h2>
+
+                <div style={{height: '50vh', width: '100%',flexDirection: 'column',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+
+                    <h2 style={{ color: 'black', fontSize: '48px', marginBottom: 15, fontWeight: 200}}>
+                      A radically transparent CRM for civil society
+                    </h2>
 
 
-                  <p style={{fontSize: '20px', marginTop: 25, color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
-                    Organise all your contacts, events, projects and relationships.
-                  </p>
                   {
                     !fire.auth().currentUser ?
 
-                  <div style={{paddingTop: 0, width: '100%', display: 'flex', justifyContent: 'flex-start'}}>
                   <RaisedButton label="Sign Up Free"
                     primary={true}
                     style={{height: 44, width: 150,
@@ -234,96 +211,165 @@ class Index extends React.Component {
                     onClick={this.handleImIn}
                     labelStyle={{letterSpacing: 0.3, fontWeight: 700, fontSize: '16px', textTransform: 'none'}}
                     />
-                  </div>
                   :
                   null
                 }
-                  </div>
-
-                </div>
-
-              <div style={{position: 'relative'}}>
-                <img
-                    style={{height: '70vh',objectPosition: '50% 60%', width: '100%',
-                     objectFit: 'cover', position: 'relative', marginTop: '-51px'}}
-                    src={'https://images.unsplash.com/photo-1492999104346-cabaa757be8f?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=e0e3f3e765bde2f5094873747a695c85&auto=format&fit=crop&w=1051&q=80'}/>
-                  <div style={{position: 'absolute',top:'-51px',  height: '100%', width: '100%',
-                   alignItems: 'center',
-                    display: 'flex', paddingRight: '20px', boxSizing: 'border-box'
-                    , paddingLeft: 150}}>
-                    <div style={{width: '600px'}}>
-                      <h2 style={{textAlign: 'left', color: 'black', fontSize: '48px',
-                    marginBottom: 15}}>Manage all your contacts</h2>
-
-                    <p style={{fontSize: '20px', marginTop: 25, color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
-                      Keep a better track of who you’ve contacted recently.
-                      <br/>
-                      <br/>
-                      Record your insight on what worked and what didn’t.
-                      <br/>
-                      <br/>
-                      Share your knowledge across your team.
-
-                    </p>
-
-                    </div>
-
-                  </div>
                 </div>
 
 
-                <div style={{position: 'relative', backgroundColor: '#FFCB00',
-                  display: 'flex', alignItems: 'center'}}>
 
-                    <div style={{ width: '100%', height: '70vh', alignItems: 'center',
-                      display: 'flex', justifyContent: 'center',paddingRight: '80px',
-                       boxSizing: 'border-box', paddingLeft: 80}}>
-
-                        <GDPR style={{height: '60%', paddingRight: 200}} color='black'/>
-
-                      <div style={{width: '600px', paddingRight: 150}}>
-                        <h2 style={{textAlign: 'left', color: 'black', fontSize: '48px',
-                            marginBottom: 15}}>
-                          Resolve your GDPR problems
-                        </h2>
+                <div style={{overflowX: 'hidden', width: '100%', position: 'relative'}}>
+                  <div style={styles.curveBox}/>
+                </div>
 
 
-                      <p style={{fontSize: '20px', marginTop: 25, color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
-                        Your volunteers and contacts can see all their personal data. They can keep it up to date, and request for it to be deleted, all in one place.
-                        <br/>
-                        <br/>
-                        If anyone makes a ‘subject access request’, resolve it by sending one link.
-                      </p>
+                <div style={{width: '100%', marginTop: '-25vh', zIndex: 5,
+                  boxSizing: 'border-box',backgroundColor: '#f6f6f4',
+                  position: 'relative', color: 'black',
 
-                      </div>
-
+                  }}>
+                  <div style={{paddingLeft: 200, paddingRight: 200,backgroundColor: '#FFCB00',
+                    borderRadius: '0 0 30% 10%',
+                  paddingBottom: '100px', }} >
+                    <div style={{fontWeight: 200,  paddingBottom: 30,
+                        fontSize: '48px', marginTop: '-20px', textAlign: 'left'}}>
+                      <span>Built for </span>
+                      <span   style={{display: 'inline-block', fontWeight: 700}}><Typing
+                        style={{display: 'inline-block'}}
+                        loop={true}
+                         onFinishedTyping={this.changeTarget}>
+                        <span style={{display: 'inline-block'}}>{targets[this.state.targetCount]}</span>
+                        <Typing.Reset count={0} delay={900} />
+                      </Typing>
+                      </span>
                     </div>
-                  </div>
-
-                  <div style={{position: 'relative', color: 'white', backgroundColor: '#000AB2',
-                    display: 'flex', alignItems: 'center'}}>
-
-                      <div style={{ width: '100%', height: '70vh', alignItems: 'center',
-                        display: 'flex', justifyContent: 'center',paddingRight: '80px',
-                         boxSizing: 'border-box', paddingLeft: 80}}>
-                        <div style={{width: '800px'}}>
-                          <h2 style={{textAlign: 'left',fontSize: '48px',
-                        marginBottom: 15}}>Join a growing network of organisations, volunteers and funders</h2>
-
-
-                        <p style={{fontSize: '20px', marginTop: 25,fontWeight: 'lighter', textAlign: 'left'}}>
-                          Add your organisation and your volunteers to a network of people working together to improve their communities. <br/><br/>
-                          Showcase your projects, inspire your volunteers and demonstrate your impact to the world at large.
-
-                        </p>
-
+                    <div style={{height: 4, width: 100, backgroundColor: 'black'}}/>
+                    <div style={{
+                        display: 'flex', justifyContent: 'space-between'}}>
+                      <div style={styles.builtCat}>
+                        <span style={styles.miniBuilt}>
+                          BUILT TO BE...
+                        </span>
+                        <div style={styles.builtHead}>
+                          Open
                         </div>
-
-                          <Network style={{height: '80%'}} color='white'/>
-
+                        <div style={styles.builtText}>
+                          A CRM that lets you share your contacts,
+                          projects and events to help improve impact and understanding across the volunteer sector.
+                        </div>
                       </div>
 
+                      <div style={styles.builtCat}>
+                        <span style={styles.miniBuilt}>
+                          BUILT TO BE...
+                        </span>
+                        <div style={styles.builtHead}>
+                          User-led
+                        </div>
+                        <div style={styles.builtText}>
+                          A CRM that encourages input from your volunteers. Get their feedback,
+                          find out how they want to help and let them update their own personal data.
+                        </div>
+                      </div>
+
+                      <div style={styles.builtCat}>
+                        <span style={styles.miniBuilt}>
+                          BUILT to be...
+                        </span>
+                        <div style={styles.builtHead}>
+                          Collaborative
+                        </div>
+                        <div style={styles.builtText}>
+                          A CRM that lets you share your experience with other
+                          organisations and lets your volunteers share their skills.
+                        </div>
+                      </div>
                     </div>
+                  </div>
+                </div>
+
+
+                <div style={{minHeight: '70vh', paddingTop: 100, paddingBottom: 100,
+                  width: '100%', display: 'flex', alignItems: 'center',backgroundColor: '#f6f6f4'
+                ,justifyContent: 'center'}}>
+                  <div style={{display: 'flex', height: '70vh', justifyContent: 'center', alignItems: 'center'}}>
+                    <div style={{fontSize: '3.375rem', width: '40%', paddingRight: 50, letterSpacing: '-2px',
+                    fontWeight: 500, color: 'black'}}
+                      className='big-quote'>
+                      "It really shows what is happening in your organisation, and let's us show other people too."
+                    </div>
+                    <div style={{height: '100%', width: '30%', minWidth: '300px'}}>
+                      <img
+                        style={{height: '100%', width: 'auto', borderRadius: 4}}
+                        src='https://eep.io/images/yzco4xsimv0y/3sCnNKOu0gSuYuewKUw6G6/3873f76efc0a4e22eefceed5d0f139a3/Customer-Success_King-of-Pops-442.jpg?w=500&q=95'/>
+                    </div>
+                  </div>
+                </div>
+
+              <div style={{minHeight: '80vh'}}>
+                <h2 style={{fontSize: '48px', fontWeight: 200, marginTop: 50}}>
+                  Easy to get started
+                </h2>
+                <div style={{width: '100%', display: 'flex', justifyContent: 'center'}}>
+                  <div style={{height: 4, width: 100, backgroundColor: '#000AB2'}}/>
+                </div>
+
+                <div style={{display: 'flex'}}>
+                  <div style={styles.easyBox}>
+                    <div style={{height: 195, boxSizing: 'border-box', padding: 20, width: '60%', display: 'flex', flexWrap: 'wrap', width: '100%',
+                    alignItems: 'center', justifyContent: 'center'}}>
+                      <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Microsoft_Outlook_2013_logo.svg/2000px-Microsoft_Outlook_2013_logo.svg.png'
+                        style={styles.integrationLogo}
+                        />
+                      <img src='https://eep.io/images/yzco4xsimv0y/6TmBL4BHuo8mUawcCmQK6q/b7db5963dabd34cf87fe537a958c7218/brand-assets_logos_image-gray-1960x1060.png?w=980&q=95'
+                        style={styles.integrationLogo}
+                        />
+                      <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTPFl8lWwPdrFlIZwxCER_EM0QMxsvdRBRDic8OZs1md4LKMoF'
+                        style={styles.integrationLogo}
+                        />
+                      <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/New_Logo_Gmail.svg/2000px-New_Logo_Gmail.svg.png'
+                        style={styles.integrationLogo}
+                        />
+                    </div>
+                    <div style={styles.easyHeader}>
+                      Works how you work
+                    </div>
+                    <div style={styles.easyText}>
+                      Link to your Outlook or Gmail account. Link up your Eventbrite events.
+                      Link up your calendars. Link to your Mailchimp. <br/><br/>
+                    We’ll work with the tools you’re used to.
+                    </div>
+                  </div>
+
+                  <div style={styles.easyBox}>
+                    <div>
+                      <img src='/scribble.png' style={{height: 150, padding: 20}}/>
+                    </div>
+                    <div style={styles.easyHeader}>
+                      Works with messy data
+                    </div>
+                    <div style={styles.easyText}>
+                      Broken email addresses? Duplicate records? Lots of different confusing spreadsheets?
+                      <br/><br/>We'll keep your data neat and tidy.
+                    </div>
+                  </div>
+
+                  <div style={styles.easyBox}>
+                    <div>
+                      <Network style={{height: 150, padding: 20}}/>
+                    </div>
+                    <div style={styles.easyHeader}>
+                      Works with complicated relationships
+                    </div>
+                    <div style={styles.easyText}>
+                      Your volunteers, trustees and contacts could belong to multiple community groups, charities and companies.
+                      <br/><br/>That’s the kind of thing we’re made for.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
                   </MediaQuery>
 
                   {/*Mobile version */}
@@ -331,130 +377,187 @@ class Index extends React.Component {
             <MediaQuery
               values={{deviceWidth: isMobile ? 600 : 1400}}
               maxDeviceWidth={700}>
-              <img
-                      style={{height: '90vh',objectPosition: '40% 0%', width: '100%',
-                       objectFit: 'cover', position: 'relative', marginTop: '-51px'}}
-                      src={'https://images.unsplash.com/photo-1472289065668-ce650ac443d2?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=cdff4c62302fd44491d4850202323d11&auto=format&fit=crop&w=1050&q=80'}/>
-                    <div style={{position: 'absolute',top:'-51px',  height: '90vh', width: '100%',
-                    flexDirection: 'column',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                      <div style={{width: '100%', paddingLeft: '20%',  boxSizing: 'border-box'}}>
-                        <h2 style={{textAlign: 'left', color: 'black', fontSize: '40px',
-                      marginBottom: 15}}>Do good, <br/> better.</h2>
+              <div style={{height: '50vh', width: '100%',flexDirection: 'column',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+
+                  <h2 style={{ color: 'black', fontSize: '48px', marginBottom: 15, fontWeight: 200}}>
+                    A radically transparent CRM for civil society
+                  </h2>
 
 
-                      <p style={{fontSize: '20px', marginTop: 25, color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
-                        All the tools you need to better engage your volunteers.
-                      </p>
-                      {
-                        !fire.auth().currentUser ?
+                {
+                  !fire.auth().currentUser ?
 
-                      <div style={{paddingTop: 0, width: '100%', display: 'flex', justifyContent: 'flex-start'}}>
-                      <RaisedButton label="Sign Up Free"
-                        primary={true}
-                        style={{height: 44, width: 150,
-                          boxShadow: '0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2)',
-                          borderRadius: 4}}
-                        onClick={this.handleImIn}
-                        labelStyle={{letterSpacing: 0.3, fontWeight: 700, fontSize: '16px', textTransform: 'none'}}
-                        />
+                <RaisedButton label="Sign Up Free"
+                  primary={true}
+                  style={{height: 44, width: 150,
+                    boxShadow: '0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2)',
+                    borderRadius: 4}}
+                  onClick={this.handleImIn}
+                  labelStyle={{letterSpacing: 0.3, fontWeight: 700, fontSize: '16px', textTransform: 'none'}}
+                  />
+                :
+                null
+              }
+              </div>
+
+
+
+              <div style={{overflowX: 'hidden', width: '100%', marginTop: 50, position: 'relative'}}>
+                <div style={styles.mobileCurveBox}/>
+              </div>
+
+
+              <div style={{width: '100%', marginTop: '-15vh', zIndex: 5,
+                boxSizing: 'border-box', paddingLeft: 10, paddingRight: 10,
+                position: 'relative', paddingBottom: '100px', color: 'black',
+
+                backgroundColor: '#FFCB00'}}>
+                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center',}} >
+                  <div style={{fontWeight: 200,  paddingBottom: 30,
+                      fontSize: '36px', marginTop: '-20px', textAlign: 'center'}}>
+                    <div>Built for </div>
+                    <span   style={{display: 'inline-block', fontWeight: 700}}><Typing
+                      style={{display: 'inline-block'}}
+                      loop={true}
+                       onFinishedTyping={this.changeTarget}>
+                      <span style={{display: 'inline-block'}}>{targets[this.state.targetCount]}</span>
+                      <Typing.Reset count={0} delay={900} />
+                    </Typing>
+                    </span>
+                  </div>
+                  <div style={{height: 4, width: 100, backgroundColor: 'black'}}/>
+                  <div>
+                    <div style={styles.mobileBuiltCat}>
+                      <span style={styles.miniBuilt}>
+                        BUILT TO BE...
+                      </span>
+                      <div style={styles.builtHead}>
+                        Open
                       </div>
-                      :
-                      null
-                    }
+                      <div style={styles.builtText}>
+                        A CRM that lets you share your contacts,
+                        projects and events to help improve impact and understanding across the volunteer sector.
                       </div>
-
                     </div>
 
-                  <div style={{position: 'relative'}}>
-                    <img
-                        style={{height: '90vh',objectPosition: '40% 60%', width: '100%',
-                         objectFit: 'cover', position: 'relative', marginTop: '-51px'}}
-                        src={'https://images.unsplash.com/photo-1492999104346-cabaa757be8f?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=e0e3f3e765bde2f5094873747a695c85&auto=format&fit=crop&w=1051&q=80'}/>
-                      <div style={{position: 'absolute',top:'-51px',  height: '80%', width: '95%',
-                      flexDirection: 'column',
-                        display: 'flex', justifyContent: 'center',paddingRight: '20px',
-                        boxSizing: 'border-box', paddingLeft: 20}}>
-                        <div style={{width: '100%'}}>
-                          <h2 style={{textAlign: 'left', color: 'black', fontSize: '48px',
-                        marginBottom: 15}}>Inspire your volunteers</h2>
-
-
-                        <p style={{fontSize: '20px', marginTop: 25, color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
-                          Let them see all the great projects your organisation does. Let them sign up to extra if they have time to spare.
-                          <br/>
-                          <br/>
-                          Let volunteers create groups, and come with their friends.
-                          <br/>
-                          <br/>
-                          But you're in control, if a project is sensitive, you can restrict who can see it.
-
-                        </p>
-
-                        </div>
-
+                    <div style={styles.mobileBuiltCat}>
+                      <span style={styles.miniBuilt}>
+                        BUILT TO BE...
+                      </span>
+                      <div style={styles.builtHead}>
+                        User-led
+                      </div>
+                      <div style={styles.builtText}>
+                        A CRM that encourages input from your volunteers. Get their feedback,
+                        find out how they want to help and let them update their own personal data.
                       </div>
                     </div>
 
-
-                    <div style={{position: 'relative'}}>
-                      <img
-                          style={{height: '90vh',objectPosition: '55% 100%', width: '100%',
-                           objectFit: 'cover', position: 'relative', marginTop: '-51px'}}
-                          src={'https://images.unsplash.com/photo-1530220616-3f1c5a86e6cb?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=29d3687e117dd607197b051ac2009473&auto=format&fit=crop&w=1191&q=80'}/>
-                        <div style={{position: 'absolute',top:'-51px',  height: '80%', width: '100%',
-                        flexDirection: 'column', alignItems: 'flex-end',
-                          display: 'flex', justifyContent: 'center',paddingRight: '20px',
-                           boxSizing: 'border-box', paddingLeft: 20}}>
-                          <div style={{ paddingRight: 10}}>
-                            <h2 style={{textAlign: 'left', color: 'black', fontSize: '48px',
-                          marginBottom: 15}}>Save yourself time</h2>
-
-
-                          <p style={{fontSize: '20px', marginTop: 25, color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
-                            Don't waste hours on boring admin. Save your time for the things that make a real difference.
-
-                        </p>
-                          <p style={{fontSize: '20px', paddingLeft: 40,  color: 'black' , fontWeight: 'lighter', textAlign: 'left'}}>
-                              We do reminder emails, calendar, and invite management all for you.</p>
-
-
-                          </div>
-
-                        </div>
+                    <div style={styles.mobileBuiltCat}>
+                      <span style={styles.miniBuilt}>
+                        BUILT to be...
+                      </span>
+                      <div style={styles.builtHead}>
+                        Collaborative
                       </div>
-
-                      <div style={{position: 'relative', color: 'white'}}>
-                        <img
-                            style={{height: '90vh',objectPosition: '50% 60%', width: '100%',
-                             objectFit: 'cover', position: 'relative', marginTop: '0px'}}
-                            src={'https://images.unsplash.com/photo-1517728848779-e95acb6ac40f?ixlib=rb-0.3.5&s=66620169dac15962f051322abe54d4b6&auto=format&fit=crop&w=1050&q=80'}/>
-                          <div style={{position: 'absolute',top:'0px',  height: '100%', width: '100%',
-                          flexDirection: 'column',
-                            display: 'flex', justifyContent: 'center',paddingRight: '20px', boxSizing: 'border-box',
-                            paddingLeft: 30}}>
-                            <div style={{width: '100%'}}>
-                              <h2 style={{textAlign: 'left',fontSize: '48px',
-                                marginTop: 0, paddingBottom: 105,
-                            marginBottom: 65}}>Do better together</h2>
+                      <div style={styles.builtText}>
+                        A CRM that lets you share your experience with other
+                        organisations and lets your volunteers share their skills.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
 
-                          <p style={{fontSize: '20px',paddingTop: 50, marginTop: 25,fontWeight: 'lighter', textAlign: 'left'}}>
-                              Receive feedback to help you improve your projects.</p>
-                            <p style={{fontSize: '20px',fontWeight: 'lighter', textAlign: 'left'}}>
-                              Help your volunteers showcase their effort.
-                            </p>
+              <div style={{minHeight: '70vh', paddingTop: 50, paddingBottom: 50,
+                width: '100%', display: 'flex', flexDirection: 'column',
+              backgroundColor: '#f6f6f4',alignItems: 'center'}}>
+              <div style={{height: '100%', width: '30%', minWidth: '300px'}}>
+                <img
+                  style={{height: 'auto', width: '80vw', borderRadius: 4}}
+                  src='https://eep.io/images/yzco4xsimv0y/3sCnNKOu0gSuYuewKUw6G6/3873f76efc0a4e22eefceed5d0f139a3/Customer-Success_King-of-Pops-442.jpg?w=500&q=95'/>
+              </div>
 
+                <div style={{display: 'flex', paddingTop: 50, justifyContent: 'center', alignItems: 'center'}}>
+                  <div style={{fontSize: '28px', width: '80vw',  letterSpacing: '-2px',
+                  fontWeight: 500, color: 'black'}}
+                    className='big-quote'>
+                    "It really shows what is happening in your organisation, and let's us show other people too."
+                  </div>
 
-                            </div>
+                </div>
+              </div>
 
-                          </div>
-                        </div>
+            <div style={{minHeight: '80vh'}}>
+              <h2 style={{fontSize: '48px', fontWeight: 200, marginTop: 50}}>
+                Easy to get started
+              </h2>
+              <div style={{width: '100%', display: 'flex', justifyContent: 'center'}}>
+                <div style={{height: 4, width: 100, backgroundColor: '#000AB2'}}/>
+              </div>
+
+              <div style={{display: 'flex', flexDirection: 'column'}}>
+                <div style={styles.mobileEasyBox}>
+                  <div style={{height: 195, boxSizing: 'border-box', padding: 20, width: '60%', display: 'flex', flexWrap: 'wrap', width: '100%',
+                  alignItems: 'center', justifyContent: 'center'}}>
+                    <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Microsoft_Outlook_2013_logo.svg/2000px-Microsoft_Outlook_2013_logo.svg.png'
+                      style={styles.integrationLogo}
+                      />
+                    <img src='https://eep.io/images/yzco4xsimv0y/6TmBL4BHuo8mUawcCmQK6q/b7db5963dabd34cf87fe537a958c7218/brand-assets_logos_image-gray-1960x1060.png?w=980&q=95'
+                      style={styles.integrationLogo}
+                      />
+                    <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTPFl8lWwPdrFlIZwxCER_EM0QMxsvdRBRDic8OZs1md4LKMoF'
+                      style={styles.integrationLogo}
+                      />
+                    <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/New_Logo_Gmail.svg/2000px-New_Logo_Gmail.svg.png'
+                      style={styles.integrationLogo}
+                      />
+                  </div>
+                  <div style={styles.easyHeader}>
+                    Works how you work
+                  </div>
+                  <div style={styles.easyText}>
+                    Link to your Outlook or Gmail account. Link up your Eventbrite events.
+                    Link up your calendars. Link to your Mailchimp. <br/><br/>
+                  We’ll work with the tools you’re used to.
+                  </div>
+                </div>
+
+                <div style={styles.mobileEasyBox}>
+                  <div>
+                    <img src='/scribble.png' style={{height: 150, padding: 20}}/>
+                  </div>
+                  <div style={styles.easyHeader}>
+                    Works with messy data
+                  </div>
+                  <div style={styles.easyText}>
+                    Broken email addresses? Duplicate records? Lots of different confusing spreadsheets?
+                    <br/><br/>We'll keep your data neat and tidy.
+                  </div>
+                </div>
+
+                <div style={styles.mobileEasyBox}>
+                  <div>
+                    <Network style={{height: 150, padding: 20}}/>
+                  </div>
+                  <div style={styles.easyHeader}>
+                    Works with complicated relationships
+                  </div>
+                  <div style={styles.easyText}>
+                    Your volunteers, trustees and contacts could belong to multiple community groups, charities and companies.
+                    <br/><br/>That’s the kind of thing we’re made for.
+                  </div>
+                </div>
+              </div>
+            </div>
 
             </MediaQuery>
 
                     <div style={{display: 'flex', height: 300, width: '100%', fontSize: '48px',
-                      padding: 10, boxSizing: 'border-box',
+                      padding: 10, boxSizing: 'border-box', backgroundColor: '#FFCB00',
+                      color: 'black',
                       flexDirection: 'column',
                       alignItems: 'center', justifyContent: 'center'}}>
                       Get started today
@@ -474,174 +577,8 @@ class Index extends React.Component {
 
 
                 <div>
-            <MediaQuery
-              values={{deviceWidth: isMobile ? 600 : 1400}}
-              minDeviceWidth={700}>
-              <div style={{position: 'sticky', top: '50px', display: 'flex', alignItems: 'center',
-                 paddingLeft: 100, zIndex: 10, paddingRight: 100
-                , background: 'linear-gradient(0deg, #ffffff, #f7f7f7)', paddingTop: 6,
-                paddingBottom: 6, borderBottom: '1px solid #DDDDDD'}}>
 
-                <Search style={{marginRight: 6}}/>
-                <TextField hintText={'Search'} onChange={this.handleSearch}/>
-              </div>
 
-            </MediaQuery>
-            <MediaQuery
-              values={{deviceWidth: isMobile ? 600 : 1400}}
-              maxDeviceWidth={700}>
-              <div style={{position: 'sticky', top: '50px', display: 'flex', alignItems: 'center', paddingLeft: 16, zIndex: 10, paddingRight: 10
-                , background: 'linear-gradient(0deg, #ffffff, #f7f7f7)', paddingTop: 6, paddingBottom: 6, borderBottom: '1px solid #DDDDDD'}}>
-
-                <Search style={{marginRight: 6}}/>
-                <TextField hintText={'Search'} onChange={this.handleSearch}/>
-              </div>
-            </MediaQuery>
-            <div>
-              <MediaQuery
-                values={{deviceWidth: isMobile ? 600 : 1400}}
-                minDeviceWidth={700}>
-                {this.state.private ?
-                  <div>
-                <h1 className='desktop-header' style={{paddingLeft: '100px', marginTop: 16}}>
-                  Private Projects</h1>
-                  <div style={{display: 'flex', flexWrap: 'wrap', paddingLeft: 100, paddingRight:100}}>
-                    {this.state.private.map((project) => (
-                      <div style={{padding: 20, minWidth: 280, boxSizing: 'border-box', width: '33%', position: 'relative'}}>
-                        <EmbeddedProject
-                          isMobile={isMobile}
-                          style={{position: 'relative'}} noLogo={true} project={project}/>
-                      </div>
-                    ))}
-                  </div>
-                  </div>
-                :
-                null}
-                <h1 className='desktop-header' style={{paddingLeft: '100px', marginTop: 16}}>
-                  Upcoming Projects</h1>
-                {this.props.loading ?
-                  <Loading/>
-                  :
-                  this.state.upcoming ?
-
-                  <div style={{display: 'flex', flexWrap: 'wrap', paddingLeft: 100, paddingRight:100}}>
-                    {this.state.upcoming.map((project) => (
-                      <div style={{padding: 20, minWidth: 280, boxSizing: 'border-box', width: '33%', position: 'relative'}}>
-                        <EmbeddedProject
-                          isMobile={isMobile}
-                          style={{position: 'relative'}} noLogo={true} project={project}/>
-                      </div>
-                    ))}
-                  </div>
-
-                  :
-                  null
-                }
-                <RegisterInterest />
-                  <h1 className='desktop-header' style={{paddingLeft: '100px', marginTop: 30}}>
-                    Successful Projects</h1>
-              {
-                  this.state.successful ?
-                  <div style={{display: 'flex', flexWrap: 'wrap', paddingLeft: 100, paddingRight:100}}>
-                    {this.state.successful.map((project) => (
-                      <div style={{padding: 20, minWidth: 280, boxSizing: 'border-box', width: '33%', position: 'relative'}}>
-                        <EmbeddedProject style={{position: 'relative'}} noLogo={true} project={project}/>
-                      </div>
-                    ))}
-                  </div>
-                  :
-                  null
-                }
-              </MediaQuery>
-              <MediaQuery
-                values={{deviceWidth: isMobile ? 600 : 1400}}
-                maxDeviceWidth={700}>
-
-                        <div style={{textAlign: 'left', paddingLeft: '18px', paddingRight: '18px', paddingBottom: '64px'}}>
-                          {this.state.private ?
-                            <div>
-                              <Subheader style={{fontSize: '25px', letterSpacing: '-0.6px', lineHeight: '30px', color: '#484848',
-                              fontWeight: 700, marginTop: '48px', marginBottom: '24px', paddingLeft: '0px'}}>
-                                Private Projects
-                              </Subheader>
-                              <div style={{display: 'flex', flexWrap: 'wrap',
-                              textAlign: 'left'}}>
-                                {this.state.private.map((project) => (
-                                  <div style={{paddingTop: 10, paddingBottom: 10, width: '100%', boxSizing: 'border-box'}}>
-                                    <EmbeddedProject noLogo={true}
-                                      project={project}
-                                    />
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          :
-                          null}
-
-                          <Subheader style={{fontSize: '25px', letterSpacing: '-0.6px', lineHeight: '30px', color: '#484848',
-                          fontWeight: 700, marginTop: '48px', marginBottom: '24px', paddingLeft: '0px'}}>
-                            Upcoming Projects
-                          </Subheader>
-                          {this.props.loading ?
-                            <Loading/>
-                            :
-                            this.state.upcoming ?
-                            <div style={{display: 'flex', flexWrap: 'wrap',
-                            textAlign: 'left'}}>
-                              {this.state.upcoming.map((project) => (
-                                <div style={{paddingTop: 10, paddingBottom: 10, width: '100%', boxSizing: 'border-box'}}>
-                                  <EmbeddedProject noLogo={true}
-                                    project={project}
-                                  />
-                                </div>
-                              ))}
-                            </div>
-                                 : null
-                    }
-                      <RegisterInterest />
-                        <Subheader style={{fontSize: '25px', letterSpacing: '-0.6px', lineHeight: '30px', color: '#484848',
-                        fontWeight: 700, marginTop: '48px', marginBottom: '24px', paddingLeft: '0px'}}>
-                          Successful Projects
-                        </Subheader>
-                        {this.props.loading ?
-                          <Loading/>
-                          :
-                          this.state.successful ?
-                          <div style={{display: 'flex', flexWrap: 'wrap',
-                          textAlign: 'left'}}>
-                            {this.state.successful.map((project) => (
-                              <div style={{paddingTop: 10, paddingBottom: 10, width: '100%', boxSizing: 'border-box'}}>
-                                <EmbeddedProject noLogo={true}
-                                  project={project}
-                                />
-                              </div>
-                            ))}
-                      </div>
-                      :
-                      null
-                    }
-                    <Divider style={{marginTop: 20}}/>
-                    <h2>Get involved, start your own project</h2>
-                    <div style={{height: 40, width: '100%', display: 'flex',
-                        alignItems: 'center', justifyContent: 'center'}}>
-
-                        <RaisedButton label='Start a Project'
-                          onClick={this.handleStartProject}
-                          style={{height: '36px', marginTop: '16px', boxShadow: ''}} primary={true} overlayStyle={{height: '36px'}}
-                            buttonStyle={{height: '36px'}}
-                             labelStyle={{height: '36px', display: 'flex', alignItems: 'center',
-                                  letterSpacing: '0.6px', fontWeight: 'bold'}}
-                          />
-                          <SignupModal
-                            open={this.state.modalOpen}
-                            changeOpen={this.handleModalChangeOpen}
-                          />
-
-                    </div>
-                  </div>
-
-              </MediaQuery>
-            </div>
           </div>
       </App>
     )

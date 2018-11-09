@@ -163,6 +163,21 @@ class YourCalendar extends React.Component {
 
   }
 
+  eventStyleGetter = (event, start, end, isSelected) => {
+    console.log(event);
+    var style = {
+        backgroundColor: '#FFCB00',
+        borderRadius: 2,
+        margin: 2,
+        color: 'black',
+        border: '0px',
+        display: 'block'
+    }
+    return {
+        style: style
+    };
+  }
+
   handleEventClick = (event) => {
     console.log(event)
     Router.push(`/project-admin?project=${event._id}&organisation=${Router.query.organisation}`)
@@ -283,6 +298,7 @@ class YourCalendar extends React.Component {
                     events={this.state.events}
                     startAccessor='Start Time'
                     endAccessor='End Time'
+                    eventPropGetter={this.eventStyleGetter}
                     onSelectEvent={this.handleEventClick}
                     onSelectSlot={(slotInfo, e) =>
                       {

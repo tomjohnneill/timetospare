@@ -8,7 +8,7 @@ import TextField from 'material-ui/TextField';
 import MenuItem from 'material-ui/MenuItem';
 import Router from 'next/router';
 import fire from '../fire';
-import {buttonStyles} from './styles.jsx';
+import {buttonStyles, headerStyles} from './styles.jsx';
 import * as math from 'mathjs'
 import * as firebase from 'firebase';
 import 'handsontable/dist/handsontable.full.css';
@@ -113,9 +113,15 @@ export default class OrganisationUpload extends React.Component {
     console.log(HotTable)
     return (
       <div style={{paddingLeft: 100, paddingRight: 100}}>
-        <h2 style={{textAlign: 'left'}}>
+      <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '30% 0 0 90%',
+        transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', right: -200,
+         width: '30vw', height: '100vw'}}/>
+       <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '0 30% 90% 0%',
+         transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', left: -150,
+          width: '20vw', height: '100vw'}}/>
+        <div style={headerStyles.desktop}>
           Copy and paste in a list of your organisations.
-        </h2>
+        </div>
         <p style={{marginTop: 0, fontWeight: 200, textAlign: 'left'}}>
           Make sure each row only has one organisation name in it.
         </p>

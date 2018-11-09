@@ -8,7 +8,7 @@ import TextField from 'material-ui/TextField';
 import MenuItem from 'material-ui/MenuItem';
 import Router from 'next/router';
 import fire from '../fire';
-import {buttonStyles, iconButtonStyles} from './styles.jsx';
+import {buttonStyles, iconButtonStyles, headerStyles} from './styles.jsx';
 import Close from 'material-ui/svg-icons/navigation/close'
 import * as math from 'mathjs'
 import Refresh from 'material-ui/svg-icons/navigation/refresh';
@@ -24,6 +24,8 @@ import OrganisationUpload from './organisation-upload.jsx';
 import * as firebase from 'firebase';
 import 'handsontable/dist/handsontable.full.css';
 import { DragDropContainer, DropTarget } from 'react-drag-drop-container';
+import Checkbox from 'material-ui/Checkbox';
+import {List, ListItem} from 'material-ui/List';
 import Deduplication from './deduplication.jsx';
 //import { HotTable } from '@handsontable/react';
 
@@ -120,6 +122,14 @@ export default class DataValidation extends React.Component {
     columnNames[position] = {name: item.name, selected: false}
     console.log(columnNames)
     this.setState({selected: columns[position + 1], columns: columnNames, newColumn: false})
+  }
+
+  handleToggleColumn = (e, check, item) => {
+    var columns = this.state.columns
+    var position = columns.indexOf(item)
+    var columnNames = this.state.columns ? this.state.columns : []
+    columnNames[position] = {name: item.name, selected: false}
+    this.setState({columns: columnNames})
   }
 
   handleBack = (item) => {
@@ -281,7 +291,7 @@ export default class DataValidation extends React.Component {
       numDetails.forEach((value) => {
         if (Math.abs((value - numStats.mean)/numStats.stdev) > 2) {
           if (outliers[lookup[counter]]) {
-             outliers[lookup[counter]]  += Math.abs((value - numStats.mean)/numStats.stdev)*2
+             outliers[lookup[counter]]  += Math.abs((value - numStats.mean)/numStats.stdev)
           } else {
              outliers[lookup[counter]]  = Math.abs((value - numStats.mean)/numStats.stdev)
           }
@@ -334,7 +344,7 @@ export default class DataValidation extends React.Component {
 
     var toCheckRows = this.state.checkRows ? this.state.checkRows : {}
     Object.keys(outliers).forEach((key) => {
-      if (outliers[key] > 15) {
+      if (outliers[key] >  Math.log(this.state.grid.length)) {
         if (toCheckRows[key]) {
           toCheckRows[key].append(key)
         } else {
@@ -354,7 +364,7 @@ export default class DataValidation extends React.Component {
       var checkColumns = Object.values(checkRow)[0]
 
       if (checkColumns.includes(col+1)) {
-        td.style.background = 'yellow';
+        td.style.backgroundColor = '#ffefb1';
       }
     }
 
@@ -432,12 +442,12 @@ export default class DataValidation extends React.Component {
     switch(this.state.stage) {
       case 'validation': {
         return (
-          <div>
-            <h2 style={{textAlign: 'left', paddingLeft: 100}}>
+          <div >
+            <div style={headerStyles.desktop}>
               Some of your data looks a bit unusual. You can change it here if you need to.
-            </h2>
+            </div>
             {typeof window !== 'undefined' && HotTable ?
-              <div id="hot-app" style={{zIndex: 8}}>
+              <div id="hot-app" style={{zIndex: 8, width: '90vw', boxSizing: 'border-box'}}>
                 <HotTable
                   renderer={this.groupingRenderer.bind(this)}
                   data={tableRows} colHeaders={true}
@@ -494,18 +504,23 @@ export default class DataValidation extends React.Component {
       case 'deduplication': {
         return  <Deduplication
             data={this.state.grid}
+            columns={this.state.columns}
             goBack={() => this.setState({stage: 'org-upload'})}
           />
         break;
       }
       case 'highlight-columns' : {
         return (
-          <div style={{paddingLeft: 100, paddingRight: 100}}>
-            <h2 style={{textAlign: 'left'}}>
+          <div style={{paddingLeft: 100, paddingRight: 100, minHeight: '100vh'}}>
+            <div style={headerStyles.desktop}>
               We need your help to categorise a few of these columns
-            </h2>
+            </div>
 
-            <div style={{marginBottom: 10}}>
+               <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '30% 0 0 90%',
+                 transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', right: -200,
+                  width: '30vw', height: '100vw'}}/>
+
+                <div style={{marginBottom: 10}}>
               <p>Drag and drop the icons onto the right columns</p>
               <DragDropContainer
                 onDrop={this.handleDrop}
@@ -606,7 +621,7 @@ export default class DataValidation extends React.Component {
                       border: '2px solid #DBDBDB', borderRadius: 2,
                       color: column.category ? 'white' : null,
                       fontWeight: column.category ? 700 : null,
-                      backgroundColor: column.category ? colors[column.category] : null}}>
+                      backgroundColor: column.category ? colors[column.category] : 'white'}}>
                       <div style={{width: '100%', overflow: 'hidden', display: 'flex',
                           justifyContent: 'space-between', flexDirection: 'column',
                          paddingBottom: 10}}>
@@ -666,95 +681,29 @@ export default class DataValidation extends React.Component {
       }
       default : {
         return (
-          <div style={{paddingLeft: 100, paddingRight: 50}}>
-            <h2 style={{textAlign: 'left'}}>Which columns do you want to import?</h2>
-            <div style={{display: 'flex', maxWidth: '100vw',
-               overflow: 'auto', flexWrap: 'wrap'}}>
+          <div style={{paddingLeft: 200, paddingRight: 200, paddingTop: 50, marginBottom: 200}}>
+            <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '30% 0 0 90%',
+              transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', right: -150,
+               width: '40vw', height: '100vw'}}/>
+            <h2 style={{textAlign: 'left', fontWeight: 200, fontSize: '36px', marginBottom: 50}}>
+              Which columns do you want to import?</h2>
+            <div style={{ maxWidth: '500px', textAlign: 'left',
+               overflow: 'auto'}}>
               {this.state.columns.map((item) => (
-                <div style={{width: 275, minWidth: 275, margin: 5,
-                    backgroundColor: 'white',
-                    borderColor: this.state.selected === item ?
-                      '#65A1e7' :
-                      this.state.columns.indexOf(item) <
-                       this.state.columns.indexOf(this.state.selected) ||
-                       this.state.columnNames && this.state.columnNames.length === this.state.columns.length ?
-                      '#DBDBDB':
-                       '#000AB2',
-                    borderWidth: '2px',
-                    borderStyle: 'solid'
-                    }}>
-
-                  {this.state.selected === item ?
-                    <div style={{padding: 6, textAlign: 'center'}}>
-                      <div style={{textAlign: 'left', fontWeight: 700}}>
-                        {item.name.includes('Custom Column') ? 'Unnamed' : item.name}
-                      </div>
-
-                      <div style={{display: 'flex',  height: 66,
-                          boxSizing: 'border-box', alignItems: 'center'}}>
-                        {
-                          this.state.columns.indexOf(item) !== 0 ?
-                        <FlatButton
-                          style={buttonStyles.smallSize}
-                        labelStyle={buttonStyles.smallLabel}
-                            onClick={() => this.handleBack(item)}
-                            label='Back'/>
-                          :
-                          null
-                        }
-                      <RaisedButton
-                        style={buttonStyles.smallSize}
-                        labelStyle={buttonStyles.smallLabel}
-                        secondary={true}
-                        disabled={item.name.includes('Custom Column') && !this.state.newColumnName}
-                        onClick={() => this.handleSave(item)}
-                        label='Save'/>
-                      <FlatButton
-                        style={buttonStyles.smallSize}
-                        labelStyle={buttonStyles.smallLabel}
-                        onClick={() => this.handleSkip(item)}
-                          label='Skip'/>
-                      </div>
-                    </div>
-                    :
-                    <div style={{height: 100, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                      <div style={{textAlign: 'center', fontWeight: 700}}>
-                        {item.name.includes('Custom Column') ? 'Unnamed' : item.name}
-                        {item.selected === false ?
-                          <div style={{fontStyle:'italic',fontWeight: 'lighter', color: '#000AB2'}}>
-                          Will not be imported
-                        </div> : null}
-                      </div>
-                    </div>}
-
-                  {this.state.grid.slice(0, 5).map((row) => (
-                    <div>
-                      <div style={{textAlign: 'left',
-                        height: 35,
-                        display: 'flex',
-                        paddingLeft: 6,
-                        alignItems: 'center',
-                        borderTopColor: this.state.selected === item ? 'rgba(101, 161, 231, 0.8)':
-                        this.state.columns.indexOf(item) <
-                         this.state.columns.indexOf(this.state.selected)||
-                         this.state.columnNames && this.state.columnNames.length === this.state.columns.length  ?
-                         'rgba(219, 219, 219, 0.8)'
-                         :
-                        'rgba(229, 87, 73, 0.8)',
-                        borderTopWidth: 1,
-                        borderTopStyle: 'solid',
-                        backgroundColor: this.state.selected === item ? 'rgba(101, 161, 231, 0.4)':
-                        this.state.columns.indexOf(item) <
-                         this.state.columns.indexOf(this.state.selected) ||
-                         this.state.columnNames && this.state.columnNames.length === this.state.columns.length ?
-                         'rgba(219, 219, 219, 0.4)':
-                        'rgba(229, 87, 73, 0.4)'
-                      }}>
-                        {row[this.state.columns.indexOf(item)]}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <ListItem  primaryText={item.name}
+                  nestedItems={
+                    this.state.grid.slice(0,5).map((row) => (
+                      <ListItem
+                        style={{borderBottom: '1px solid #DBDBDB'}}
+                        primaryText={row[this.state.columns.indexOf(item)]}/>
+                    ))
+                  }
+                  style={{borderBottom: '1px solid #DBDBDB'}}
+                  leftCheckbox={<Checkbox
+                    defaultChecked={true}
+                    onCheck={(e, check) => this.handleToggleColumn(e, check, item)}
+                    />}
+                  />
               ))}
 
             </div>

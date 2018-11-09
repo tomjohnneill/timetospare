@@ -23,6 +23,7 @@ import withMui from '../components/hocs/withMui';
 
 import fire from '../fire';
 
+let mobile = require('is-mobile');
 let db = fire.firestore()
 
 var algoliasearch = require('algoliasearch/lite')
@@ -223,32 +224,61 @@ class AllProjects extends React.Component {
     this.state = {loading: true}
   }
 
-  componentDidMount(props) {
-    db.collection("Project").where("Approved", "==", true).get().then((querySnapshot) => {
-      let upcoming = []
-      let successful = []
-      let projects = []
-      querySnapshot.forEach((doc) => {
-        var hit = doc.data()
-        hit._id = doc.id
-        projects.push(hit)
-        if (hit['End Time'] && new Date(hit['End Time']) > new Date()) {
-          upcoming.push(hit)
-        } else if
-          (hit['Deadline'] && new Date(hit['Deadline']) > new Date()) {
-            upcoming.push(hit)
-          }
-          else {
-          successful.push(hit)
-        }
+  static async getInitialProps(ctx) {
+    console.log(ctx)
+       const res = await db.collection("Project").get()
+       .then((querySnapshot) => {
+         let upcoming = []
+         let successful = []
+         let projects = []
+         querySnapshot.forEach((doc) => {
+           var hit = doc.data()
+           hit._id = doc.id
+           projects.push(hit)
+           if (hit['End Time'] && new Date(hit['End Time']) > new Date()) {
+             upcoming.push(hit)
+           } else if
+             (hit['Deadline'] && new Date(hit['Deadline']) > new Date()) {
+               upcoming.push(hit)
+             }
+             else {
+             successful.push(hit)
+           }
 
 
-      })
-      this.setState({projects: projects,
-        upcoming: upcoming, successful: successful,
-        loading: false});
-      })
-  }
+         })
+         return({projects: projects,
+           upcoming: upcoming, successful: successful,
+           loading: false});
+       })
+       return res
+     }
+
+       getPrivateProjects = (uid) => {
+         db.collection("Project").where("View." + fire.auth().currentUser.uid, "==", true)
+         .get().then((querySnapshot) => {
+           var data = []
+           querySnapshot.forEach((project) => {
+             var elem = project.data()
+             elem._id = project.id
+             data.push(elem)
+           })
+           this.setState({private: data})
+         })
+       }
+
+       componentDidMount(props) {
+         if (fire.auth().currentUser) {
+           this.getPrivateProjects(fire.auth().currentUser.uid)
+         }
+         fire.auth().onAuthStateChanged((user) => {
+           if (user !== null) {
+             this.getPrivateProjects(fire.auth().currentUser.uid)
+           }
+         })
+         Router.prefetch('/signup')
+       }
+
 
   handleSearch = (e, input) => {
     const client = algoliasearch('52RYQZ0NQK', 'b10f7cdebfc189fc6f889dbd0d3ffec2');
@@ -282,6 +312,7 @@ class AllProjects extends React.Component {
   }
 
   render() {
+    var isMobile = mobile(this.props.userAgent)
     if (this.state.projects) {
       console.log(this.state.projects)
     }
@@ -313,18 +344,38 @@ class AllProjects extends React.Component {
           </div>
         </MediaQuery>
         <div>
-          <MediaQuery minDeviceWidth={700}>
+          <MediaQuery
+            values={{deviceWidth: isMobile ? 600 : 1400}}
+            minDeviceWidth={700}>
+            {this.state.private ?
+              <div>
+            <h1 className='desktop-header' style={{paddingLeft: '100px', marginTop: 16}}>
+              Private Projects</h1>
+              <div style={{display: 'flex', flexWrap: 'wrap', paddingLeft: 100, paddingRight:100}}>
+                {this.state.private.map((project) => (
+                  <div style={{padding: 20, minWidth: 280, boxSizing: 'border-box', width: '33%', position: 'relative'}}>
+                    <EmbeddedProject
+                      isMobile={isMobile}
+                      style={{position: 'relative'}} noLogo={true} project={project}/>
+                  </div>
+                ))}
+              </div>
+              </div>
+            :
+            null}
             <h1 className='desktop-header' style={{paddingLeft: '100px', marginTop: 16}}>
               Upcoming Projects</h1>
-            {this.state.loading ?
+            {this.props.loading ?
               <Loading/>
               :
-              this.state.projects ?
+              this.state.upcoming ?
 
               <div style={{display: 'flex', flexWrap: 'wrap', paddingLeft: 100, paddingRight:100}}>
                 {this.state.upcoming.map((project) => (
                   <div style={{padding: 20, minWidth: 280, boxSizing: 'border-box', width: '33%', position: 'relative'}}>
-                    <EmbeddedProject style={{position: 'relative'}} noLogo={true} project={project}/>
+                    <EmbeddedProject
+                      isMobile={isMobile}
+                      style={{position: 'relative'}} noLogo={true} project={project}/>
                   </div>
                 ))}
               </div>
@@ -348,17 +399,39 @@ class AllProjects extends React.Component {
               null
             }
           </MediaQuery>
-          <MediaQuery maxDeviceWidth={700}>
+          <MediaQuery
+            values={{deviceWidth: isMobile ? 600 : 1400}}
+            maxDeviceWidth={700}>
 
                     <div style={{textAlign: 'left', paddingLeft: '18px', paddingRight: '18px', paddingBottom: '64px'}}>
+                      {this.state.private ?
+                        <div>
+                          <Subheader style={{fontSize: '25px', letterSpacing: '-0.6px', lineHeight: '30px', color: '#484848',
+                          fontWeight: 700, marginTop: '48px', marginBottom: '24px', paddingLeft: '0px'}}>
+                            Private Projects
+                          </Subheader>
+                          <div style={{display: 'flex', flexWrap: 'wrap',
+                          textAlign: 'left'}}>
+                            {this.state.private.map((project) => (
+                              <div style={{paddingTop: 10, paddingBottom: 10, width: '100%', boxSizing: 'border-box'}}>
+                                <EmbeddedProject noLogo={true}
+                                  project={project}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      :
+                      null}
+
                       <Subheader style={{fontSize: '25px', letterSpacing: '-0.6px', lineHeight: '30px', color: '#484848',
                       fontWeight: 700, marginTop: '48px', marginBottom: '24px', paddingLeft: '0px'}}>
                         Upcoming Projects
                       </Subheader>
-                      {this.state.loading ?
+                      {this.props.loading ?
                         <Loading/>
                         :
-                        this.state.projects ?
+                        this.state.upcoming ?
                         <div style={{display: 'flex', flexWrap: 'wrap',
                         textAlign: 'left'}}>
                           {this.state.upcoming.map((project) => (
@@ -376,10 +449,10 @@ class AllProjects extends React.Component {
                     fontWeight: 700, marginTop: '48px', marginBottom: '24px', paddingLeft: '0px'}}>
                       Successful Projects
                     </Subheader>
-                    {this.state.loading ?
+                    {this.props.loading ?
                       <Loading/>
                       :
-                      this.state.projects ?
+                      this.state.successful ?
                       <div style={{display: 'flex', flexWrap: 'wrap',
                       textAlign: 'left'}}>
                         {this.state.successful.map((project) => (

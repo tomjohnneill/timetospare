@@ -143,7 +143,7 @@ export default class Footer extends React.Component {
               <div style={{flex: 2}}/>
               <div style={{flex: 2, marginLeft: 24, display: 'flex', justifyContent: 'center'}}>
                 <div style={{width: '100%'}}>
-                  hello@timetospare.org.uk
+                  hello@timetospare.com
                   <div style={{display: 'block'}}>
                     <Link style={{width: '100%', display: 'block'}} href='/about'><div>About</div></Link>
                     <Link style={{width: '100%', display: 'block'}} href='/why'><div>Why Start a Project?</div></Link>

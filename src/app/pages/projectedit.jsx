@@ -397,7 +397,7 @@ class ProjectEdit extends React.Component {
               <div style={{width: '50%', padding: 15}}>
                 <div style={editStyles.container}>
                   <IconButton
-                    onClick={() => Router.push('/project-calendar')}
+                    onClick={() => Router.back()}
                     tooltip='Back to calendar'
                     style={{padding: 0, width: 54, height: 54}} iconStyle={{width: 54, height: 30}}>
                     <Close  color={'#484848'}/>

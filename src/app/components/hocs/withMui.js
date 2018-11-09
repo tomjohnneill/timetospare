@@ -2,6 +2,8 @@ import React from "react"
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import { withRouter } from 'next/router'
+import 'babel-polyfill'
+
 var cookie = require('cookie');
 
 var injectTapEventPlugin = require("react-tap-event-plugin");

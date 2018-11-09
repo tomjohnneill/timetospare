@@ -7,13 +7,14 @@ import SelectField from 'material-ui/SelectField';
 import Divider from 'material-ui/Divider';
 import TextField from 'material-ui/TextField';
 import MenuItem from 'material-ui/MenuItem';
-import CSVReader from 'react-csv-reader'
 import Router from 'next/router';
 import fire from '../fire';
 import withMui from '../components/hocs/withMui';
 import DataValidation from '../components/data-validation';
-import {buttonStyles} from '../components/styles.jsx';
+import {buttonStyles, headerStyles} from '../components/styles.jsx';
 import * as firebase from 'firebase';
+import Dropzone from 'react-dropzone';
+import * as Papa from 'papaparse';
 
 let db = fire.firestore()
 
@@ -36,10 +37,31 @@ export class UploadData extends React.Component {
     this.setState({columns: columns, grid: grid})
   }
 
+  handleDrop = (file, rej) => {
+    console.log('hello')
+    console.log(file)
+    Papa.parse(file[0],  {
+      complete: (result) => {
+        var data = result.data
+
+        var grid = data.slice(1)
+
+        console.log(grid)
+        var headers = data[0]
+        var columns = []
+        headers.forEach((each) => {
+          columns.push({name: each})
+        })
+        this.setState({columns: columns, grid: grid})
+      }
+    })
+  }
+
   render() {
     return (
       <App>
-        <div style={{minHeight: '100vh'}}>
+
+         <div style={{minHeight: '100vh', display: 'flex', alignItems: 'center', flexDirection: 'column'}}>
 
         {
           this.state.grid ?
@@ -49,13 +71,18 @@ export class UploadData extends React.Component {
             />
           :
           <div style={{padding: 40}}>
-            <CSVReader
-              cssClass="csv-input"
-              label="Upload a csv with your contacts data"
-              onFileLoaded={this.handleForce}
-              onError={this.handleDarkSideForce}
-              inputId="ObiWan"
-            />
+            <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '0 30% 90% 0%',
+              transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', left: -150,
+               width: '30vw', height: '100vw'}}/>
+            <div style={headerStyles.desktop}>
+              Upload your CSV file
+            </div>
+          <Dropzone onDrop={this.handleDrop}>
+
+
+          </Dropzone>
+
+
           </div>
         }
 

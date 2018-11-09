@@ -1,6 +1,7 @@
 import Document, { Head, Main, NextScript } from 'next/document'
 import { GA_TRACKING_ID } from '../lib/gtag'
 
+
 export default class MyDocument extends Document {
   static getInitialProps({ renderPage }) {
     const { html, head, errorHtml, chunks } = renderPage();
@@ -33,7 +34,7 @@ export default class MyDocument extends Document {
             margin: 0,
             padding: 0,
             fontFamily: 'Nunito',
-            color: '#484848',
+            color: 'black',
             textDecoration: 'none',
             listStyleType: 'none'
           }}

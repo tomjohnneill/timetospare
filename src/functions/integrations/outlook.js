@@ -42,6 +42,7 @@ const requestNewToken = (refresh_token, uid) => {
   var data = {
     grant_type: 'refresh_token',
     client_id: CLIENT_ID,
+    refresh_token: refresh_token,
     client_secret: CLIENT_SECRET,
   }
   console.log(data)

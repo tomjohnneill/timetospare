@@ -298,7 +298,7 @@ export default class Header extends React.Component {
         <Head>
           <title>Time to Spare</title>
           <meta name="viewport" content="initial-scale=1.0, width=device-width" key="viewport" />
-          <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script>
+          
         </Head>
         <AppBar
 
@@ -388,13 +388,27 @@ export default class Header extends React.Component {
                                      null
                                    }
 
+                                   <div style={{width: 25, color:'#DBDBDB'}}>
+                                     |
+                                   </div>
 
-
+                                   <Link prefetch href='/pricing'>
+                                     <div style={
+                                       this.props.router.pathname.includes('pricing') ?
+                                       style.selectedCategory :
+                                       style.category}
+                                       className='header-category'
+                                       >
+                                       Pricing
+                                     </div>
+                                   </Link>
 
                                   <Link prefetch href='/projects'>
-                                    <div style={{
-                                      cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight:25}}
-
+                                    <div style={
+                                      this.props.router.pathname.includes('projects') ?
+                                      style.selectedCategory :
+                                      style.category}
+                                      className='header-category'
                                       >
                                       Projects
                                     </div>

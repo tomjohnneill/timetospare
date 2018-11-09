@@ -197,7 +197,7 @@ export class Organisation extends React.Component {
         return (
           <a href={int.Details ? int.Details.url : null}>
             <div
-              style={{borderLeft: '3px solid #e91e63', backgroundColor: '#f9c8d9',  marginBottom: 10}}
+              style={{ borderBottom : '1px solid #DBDBDB'}}
               >
               <ListItem
                 id={int._id}
@@ -207,7 +207,7 @@ export class Organisation extends React.Component {
                   style={iconButtonStyles.button}><MoreVert /></IconButton>
                 }
                 className='email-interaction'
-                style={{marginBottom: 10,  backgroundColor: '#f9c8d9'}}
+
                 primaryText={int.Details ? int.Details.name : null}
                 primaryTogglesNestedList={true}
                 nestedItems={[<div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
@@ -228,7 +228,9 @@ export class Organisation extends React.Component {
                 </div>]}
                 secondaryText={int.Date.toLocaleString('en-gb',
                   {weekday: 'long', month: 'long', day: 'numeric'})}
-                leftIcon={int.Pinned ? <Warning color='red'/> : <EventIcon color={'black'}/>} />
+                  leftAvatar={<Avatar
+                    backgroundColor={'#e91e63'}
+                    icon={<EventIcon /> } />} />
 
             </div>
           </a>
@@ -248,7 +250,7 @@ export class Organisation extends React.Component {
         break;
       case "Email":
         return (
-          <div style={{borderLeft: '3px solid #DBDBDB', backgroundColor: 'rgb(249, 249, 249)', paddingBottom: 10, marginBottom: 10}}>
+          <div style={{ borderBottom : '1px solid #DBDBDB'}}>
             <ListItem
               className='email-interaction'
               style={{marginBottom: 5 }}
@@ -259,7 +261,9 @@ export class Organisation extends React.Component {
               primaryText={<span>Received your email: <b>{int.Details ? int.Details.Subject : ""}</b></span>}
               secondaryText={int.Date.toLocaleString('en-gb',
                 {weekday: 'long', month: 'long', day: 'numeric'})}
-               leftIcon={<Email />} />
+                leftAvatar={<Avatar
+                  backgroundColor={'#DBDBDB'}
+                  icon={<Email /> } />} />
              <div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
                {
                  int.Members && this.state.membersLoaded
@@ -301,7 +305,7 @@ export class Organisation extends React.Component {
       case "Note":
         return (
           <div
-            style={{borderLeft: '3px solid rgb(253,216,53)', backgroundColor: 'rgb(255,249,196)',  marginBottom: 10}}
+            style={{  borderBottom : '1px solid #DBDBDB'}}
             >
             <ListItem
               id={int._id}
@@ -309,9 +313,7 @@ export class Organisation extends React.Component {
                 tooltip='Options'
                 onClick={(e) => this.handleOptionsClick(e, int)}
                 style={iconButtonStyles.button}><MoreVert /></IconButton>}
-
               className='email-interaction'
-              style={{marginBottom: 10,  backgroundColor: 'rgb(255,249,196)'}}
               primaryText={<div>
                 <div className='story-text' dangerouslySetInnerHTML={this.noteMarkup(int.Details ? int.Details.Note : null)}/>
               </div>}
@@ -334,7 +336,10 @@ export class Organisation extends React.Component {
               </div>]}
               secondaryText={int.Date.toLocaleString('en-gb',
                 {weekday: 'long', month: 'long', day: 'numeric'})}
-               leftIcon={int.Pinned ? <Warning color='red'/> : <NoteIcon style={{height: 36, width: 36, marginLeft: 6, marginTop: 6}} fill={'black'}/>} />
+                leftAvatar={<Avatar
+                  backgroundColor={'rgb(253,216,53)'}
+                  icon={<NoteIcon  color={'black'}/> } />}
+               />
 
           </div>
         )
@@ -393,6 +398,12 @@ export class Organisation extends React.Component {
     return (
       <div>
         <App>
+          <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '30% 0 0 90%',
+            transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', right: -250,
+             width: '30vw', height: '100vw'}}/>
+           <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '0 30% 90% 0%',
+             transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', left: -250,
+              width: '20vw', height: '100vw'}}/>
           <Dialog
             open={this.state.deleteOpen}
             actions={[

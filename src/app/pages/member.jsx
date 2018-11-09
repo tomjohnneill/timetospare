@@ -177,7 +177,7 @@ export class Member extends React.Component {
       case "Event":
         return (
           <div
-            style={{borderLeft: '3px solid #e91e63', backgroundColor: '#f9c8d9',  marginBottom: 10}}
+            style={{ borderBottom : '1px solid #DBDBDB'}}
             >
             <ListItem
               id={int._id}
@@ -187,12 +187,15 @@ export class Member extends React.Component {
                 style={iconButtonStyles.button}><MoreVert /></IconButton>
               }
               className='email-interaction'
-              style={{marginBottom: 10,  backgroundColor: '#f9c8d9'}}
+
               primaryText={int.Details ? int.Details.name : null}
               primaryTogglesNestedList={true}
               secondaryText={new Date(int.Date).toLocaleString('en-gb',
                 {weekday: 'long', month: 'long', day: 'numeric'})}
-              leftIcon={int.Pinned ? <Warning color='red'/> : <EventIcon color={'black'}/>} />
+                leftAvatar={<Avatar
+                  backgroundColor={'#e91e63'}
+                  icon={<EventIcon /> } />}
+               />
 
           </div>
         )
@@ -215,7 +218,7 @@ export class Member extends React.Component {
             <ListItem
               id={int._id}
               className='email-interaction'
-              style={{marginBottom: 10, borderLeft: '3px solid #DBDBDB', backgroundColor: 'rgb(249, 249, 249)'}}
+              style={{ borderBottom : '1px solid #DBDBDB'}}
               primaryText={<span>Received your email: <b>{int.Details ? int.Details.Subject : ""}</b></span>}
               rightIcon={<IconButton
                 tooltip='Options'
@@ -223,7 +226,10 @@ export class Member extends React.Component {
                 style={iconButtonStyles.button}><MoreVert /></IconButton>}
               secondaryText={int.Date.toLocaleString('en-gb',
                 {weekday: 'long', month: 'long', day: 'numeric'})}
-               leftIcon={<Email />} />
+                leftAvatar={<Avatar
+                  backgroundColor={'#DBDBDB'}
+                  icon={<Email /> } />}
+                   />
           </div>
         )
         break;
@@ -237,13 +243,18 @@ export class Member extends React.Component {
                 onClick={(e) => this.handleOptionsClick(e, int)}
                 style={iconButtonStyles.button}><MoreVert /></IconButton>}
               className='email-interaction'
-              style={{marginBottom: 10, borderLeft: '3px solid #DBDBDB', backgroundColor: 'rgb(249, 249, 249)'}}
+                style={{ borderBottom : '1px solid #DBDBDB'}}
               primaryText={<span>Replied to your email: <b>{int.Details ? int.Details.Subject : ""}</b>
             <div className='story-text' dangerouslySetInnerHTML={this.noteMarkup(int.Details ? int.Details.Message : null)}/>
         </span>}
               secondaryText={int.Date.toLocaleString('en-gb',
                 {weekday: 'long', month: 'long', day: 'numeric'})}
-               leftIcon={<Email />} />
+
+                leftAvatar={<Avatar
+                  backgroundColor={'#DBDBDB'}
+                  icon={<Email /> } />}
+                  />
+
           </div>
         )
         break;
@@ -253,7 +264,7 @@ export class Member extends React.Component {
             <ListItem
               id={int._id}
               className='email-interaction'
-              style={{marginBottom: 10, borderLeft: '3px solid rgb(253,216,53)', backgroundColor: 'rgb(255,249,196)'}}
+              style={{  borderBottom : '1px solid #DBDBDB'}}
               primaryText={<div>
                 <div className='story-text' dangerouslySetInnerHTML={this.noteMarkup(int.Details ? int.Details.Note : null)}/>
               </div>}
@@ -263,7 +274,11 @@ export class Member extends React.Component {
                 style={iconButtonStyles.button}><MoreVert /></IconButton>}
               secondaryText={int.Date.toLocaleString('en-gb',
                 {weekday: 'long', month: 'long', day: 'numeric'})}
-               leftIcon={int.Pinned ? <Warning color='red'/> : <NoteIcon style={{height: 36, width: 36, marginLeft: 6, marginTop: 6}} fill={'black'}/>} />
+              leftAvatar={<Avatar
+                backgroundColor={'rgb(253,216,53)'}
+                icon={<NoteIcon  color={'black'}/> } />}
+
+                  />
           </div>
         )
         break;
@@ -345,6 +360,12 @@ export class Member extends React.Component {
     }
     return (
       <div>
+        <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '30% 0 0 90%',
+          transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', right: -250,
+           width: '30vw', height: '100vw'}}/>
+         <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '0 30% 90% 0%',
+           transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', left: -250,
+            width: '20vw', height: '100vw'}}/>
         <App>
           <Popover
             open={this.state.optionsOpen}
@@ -426,7 +447,7 @@ export class Member extends React.Component {
                 style={{display: 'flex', height: 80, alignItems: 'center'}}
                 primaryText={<span>Contact {this.state.member['Full Name'] ? this.state.member['Full Name'] : decodeURIComponent(this.props.url.query.name)}</span>}
                 onClick={() => Router.push(`/csv-upload?organisation=${this.state.organisation}`,
-                      `/csv-upload/${this.state.organisation}`)}
+                      `/messaging/${this.state.organisation}`)}
                 leftAvatar={<Avatar backgroundColor={'#FFCB00'} icon={<Email/>}></Avatar>}
 
               />
@@ -441,7 +462,7 @@ export class Member extends React.Component {
                 justifyContent: 'space-between', alignItems: 'center'}}>
                 <div style={{textAlign: 'left'}}>
 
-                  <div style={{fontWeight: 700, fontSize: '40px', paddingBottom: 10,
+                  <div style={{fontWeight: 200, fontSize: '40px', paddingBottom: 10,
                     borderBottom: '4px solid #000AB2', display: 'flex', alignItems: 'center'
                   }}>
                   <AvatarIcon style={{height: 60, paddingRight: 15}} color='#484848'/>

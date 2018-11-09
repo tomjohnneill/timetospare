@@ -45,13 +45,13 @@ export default class Deduplication extends React.Component {
   }
 
   componentDidMount (props) {
-    console.log(this.props.data)
+
     if (typeof window !== 'undefined') {
       this.HotTable = require('@handsontable/react').HotTable
       this.Handsontable = require('handsontable')
       this.setState({shouldRemount: true})
     }
-    console.log(this.props.columns)
+
     this.findDuplicates(this.props.data)
   }
 
@@ -67,11 +67,31 @@ export default class Deduplication extends React.Component {
     })
   }
 
+  convertRowToKeys = (row) => {
+
+    var keyedData = {}
+
+    for (var i = 0; i < this.props.columns.length; i ++) {
+      var column = this.props.columns[i]
+      if (column.category) {
+        keyedData[column.category] = row[i]
+      } else {
+        keyedData[column.name] = row[i]
+      }
+    }
+    return keyedData
+  }
+
   convertRowToGrid = (row) => {
     var rowData = []
-    Object.keys(row[0]).forEach((key) => {
-      rowData.push(row[0][key])
-    })
+    if (row[0]) {
+      Object.keys(row[0]).forEach((key) => {
+        rowData.push(row[0][key])
+      })
+    } else {
+      console.log('row[0] was error', row)
+    }
+
     return rowData
   }
 
@@ -105,14 +125,18 @@ export default class Deduplication extends React.Component {
     return finishedData
   }
 
-  getGridFromIndices = (indices) => {
+  getGridFromIndices = (indices, keepAllColumns) => {
     var data = []
     indices.forEach((index) => {
       var row = this.props.data.slice(index, index + 1)
       var rowGrid = this.convertRowToGrid(row)
       data.push(rowGrid)
     })
-    return this.deleteEmptyColumns(data)
+    if (keepAllColumns) {
+      return data
+    } else {
+      return this.deleteEmptyColumns(data)
+    }
   }
 
   runThroughOneField = (data, oldSymm, columnName, column) => {
@@ -152,18 +176,25 @@ export default class Deduplication extends React.Component {
     var rowNamesMatch = true
     var baseName = null
     duplicateGroup.forEach((index) => {
-      var dataRow = this.props.data[index]
+      var dataRow = this.props.data.slice(index, index + 1)
+      console.log(dataRow)
+      if (dataRow && dataRow[0]) {
+        if (!baseName) {
 
-      if (!baseName) {
-        console.log(dataRow['Full Name'])
-        baseName = dataRow['Full Name']
-      } else {
-        console.log(baseName, dataRow['Full Name'])
-        if (!arraysEqual(baseName, dataRow['Full Name'])) {
-          console.log('no match')
-          rowNamesMatch = false
+          baseName = dataRow[0]['Full Name']
+
+        } else {
+
+          if (!arraysEqual(baseName, dataRow[0]['Full Name'])) {
+
+            rowNamesMatch = false
+          }
         }
+        console.log(baseName)
+      } else {
+        rowNamesMatch = false
       }
+
     })
     return rowNamesMatch
   }
@@ -204,24 +235,124 @@ export default class Deduplication extends React.Component {
       }
     })
     this.setState({duplicates: duplicateArray})
+
+    for (var i = duplicateArray.length - 1; i >= 0; i--) {
+      if (this.highlightObvious(duplicateArray[i])) {
+        this.mergeRows(duplicateArray[i], duplicateArray)
+      }
+    }
+
+  }
+
+  getRichestRowIndex = (grid) => {
+    var rowRichness = []
+    for (var j = 0; j < grid.length; j ++) {
+      var row = grid[j]
+      var dataLength = 0
+      for (var i = 0 ; i < row.length; i ++) {
+          if (typeof row[i] === 'string' && row[i].length > 0) {
+            dataLength += 1
+          }
+      }
+      rowRichness[j] = dataLength
+    }
+
+    var richestRow = rowRichness.indexOf(Math.max.apply(null, rowRichness))
+    return richestRow
+  }
+
+  mergeRows = (rows, duplicateArray) => {
+
+    var duplicates
+    if (duplicateArray) {
+      duplicates = duplicateArray
+    }
+    else if (this.state.duplicates) {
+      duplicates = this.state.duplicates
+    }  else {
+      throw new Error('No duplicate array was provided to the mergeRows function')
+    }
+    var position = duplicates.indexOf(rows)
+
+    if (rows.length > 1) {
+      var grid = this.getGridFromIndices(rows, true)
+      console.log('function in mergeRows was successful')
+      var richestRowIndex = this.getRichestRowIndex(grid)
+
+      var masterRow = []
+      for (var i = 0; i < grid[richestRowIndex].length; i ++) {
+        var column = grid[richestRowIndex][i]
+        if (typeof column === 'string') {
+          masterRow.push(column)
+        } else if (typeof column === 'object') {
+          var arrayData = []
+          grid.forEach((row) => {
+            row[i].forEach((dataPoint) => {
+              if (!arrayData.includes(dataPoint)) {
+                arrayData.push(dataPoint)
+              }
+            })
+          })
+          masterRow.push(arrayData)
+        }
+      }
+      // var newData = this.deleteRowsByIndex(this.props.data, rows)
+      var mergedRows = this.state.mergedRows ? this.state.mergedRows : []
+      mergedRows.push(this.convertRowToKeys(masterRow))
+      var toBeDeleted = this.state.toBeDeleted ? this.state.toBeDeleted : []
+      rows.forEach((row) => {
+        if (!toBeDeleted.includes(row)) {
+          toBeDeleted.push(row)
+        }
+      })
+      console.log(mergedRows)
+      console.log(toBeDeleted)
+      this.setState({mergedRows: mergedRows, toBeDeleted: toBeDeleted})
+
+      var position = duplicates.indexOf(rows)
+
+      duplicates.splice(position, 1)
+      this.setState({duplicates : duplicates})
+    }
+  }
+
+  deleteRowsByIndex = (grid, indices) => {
+    var newGrid = grid
+    var sortedIndex = indices.sort(function(a, b){return b -a})
+    sortedIndex.forEach((index) => {
+      newGrid.splice(index, 1)
+    })
+    return newGrid
   }
 
   render() {
-    const HotTable = this.HotTable
+
+    console.log(this.state)
+    console.log(this.props)
+
     return (
       <div style={{display: 'flex'}}>
 
-        {typeof window !== 'undefined' && HotTable ?
+        {typeof window !== 'undefined' && this.state.duplicates ?
           <div style={{padding: 30, boxSizing: 'border-box',
             maxWidth: '100%',
              minWidth: '300px'}}>
              <h2 style={{textAlign: 'left', fontWeight: 200}}>We found
-               <b style={{color: '#000AB2' }}> {this.state.duplicates.length}</b> potential duplicate groups</h2>
+               <b style={{color: '#000AB2' }}> {this.state.duplicates.length}</b> potential duplicate groups
+              </h2>
+              {this.state.mergedRows ?
+              <p style={{textAlign: 'left'}}>
+                We have already merged <b style={{color: '#000AB2' }}> {this.state.mergedRows.length}</b> definite duplicate groups
+              </p>
+              :
+              null}
              {
                this.state.duplicates ?
                this.state.duplicates.map((group) => (
-                 <div style={{width: "100%", overflowX: 'scroll'}}>
-                   <table width="100%" style={{backgroundColor: this.highlightObvious(group) ? 'yellow' : null}} >
+                 <div style={{width: "100%", overflowX: 'scroll'}}
+                   onClick={() => this.mergeRows(group)}
+                   >
+                   <table width="100%"  >
                      {this.getGridFromIndices(group).map((item) => (
                        <tr style={{width: '100vw', overflowX: 'scroll'}}>
                          {item.map((elem) => <td style={{padding: 2, border: '1px solid #DBDBDB'}}>{elem}</td>)}
