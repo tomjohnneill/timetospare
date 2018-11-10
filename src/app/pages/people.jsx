@@ -13,7 +13,7 @@ import Dialog from 'material-ui/Dialog';
 import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton';
 import FlatButton from 'material-ui/FlatButton';
 import CommunicationChatBubble from 'material-ui/svg-icons/av/play-arrow';
-import {buttonStyles, radioButtonStyles, textFieldStyles} from '../components/styles.jsx';
+import {buttonStyles, radioButtonStyles, textFieldStyles, chipStyles} from '../components/styles.jsx';
 import {CSVLink} from 'react-csv';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
@@ -21,14 +21,42 @@ import {List, ListItem} from 'material-ui/List';
 import 'react-table/react-table.css'
 import ReactTable from "react-table";
 import {Tag} from '../components/icons.jsx';
+import Chip from 'material-ui/Chip';
 import AddTag from '../components/addTag.jsx';
 import TextField from 'material-ui/TextField';
 
 
 let db = fire.firestore()
 
-
+var randomColor = require('randomcolor')
 let functions = fire.functions('us-central1')
+
+const ChipArray = (props) => (
+          <div
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              flexWrap: 'wrap',
+            }}
+          >
+            {typeof props.data.value === 'object' ?
+              props.data.value.map((entry) => (
+                <Chip style={chipStyles.chip}
+                  backgroundColor={props.color}
+                  labelStyle={chipStyles.chipLabel}>
+                  {entry}
+                </Chip>
+              ))
+              :
+              <Chip style={chipStyles.chip}
+                backgroundColor={props.color}
+                labelStyle={chipStyles.chipLabel}>
+                {props.data.value}
+              </Chip>
+            }
+          </div>
+)
 
 const getColumnsFromMembers = (members) => {
   var rawKeys = []
@@ -37,11 +65,27 @@ const getColumnsFromMembers = (members) => {
     var keys = Object.keys(member)
     keys.forEach((key) => {
       if (!rawKeys.includes(key) && key !== '_id' && key !== 'tags') {
-        rawKeys.push(key)
-        columns.push({id: key, Header: key, accessor: key})
+        console.log(key, typeof member[key])
+        if (typeof member[key] === 'object') {
+          rawKeys.push(key)
+          columns.push({
+            id: key,
+            Header: key,
+            accessor: key,
+            Cell: row => (
+              <ChipArray
+                color={randomColor({luminosity: 'light'})}
+                data={row}/>
+            )
+          })
+        } else {
+          rawKeys.push(key)
+          columns.push({id: key, Header: key, accessor: key})
+        }
       }
      })
   })
+  console.log(columns)
   return columns
 }
 
@@ -198,18 +242,6 @@ export class People extends React.Component {
               getTdProps={(state, rowInfo, column, instance) => {
                 return {
                   onClick: (e, handleOriginal) => {
-                    console.log("A Td Element was clicked!");
-                    console.log("it produced this event:", e);
-                    console.log("It was in this column:", column);
-                    console.log("It was in this row:", rowInfo);
-                    console.log(rowInfo.original)
-                    console.log("It was in this table instance:", instance);
-
-                    // IMPORTANT! React-Table uses onClick internally to trigger
-                    // events like expanding SubComponents and pivots.
-                    // By default a custom 'onClick' handler will override this functionality.
-                    // If you want to fire the original onClick handler, call the
-                    // 'handleOriginal' function.
                     Router.push(`/member?member=${rowInfo.original._id}&organisation=${Router.query.organisation}&name=${rowInfo.original['Full Name']}`)
                     if (handleOriginal) {
                       handleOriginal();
@@ -222,7 +254,7 @@ export class People extends React.Component {
               ref={(r) => {
                 this.selectTable = r;
               }}
-              className='-highlight -striped'
+              className='-highlight'
               data={this.state.data}
               columns={this.state.columns}
               filterable={true}

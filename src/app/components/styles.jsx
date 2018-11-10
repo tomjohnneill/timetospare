@@ -47,7 +47,7 @@ export const radioButtonStyles = {
 
 export const chipStyles = {
     chip: {
-      margin: 0,
+      margin: 2,
       height: 25,
       lineHeight: '25px'
     },
