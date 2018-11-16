@@ -16,7 +16,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
 import ArrowRight from 'material-ui/svg-icons/navigation/arrow-forward';
 import Divider from 'material-ui/Divider'
-import {buttonStyles, iconButtonStyles} from '../components/styles.jsx';
+import {buttonStyles, iconButtonStyles, chipStyles} from '../components/styles.jsx';
 import AddNote from '../components/addNote.jsx';
 import {ReviewIcon, NoteIcon, Tag, Pin} from '../components/icons.jsx';
 import AddTag from '../components/addTag.jsx';
@@ -34,6 +34,8 @@ import IconButton from 'material-ui/IconButton';
 let db = fire.firestore()
 
 const _MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+let functions = fire.functions('europe-west1')
 
 // a and b are javascript Date objects
 function dateDiffInDays(a, b) {
@@ -96,51 +98,93 @@ export class Organisation extends React.Component {
   }
 
   updateData = () => {
-    this.setState({interactions: [], pinned: []})
-    db.collection("Interactions")
-    .where("Organisations", "array-contains", Router.query.targetorganisation)
-    .where("Pinned", "==", true)
-    .orderBy("Date", 'desc').get()
-    .then((pinSnapshot) => {
-      var pinnedData = this.state.pinned ? this.state.pinned : []
-      pinSnapshot.forEach((pinDoc) => {
-        var elem = pinDoc.data()
-        elem._id = pinDoc.id
-        pinnedData.push(elem)
-      })
-      this.setState({pinned: pinnedData})
-    })
-
-    db.collection("Interactions")
-    .where("Organisations", "array-contains", Router.query.targetorganisation)
-    .orderBy("Date", 'desc').get()
-    .then((intSnapshot) => {
+    if (localStorage.getItem('sample') == 'true') {
       var data = []
-      var promises = []
-      intSnapshot.forEach((intDoc) => {
-        var elem = intDoc.data()
-        elem._id = intDoc.id
-        data.push(elem)
-        if (elem.Members) {
-          elem.Members.forEach((member) => {
-            promises.push(db.collection("PersonalData").doc(member)
-              .get().then((dataDoc) => {
-                let userData = dataDoc.data()
-                userData.color = randomColor({luminosity: 'light'})
-                let interactionUsers = this.state.interactionUsers
-                interactionUsers[member] = userData
-                this.setState({interactionUsers: interactionUsers})
-              })
-            )
-          })
+      var corsRequest = functions.httpsCallable('integrations-wrapCors');
+      var teams = {}
+      corsRequest({url: 'https://fantasy.premierleague.com/drf/teams/'})
+      .then(teamData => {
+        teamData.data.forEach((team) => {
+          teams[team.id] = team.name
+        })
+      })
+      .then(() => corsRequest({url: 'https://fantasy.premierleague.com/drf/fixtures/'}))
+      .then(responseData => {
+        var data = []
+        responseData.data.forEach((fixture) => {
+          if (fixture.team_a === parseInt(Router.query.team) || fixture.team_h === parseInt(Router.query.team)) {
+            data.push({
+              Date: new Date(fixture.kickoff_time),
+              Type: 'Event',
+              Details: {
+                name: `${teams[fixture.team_h]} v ${teams[fixture.team_a]}`
+              }
+            })
+          }
+        })
+        if (this.state.interactions) {
+
+          var ints = this.state.interactions.concat(data)
+          ints = ints.sort(function(a, b) {
+              a = new Date(a.Date);
+              b = new Date(b.Date);
+              return a>b ? -1 : a<b ? 1 : 0;
+          });
+          this.setState({interactions: ints})
+        } else {
+
+          this.setState({interactions: data})
         }
 
-
-
       })
-      Promise.all(promises).then(() => this.setState({membersLoaded: true}))
-      this.setState({interactions: data})
-    })
+    } else {
+      console.log('executed the bit for real data')
+      this.setState({interactions: [], pinned: []})
+      db.collection("Interactions")
+      .where("Organisations", "array-contains", Router.query.targetorganisation)
+      .where("Pinned", "==", true)
+      .orderBy("Date", 'desc').get()
+      .then((pinSnapshot) => {
+        var pinnedData = this.state.pinned ? this.state.pinned : []
+        pinSnapshot.forEach((pinDoc) => {
+          var elem = pinDoc.data()
+          elem._id = pinDoc.id
+          pinnedData.push(elem)
+        })
+        this.setState({pinned: pinnedData})
+      })
+
+      db.collection("Interactions")
+      .where("Organisations", "array-contains", Router.query.targetorganisation)
+      .orderBy("Date", 'desc').get()
+      .then((intSnapshot) => {
+        var data = []
+        var promises = []
+        intSnapshot.forEach((intDoc) => {
+          var elem = intDoc.data()
+          elem._id = intDoc.id
+          data.push(elem)
+          if (elem.Members) {
+            elem.Members.forEach((member) => {
+              promises.push(db.collection("PersonalData").doc(member)
+                .get().then((dataDoc) => {
+                  let userData = dataDoc.data()
+                  userData.color = randomColor({luminosity: 'light'})
+                  let interactionUsers = this.state.interactionUsers
+                  interactionUsers[member] = userData
+                  this.setState({interactionUsers: interactionUsers})
+                })
+              )
+            })
+          }
+
+        })
+        Promise.all(promises).then(() => this.setState({membersLoaded: true}))
+        this.setState({interactions: data})
+      })
+    }
+
+
   }
 
   handleOptionsClick = (event, int) => {
@@ -195,7 +239,7 @@ export class Organisation extends React.Component {
     switch(int.Type) {
       case "Event":
         return (
-          <a href={int.Details ? int.Details.url : null}>
+          <Link prefetch href={`/project-admin?project=${int._id}&organisation=${Router.query.organisation}`}>
             <div
               style={{ borderBottom : '1px solid #DBDBDB'}}
               >
@@ -216,7 +260,8 @@ export class Organisation extends React.Component {
                      ? int.Members.map((user) => (
                        <Link  prefetch href={`/member?organisation=${Router.query.organisation}&member=${user}`}>
                           <Chip
-                            style={styles.chip}
+                            style={chipStyles.chip}
+                            labelStyle={chipStyles.chipLabel}
                             backgroundColor={this.state.interactionUsers[user] ? this.state.interactionUsers[user].color : null}>
                              {this.state.interactionUsers[user] ? this.state.interactionUsers['Full Name'] : null}
                           </Chip>
@@ -227,13 +272,17 @@ export class Organisation extends React.Component {
                   }
                 </div>]}
                 secondaryText={int.Date.toLocaleString('en-gb',
-                  {weekday: 'long', month: 'long', day: 'numeric'})}
+                  {weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'})}
                   leftAvatar={<Avatar
-                    backgroundColor={'#e91e63'}
-                    icon={<EventIcon /> } />} />
+                  backgroundColor={'#e91e63'}
+                  icon={
+                    <Link prefetch href={`/project-admin?project=${int._id}&organisation=${Router.query.organisation}`}>
+                    <EventIcon color='white'/>
+                  </Link> } />
+                  } />
 
             </div>
-          </a>
+          </Link>
         )
       case "Invited":
 
@@ -270,7 +319,8 @@ export class Organisation extends React.Component {
                   ? int.Members.map((user) => (
                     <Link  prefetch href={`/member?organisation=${Router.query.organisation}&member=${user}`}>
                        <Chip
-                         style={styles.chip}
+                         style={chipStyles.chip}
+                         labelStyle={chipStyles.chipLabel}
                          backgroundColor={this.state.interactionUsers[user].color}>
                          {this.state.interactionUsers[user] ? this.state.interactionUsers['Full Name'] : null}
                        </Chip>
@@ -324,7 +374,8 @@ export class Organisation extends React.Component {
                    ? int.Members.map((user) => (
                      <Link  prefetch href={`/member?organisation=${Router.query.organisation}&member=${user}`}>
                         <Chip
-                          style={styles.chip}
+                          style={chipStyles.chip}
+                          labelStyle={chipStyles.chipLabel}
                           backgroundColor={this.state.interactionUsers[user] ? this.state.interactionUsers[user].color : null}>
                            {this.state.interactionUsers[user] ? this.state.interactionUsers['Full Name'] : null}
                         </Chip>
@@ -358,7 +409,51 @@ export class Organisation extends React.Component {
     fire.auth().onAuthStateChanged((user) => {
       if (user === null) {
 
-      } else {
+      }
+      else if (localStorage.getItem('sample') == "true") {
+        var data = []
+        var news = []
+        var corsRequest = functions.httpsCallable('integrations-wrapCors');
+        corsRequest({url: 'https://fantasy.premierleague.com/drf/elements/'})
+        .then(responseData => {
+          console.log(responseData)
+          responseData.data.forEach((player) => {
+            if (player.team === parseInt(Router.query.team)) {
+
+              if (player.news_added != 'null' && player.news.length > 0) {
+                news.push({
+                  Type: 'Note',
+                  Date: new Date(player.news_added),
+                  Details: {
+                    Note: player.news
+                  }
+                })
+                console.log(news)
+
+              }
+
+              data.push({
+                '_id': player.id,
+                'Full Name': player.first_name + ' ' + player.second_name,
+                'Team': player.team
+              })
+            }
+          })
+          if (this.state.interactions) {
+            var ints = this.state.interactions.concat(news)
+            ints = ints.sort(function(a, b) {
+                a = new Date(a.Date);
+                b = new Date(b.Date);
+                return a>b ? -1 : a<b ? 1 : 0;
+            });
+            this.setState({interactions: ints})
+          } else {
+            this.setState({interactions: news})
+          }
+          this.setState({members: data})
+        })
+      }
+      else {
         db.collection("PersonalData")
         .where("Organisations", "array-contains", Router.query.targetorganisation)
         .get()
@@ -395,6 +490,7 @@ export class Organisation extends React.Component {
   }
 
   render() {
+    console.log(this.state.interactions)
     return (
       <div>
         <App>
@@ -541,10 +637,13 @@ export class Organisation extends React.Component {
                   nestedItems = {
                     [<div style={{display: 'flex', flexWrap: 'wrap'}}>
                     {this.state.members ? this.state.members.map((member) => (
-                      <Link prefetch href={`/member?organisation=${Router.query.organisation}&member=${member._id}`}>
+                      <Link prefetch href={localStorage.getItem('sample') == 'true' ?
+                        `/member?organisation=${Router.query.organisation}&member=${member._id}&team=${member.Team}&name=${member['Full Name']}`
+                        :
+                        `/member?organisation=${Router.query.organisation}&member=${member._id}`}>
                         <Chip
-                          style={styles.chip}
-
+                          style={chipStyles.chip}
+                          labelStyle={chipStyles.chipLabel}
                           backgroundColor={randomColor({luminosity: 'light'})}>
                           {member['Full Name']}
                         </Chip>
@@ -558,7 +657,6 @@ export class Organisation extends React.Component {
 
                    <ListItem
                      primaryText='Roles'
-
                      initiallyOpen={true}
                      primaryTogglesNestedList={true}
                      nestedItems = {
@@ -576,8 +674,8 @@ export class Organisation extends React.Component {
                                    <div style={{flex: 7, padding: 5}}>
                                      <Chip
                                        backgroundColor={randomColor({luminosity: 'light'})}
-                                       style={styles.chip}
-                                       labelStyle={styles.chipLabel}
+                                       style={chipStyles.chip}
+                                       labelStyle={chipStyles.chipLabel}
                                        >
                                        {role}
                                      </Chip>

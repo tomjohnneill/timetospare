@@ -149,11 +149,17 @@ export class Organisation extends React.Component {
           <div style={{width: '100%', display: 'flex', justifyContent: 'center', minHeight: '100vh', paddingBottom: 50, paddingTop: 20}}>
             <div style={{textAlign: 'left'}}>
               {
-                this.state.organisation ?
+                this.state.organisation || (typeof window !== 'undefined' && localStorage.getItem('sample') == "true")?
                 <div>
                   <h2 style={{fontSize: '40px'}}>Good {timeOfDay}, {this.state.user['Name']}!</h2>
                   <p style={{borderBottom: '1px solid #DBDBDB', paddingBottom: 20}}>
-                     Welcome back to your Time to Spare dashboard. Have a look around to see how we can help today.
+                    {
+                      typeof window !== 'undefined' && localStorage.getItem('sample') == 'true' ?
+                      "We've filled your Time to Spare with some pretend data. Take a look around or import your own."
+                      :
+                      "Welcome back to your Time to Spare dashboard. Have a look around to see how we can help today."
+                    }
+
                   </p>
                   {
                     this.props.url.query.access_token ?

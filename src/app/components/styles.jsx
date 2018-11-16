@@ -53,5 +53,9 @@ export const chipStyles = {
     },
     chipLabel: {
       lineHeight: '25px'
+    },
+    deleteStyle: {
+      margin: '0 0 0 -8px',
+      height: 25
     }
 }

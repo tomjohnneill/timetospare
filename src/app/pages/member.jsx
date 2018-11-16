@@ -15,7 +15,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
 import ArrowRight from 'material-ui/svg-icons/navigation/arrow-forward';
 import Divider from 'material-ui/Divider'
-import {buttonStyles, iconButtonStyles} from '../components/styles.jsx';
+import {buttonStyles, iconButtonStyles, headerStyles, chipStyles} from '../components/styles.jsx';
 import AddNote from '../components/addNote.jsx';
 import 'react-quill/dist/quill.snow.css';
 import Warning from 'material-ui/svg-icons/alert/warning';
@@ -34,6 +34,8 @@ import Close from 'material-ui/svg-icons/navigation/close'
 
 let db = fire.firestore()
 var randomColor = require('randomcolor')
+
+let functions = fire.functions('europe-west1')
 
 const styles = {
   chip: {
@@ -58,6 +60,36 @@ export class Member extends React.Component {
   }
 
   updateData = () => {
+    if (localStorage.getItem('sample') == "true") {
+      var data = []
+      var corsRequest = functions.httpsCallable('integrations-wrapCors');
+      var teams = {}
+      corsRequest({url: 'https://fantasy.premierleague.com/drf/teams/'})
+      .then(teamData => {
+        teamData.data.forEach((team) => {
+          teams[team.id] = team.name
+        })
+      })
+      .then(() => corsRequest({url: 'https://fantasy.premierleague.com/drf/fixtures/'}))
+      .then(responseData => {
+        console.log(responseData)
+        var data = []
+        responseData.data.forEach((fixture) => {
+          if (fixture.team_a === parseInt(Router.query.team) || fixture.team_h === parseInt(Router.query.team)) {
+            data.push({
+              Date: fixture.kickoff_time,
+              Type: 'Event',
+              Details: {
+                name: `${teams[fixture.team_h]} v ${teams[fixture.team_a]}`
+              }
+            })
+          }
+        })
+        console.log(data)
+        this.setState({interactions: data})
+      })
+    }
+
     this.setState({interactions: [], pinned: []})
     db.collection("Interactions")
     .where("Member", "==", Router.query.member)
@@ -112,42 +144,38 @@ export class Member extends React.Component {
   }
 
   componentDidMount(props) {
-    db.collection("PersonalData").doc(Router.query.member).get()
-    .then((doc) => {
-      var elem = doc.data()
-      elem._id = doc.id
-      const rawData = Object.create(elem)
-      console.log(rawData)
-      this.setState({memberData: rawData})
-
-      this.setState({member: elem})
-    })
-    /*
-    fire.auth().onAuthStateChanged((user) => {
-      if (user === null) {
-
-      } else {
-        fire.auth().currentUser.getIdToken()
-        .then((token) =>
-          fetch(`https://us-central1-whosin-next.cloudfunctions.net/users-getOneMember?organisation=${Router.query.organisation}&member=${Router.query.member}`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-              'Authorization': 'Bearer ' + token
-            },
-          })
-          .then(response => response.json())
-          .then((memberArray) => {
-            console.log(memberArray)
-            if (memberArray) {
-              this.setState({member: memberArray})
+    if (localStorage.getItem('sample') == 'true') {
+      var corsRequest = functions.httpsCallable('integrations-wrapCors');
+      var teams = {}
+      var data = []
+      corsRequest({url: 'https://fantasy.premierleague.com/drf/teams/'})
+      .then(teamData => {
+        teamData.data.forEach((team) => {
+          if (team.id == Router.query.team) {
+            var teamData = {
+              Organisations: [{
+                name: team.name,
+                _id: team.id
+              }]
             }
+            console.log(teamData)
+            this.setState({memberData: teamData})
+          }
+        })
+      })
+    } else {
+      db.collection("PersonalData").doc(Router.query.member).get()
+      .then((doc) => {
+        var elem = doc.data()
+        elem._id = doc.id
+        const rawData = Object.create(elem)
+        console.log(rawData)
+        this.setState({memberData: rawData})
 
-          })
-        )
-      }
-    })
-    */
+        this.setState({member: elem})
+      })
+
+    }
     this.updateData()
   }
 
@@ -176,28 +204,41 @@ export class Member extends React.Component {
     switch(int.Type) {
       case "Event":
         return (
-          <div
-            style={{ borderBottom : '1px solid #DBDBDB'}}
-            >
-            <ListItem
-              id={int._id}
-              rightIcon={<IconButton
-                tooltip='Options'
-                onClick={(e) => this.handleOptionsClick(e, int)}
-                style={iconButtonStyles.button}><MoreVert /></IconButton>
-              }
-              className='email-interaction'
 
-              primaryText={int.Details ? int.Details.name : null}
-              primaryTogglesNestedList={true}
-              secondaryText={new Date(int.Date).toLocaleString('en-gb',
-                {weekday: 'long', month: 'long', day: 'numeric'})}
-                leftAvatar={<Avatar
-                  backgroundColor={'#e91e63'}
-                  icon={<EventIcon /> } />}
-               />
+            <div
+              style={{ borderBottom : '1px solid #DBDBDB'}}
+              >
 
-          </div>
+              <ListItem
+                id={int._id}
+                rightIcon={<IconButton
+                  tooltip='Options'
+                  onClick={(e) => this.handleOptionsClick(e, int)}
+                  style={iconButtonStyles.button}><MoreVert /></IconButton>
+                }
+                className='email-interaction'
+
+                primaryText={int.Details ?
+                  <Link prefetch href={`/project-admin?project=${int._id}&organisation=${Router.query.organisation}`}>
+                    {int.Details.name}
+                  </Link>
+                   : null}
+                primaryTogglesNestedList={true}
+                secondaryText={new Date(int.Date).toLocaleString('en-gb',
+                  {weekday: 'long', month: 'long', day: 'numeric'})}
+                  leftAvatar={
+
+                      <Avatar
+                      backgroundColor={'#e91e63'}
+                      icon={
+                        <Link prefetch href={`/project-admin?project=${int._id}&organisation=${Router.query.organisation}`}>
+                        <EventIcon color='white'/>
+                      </Link> } />
+
+                }
+                 />
+            </div>
+
         )
       case "Invited":
       console.log(int.Type)
@@ -335,20 +376,45 @@ export class Member extends React.Component {
   }
 
   handleDeleteInteraction = (int) => {
-    db.collection("Interactions").doc(int._id).delete()
-    .then(() => {
-      this.setState({deleteOpen: false, interactions: []})
-      this.updateData()
-    })
+    if (localStorage.getItem('sample') == "true") {
+      if (this.state.interactions.includes(int)) {
+        var position = this.state.interactions.indexOf(int)
+        var ints = this.state.interactions
+        ints.splice(position, 1)
+        this.setState({interactions: ints})
+      } else {
+        var position = this.state.pinned.indexOf(int)
+        var ints = this.state.pinned
+        ints.splice(position, 1)
+        this.setState({pinned: ints})
+      }
+      this.setState({deleteOpen: false})
+    } else {
+      db.collection("Interactions").doc(int._id).delete()
+      .then(() => {
+        this.setState({deleteOpen: false, interactions: []})
+        this.updateData()
+      })
+    }
+
   }
 
 
-  handlePin = () => {
-    db.collection("Interactions").doc(this.state.targetedInt._id).update({Pinned: true})
-    .then(() => {
-      this.setState({optionsOpen: false, interactions: []})
-      this.updateData()
-    })
+  handlePin = (int) => {
+    if (localStorage.getItem('sample') == "true") {
+      var position = this.state.interactions.indexOf(int)
+      var interactions = this.state.interactions
+      var pinned = this.state.pinned ? this.state.pinned : []
+      pinned.push(int)
+      interactions.splice(position, 1)
+      this.setState({interactions: interactions, pinned: pinned})
+    } else {
+      db.collection("Interactions").doc(this.state.targetedInt._id).update({Pinned: true})
+      .then(() => {
+        this.setState({optionsOpen: false, interactions: []})
+        this.updateData()
+      })
+    }
   }
 
   render() {
@@ -384,7 +450,7 @@ export class Member extends React.Component {
                 onClick={() => this.setState({deleteOpen: true, optionsOpen: false})}
                 primaryText="Remove from this member" leftIcon={<Close/>} />
               <MenuItem
-                onClick={this.handlePin}
+                onClick={() => this.handlePin(this.state.targetedInt)}
                 primaryText="Pin this" leftIcon={<Pin/>} />
             </Menu>
           </Popover>
@@ -415,7 +481,7 @@ export class Member extends React.Component {
                   primary={true}/>
             ]}
             onRequestClose={() => this.setState({deleteOpen:false})}>
-            <h2 style={{textAlign: 'left'}}>Are you sure you want to delete this?</h2>
+            <h2 style={headerStyles.desktop}>Are you sure you want to delete this?</h2>
             <div style={{textAlign: 'left'}}>
               {this.state.targetedInt ? this.renderInteraction(this.state.targetedInt) : null}
             </div>
@@ -507,8 +573,8 @@ export class Member extends React.Component {
                                   <div style={{flex: 7, padding: 5}}>
                                     <Chip
                                       backgroundColor={randomColor({luminosity: 'light'})}
-                                      style={styles.chip}
-                                      labelStyle={styles.chipLabel}
+                                      style={chipStyles.chip}
+                                      labelStyle={chipStyles.chipLabel}
                                       >
                                       {this.state.member[key]}
                                     </Chip>
@@ -532,18 +598,36 @@ export class Member extends React.Component {
                      initiallyOpen={true}
                      primaryTogglesNestedList={true}
                      nestedItems={
-                       [<div>
-                         {this.state.memberData && this.state.memberData.Organisations ?
+                       [<div style={{display: 'flex', flexWrap: 'wrap', padding: 10}}>
+                         {this.state.memberData && this.state.memberData.Organisations && (typeof window !== 'undefined' && localStorage.getItem('sample') != 'true') ?
                            this.state.memberData.Organisations.map((tag) => (
                            <Link prefetch href={`/organisation?targetorganisation=${tag}&organisation=${Router.query.organisation}`}>
                          <Chip
 
-                           style={{margin:6, cursor: 'pointer'}}
+                           style={chipStyles.chip}
+                           labelStyle={chipStyles.chipLabel}
+                           deleteIconStyle={chipStyles.deleteStyle}
                            onRequestDelete={() => this.handleDeleteTag(tag)}
                            >{tag}
                          </Chip>
                          </Link>
-                       )) : null}
+                       )) : (typeof window !== 'undefined' && localStorage.getItem('sample') == 'true' && this.state.memberData && this.state.memberData.Organisations && this.state.memberData.Organisations.length > 0) ?
+
+                       this.state.memberData.Organisations.map((tag) => (
+                       <Link prefetch href={`/organisation?targetorganisation=${tag.name}&team=${tag._id}&organisation=${Router.query.organisation}`}>
+                         <Chip
+
+                           style={chipStyles.chip}
+                           labelStyle={chipStyles.chipLabel}
+                           deleteIconStyle={chipStyles.deleteStyle}
+                           onRequestDelete={() => this.handleDeleteTag(tag)}
+                           >{tag.name}
+                         </Chip>
+                         </Link>
+                       ))
+                       :
+                       null
+                     }
                        </div>,
                        <div style={{padding: 6}}>
                          <RaisedButton label='Add new organisation'
@@ -563,12 +647,13 @@ export class Member extends React.Component {
                      initiallyOpen={true}
                      primaryTogglesNestedList={true}
                      nestedItems={
-                       [<div>
+                       [<div style={{display: 'flex', flexWrap: 'wrap', padding: 10}}>
                          {this.state.memberData && this.state.memberData.tags ? this.state.memberData.tags.map((tag) => (
                            <Link prefetch href={`/tag?tag=${tag}&organisation=${Router.query.organisation}`}>
                          <Chip
-
-                           style={{margin:6, cursor: 'pointer'}}
+                           style={chipStyles.chip}
+                           labelStyle={chipStyles.chipLabel}
+                           deleteIconStyle={chipStyles.deleteStyle}
                            onRequestDelete={() => this.handleDeleteTag(tag)}
                            >{tag}
                          </Chip>

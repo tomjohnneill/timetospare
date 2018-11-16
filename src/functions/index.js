@@ -3,12 +3,13 @@ import { mars } from "./worlds/mars"
 import { jupiter } from "./worlds/jupiter"
 import { mailchimpAuth } from "./mailchimp/auth"
 import {getListOfLists, getContacts} from './mailchimp/import.js';
-import {addMember, getMemberDetails, getOneMember, getMemberInListEurope, addTagToMembers, makeNewUserAdmin} from './users/members.js';
+import {updateContactRecord,  makeNewUserAdmin} from './users/members.js';
 import {sendCustomEmail, receiveReply} from './messaging/emails.js';
 import {sendCustomSMS} from './messaging/sms.js';
 import {sendInviteEmail} from './transactional/signup.js';
 import {outlookAuth,scrapeOutlookEmails} from './integrations/outlook.js';
 import {getEventbriteOrganisations, getEventAttendees} from './integrations/eventbrite.js';
+import {wrapCors} from './integrations/cors.js';
 
 /*
 Namespace application services with function groups.
@@ -37,12 +38,8 @@ const mailchimp = {
 }
 
 const users = {
-  addMember,
-  getMemberDetails,
-  getOneMember,
-  getMemberInListEurope,
-  addTagToMembers,
-  makeNewUserAdmin
+  makeNewUserAdmin,
+  updateContactRecord
 }
 
 const messaging = {
@@ -59,7 +56,8 @@ const integrations = {
   outlookAuth,
   scrapeOutlookEmails,
   getEventbriteOrganisations,
-  getEventAttendees
+  getEventAttendees,
+  wrapCors
 }
 
 export { app, greetings, mailchimp, users, messaging, transactional, integrations}

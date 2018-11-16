@@ -29,7 +29,7 @@ import TextField from 'material-ui/TextField';
 let db = fire.firestore()
 
 var randomColor = require('randomcolor')
-let functions = fire.functions('us-central1')
+let functions = fire.functions('europe-west1')
 
 const ChipArray = (props) => (
           <div
@@ -112,22 +112,51 @@ export class People extends React.Component {
     console.log(this.state)
     this.setState({organisation: Router.query.organisation, tagType: 'existing'})
     if (Router.query.organisation) {
-
-      db.collection("PersonalData").where("organisation", "==", Router.query.organisation)
-      .get().then((querySnapshot) => {
+      if (typeof window !== 'undefined' && localStorage.getItem('sample') == "true") {
         var data = []
-        querySnapshot.forEach((member) => {
-          var elem = member.data()
-          elem._id = member.id
-          delete elem.organisation
-          if (elem.lists) {
-            delete elem.lists
-          }
-          data.push(elem)
+        var corsRequest = functions.httpsCallable('integrations-wrapCors');
+        corsRequest({url: 'https://fantasy.premierleague.com/drf/elements/'})
+        .then(responseData => {
+          console.log(responseData)
+          responseData.data.forEach((player) => {
+            data.push({
+              '_id': player.id,
+              'organisation': player.team,
+              'Full Name': player.first_name + ' ' + player.second_name,
+              'Email': [player.first_name + player.second_name + '@gmail.com'],
+              'Goals Conceded': player.goals_conceded,
+              'Goals Scored': player.goals_scored,
+              'Yellow Cards': player.yellow_cards,
+              'Red Cards': player.red_cards,
+              'News': player.news
+            })
+          })
+          this.setState({data: data, columns: getColumnsFromMembers(data)})
         })
-        console.log(data)
-        this.setState({data: data, columns: getColumnsFromMembers(data)})
-      })
+      } else {
+        db.collection("PersonalData").where("organisation", "==", Router.query.organisation)
+        .get().then((querySnapshot) => {
+          var data = []
+          querySnapshot.forEach((member) => {
+            var elem = member.data()
+            elem._id = member.id
+            delete elem.organisation
+            if (elem.lastContacted) {
+              elem['Last Contacted'] = elem.lastContacted.toLocaleString('en-gb',
+                {weekday: 'long', month: 'long', day: 'numeric'})
+              delete elem.lastContacted
+              
+            }
+            if (elem.lists) {
+              delete elem.lists
+            }
+            data.push(elem)
+          })
+          console.log(data)
+          this.setState({data: data, columns: getColumnsFromMembers(data)})
+        })
+      }
+
 
 
     }
@@ -155,6 +184,9 @@ export class People extends React.Component {
 
     return (
       <div>
+        <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '40% 0 0 90%',
+          transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', right: -350,
+           width: '30vw', height: '100vw'}}/>
         <App>
           <Dialog
             open={this.state.import}
@@ -192,7 +224,7 @@ export class People extends React.Component {
             <div style={{width: '100%', paddingBottom: 20,
               display: 'flex', justifyContent: 'space-between'}}>
               <div style={{fontWeight: 200, fontSize: '30px'}}>
-                Your people
+                People
               </div>
               <div style={{display: 'flex'}}>
                 {
@@ -242,7 +274,11 @@ export class People extends React.Component {
               getTdProps={(state, rowInfo, column, instance) => {
                 return {
                   onClick: (e, handleOriginal) => {
-                    Router.push(`/member?member=${rowInfo.original._id}&organisation=${Router.query.organisation}&name=${rowInfo.original['Full Name']}`)
+                    if (localStorage.getItem('sample') == "true") {
+                      Router.push(`/member?member=${rowInfo.original._id}&organisation=none&name=${rowInfo.original['Full Name']}&team=${rowInfo.original['organisation']}`)
+                    } else {
+                      Router.push(`/member?member=${rowInfo.original._id}&organisation=${Router.query.organisation}&name=${rowInfo.original['Full Name']}`)
+                    }
                     if (handleOriginal) {
                       handleOriginal();
                     }

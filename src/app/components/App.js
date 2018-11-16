@@ -6,7 +6,9 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import "../style.css"
 import { withRouter } from 'next/router'
+import RaisedButton from 'material-ui/RaisedButton';
 import * as gtag from '../lib/gtag'
+import {buttonStyles} from './styles.jsx'
 
 var injectTapEventPlugin = require("react-tap-event-plugin");
 try {
@@ -54,6 +56,26 @@ export const App = ({ children, router, href }) => (
         <Header children={children} router={router}/>
         <div style={{height: 50}}/>
         {children}
+        {
+          typeof window !== 'undefined' && localStorage.getItem('sample') == 'true' ?
+          <div style={{overflowX: 'hidden',position: 'fixed',
+            borderTop: '1px solid #DBDBDB', color: 'white',
+            backgroundColor: '#000AB2', zIndex: 10, flexDirection: 'column',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+           height: 120, width: '100%', bottom: 0}}>
+           <div style={{paddingBottom: 10, fontSize: '20px', fontWeight: 200}}>
+             Looks good?
+           </div>
+              <RaisedButton label='Use Real Data'
+                style={buttonStyles.bigSize}
+                labelStyle={buttonStyles.bigLabel}
+                />
+
+          </div>
+          :
+          null
+        }
+
         <Footer/>
       </div>
 

@@ -2,7 +2,7 @@ import React from 'react'
 import 'react-quill/dist/quill.snow.css';
 import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
-import {buttonStyles} from './styles.jsx';
+import {buttonStyles, headerStyles} from './styles.jsx';
 
 const modules = {
     toolbar: [
@@ -30,8 +30,8 @@ export default class AddNote extends React.Component {
   render() {
     const ReactQuill = this.ReactQuill
     return (
-      <div style={{padding: 10, marginBottom: 10, borderLeft: '3px solid rgb(253,216,53)', backgroundColor: 'rgb(255,249,196)'}}>
-        <h2 style={{margin:0, marginBottom: 6}}>Type your note</h2>
+      <div style={{padding: 10, marginBottom: 10, backgroundColor: 'rgb(255,249,196)'}}>
+        <div style={headerStyles.desktop}>Type your note</div>
         <ReactQuill
           style={{fontFamily: 'Nunito', backgroundColor: 'white'}}
           modules={modules}

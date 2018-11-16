@@ -298,7 +298,7 @@ export default class Header extends React.Component {
         <Head>
           <title>Time to Spare</title>
           <meta name="viewport" content="initial-scale=1.0, width=device-width" key="viewport" />
-          
+
         </Head>
         <AppBar
 
@@ -332,7 +332,7 @@ export default class Header extends React.Component {
                                   className='link-container'
                                    style={{display: 'flex', height: '100%', fontWeight: 'normal', alignItems: 'center'}}>
                                    {
-                                     this.state.organisation ?
+                                     this.state.organisation || (typeof window !== 'undefined' && localStorage.getItem('sample') == "true") ?
                                      <div style={{display: 'flex', height: '100%', fontWeight: 'normal', alignItems: 'center'}}>
                                        <Link prefetch href={`/dashboard`}>
                                          <div
@@ -370,7 +370,7 @@ export default class Header extends React.Component {
                                            People
                                          </div>
                                        </DataLink>
-                                       <Link prefetch href={`/organisations?organisation=${this.state.organisation}`}>
+                                       <Link prefetch href={`/organisations?view=${this.state.organisation}`}>
                                          <div
                                            className='header-category'
                                            style={

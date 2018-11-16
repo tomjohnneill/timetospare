@@ -83,7 +83,8 @@ export class SignupModal extends React.Component {
                   if (Router.query.organisation && Router.query.orgId) {
                     window.location.href = 'https://timetospare.com/dashboard'
                   } else {
-                    Router.push('/create-other')
+                    localStorage.setItem('sample', true)
+                    Router.push('/dashboard')
                   }
 
 
@@ -290,7 +291,7 @@ export class SignupModal extends React.Component {
                     {this.props.url.query.organisation ?
                       `${this.props.url.query.organisation} have invited you to join their organisation on Time to Spare.`
                       :
-                     "Engage your volunteers. Save yourself time. Do it all with Time to Spare."
+                     "Find out what's going on. Share your impact. Do it all with Time to Spare."
                    }
                   </p>
                   <p style={{fontSize: '18px', marginTop: 0}}>

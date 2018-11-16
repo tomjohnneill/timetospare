@@ -26,14 +26,14 @@ export default class OutlookIntegrate extends React.Component {
         })
       }
     }
-    db.collection("User").doc(id).get().then((doc) => {
+    return db.collection("User").doc(id).get().then((doc) => {
       this.setState({user: doc.data()})
-      this.getOrgDetails(doc.id)
+      return this.getOrgDetails(doc.id)
     })
   }
 
   getOrgDetails = (id) => {
-    db.collection("Charity").where("Admin." + id, "==", true)
+    return db.collection("Charity").where("Admin." + id, "==", true)
     .get()
     .then((querySnapshot) => {
       var data , orgId
@@ -42,7 +42,7 @@ export default class OutlookIntegrate extends React.Component {
         orgId = option.id
       })
       this.setState({organisation: data, orgId: orgId})
-      db.collection("PersonalData").where("organisation", "==",this.state.orgId)
+      return db.collection("PersonalData").where("organisation", "==",this.state.orgId)
         .where("Email", "==", this.state.user.Email)
         .get()
         .then((personalDataSnapshot) => {
@@ -62,10 +62,12 @@ export default class OutlookIntegrate extends React.Component {
 
       } else {
         this.getUserDetails(fire.auth().currentUser.uid)
+        .then(() => this.handleScrapeEmails())
       }
     })
     if (fire.auth().currentUser) {
         this.getUserDetails(fire.auth().currentUser.uid)
+        .then(() => this.handleScrapeEmails())
     }
 
 
@@ -79,7 +81,13 @@ export default class OutlookIntegrate extends React.Component {
     openid+offline_access+profile+https:%2f%2foutlook.office.com%2fmail.readwrite+https:%2f%2foutlook.office.com%2fmail.readwrite.shared+https:%2f%2foutlook.office.com%2fmail.send.shared+https:%2f%2foutlook.office.com%2fcalendars.readwrite+https:%2f%2foutlook.office.com%2fcalendars.readwrite.shared+https:%2f%2foutlook.office.com%2fcontacts.readwrite+https:%2f%2foutlook.office.com%2fcontacts.readwrite.shared+https:%2f%2foutlook.office.com%2fmailboxsettings.readwrite+https:%2f%2foutlook.office.com%2fpeople.read+https:%2f%2foutlook.office.com%2fuser.readbasic.all`
   }
 
-  handleScrapeEmails = () => {
+  handleScrapeEmails = (link) => {
+    var definedLink
+    if (link) {
+      definedLink = link
+    } else {
+      definedLink = null
+    }
     if (Router.query.access_token) {
       var inviteEmail = functions.httpsCallable('integrations-scrapeOutlookEmails')
       if (this.state.orgId) {
@@ -92,30 +100,32 @@ export default class OutlookIntegrate extends React.Component {
         alert("You don't belong to an organisation")
       }
     } else {
-      this.onIntegrateClick()
+      var inviteEmail = functions.httpsCallable('integrations-scrapeOutlookEmails')
+      if (this.state.orgId && this.state.user.outlook_refresh_token) {
+        inviteEmail({refresh_token: this.state.user.outlook_refresh_token,
+            access_token: this.state.user.outlook_access_token,
+            organisation: this.state.orgId,
+            personalDataId: this.state.personalDataId,
+            link: definedLink
+          }).then((result) => {
+            console.log(result)
+            this.props.handleResult(result)
+            if (result.data && result.data.nextLink) {
+              this.handleScrapeEmails(result.data.nextLink)
+            } else if (!result.data.nextLink) {
+              this.props.onFinish()
+            }
+          })
+        } else {
+          this.onIntegrateClick()
+        }
     }
-
-
   }
 
   render() {
     return (
       <div>
 
-
-
-        {
-          this.state.user ?
-          <RaisedButton
-            primary={true}
-            style={buttonStyles.smallSize}
-            labelStyle={buttonStyles.smallLabel}
-            onClick={this.handleScrapeEmails}
-            label='Scrape emails'
-            />
-          :
-          null
-        }
       </div>
     )
   }

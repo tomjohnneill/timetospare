@@ -143,35 +143,11 @@ export default class Footer extends React.Component {
               <div style={{flex: 2}}/>
               <div style={{flex: 2, marginLeft: 24, display: 'flex', justifyContent: 'center'}}>
                 <div style={{width: '100%'}}>
-                  hello@timetospare.com
+
                   <div style={{display: 'block'}}>
-                    <Link style={{width: '100%', display: 'block'}} href='/about'><div>About</div></Link>
-                    <Link style={{width: '100%', display: 'block'}} href='/why'><div>Why Start a Project?</div></Link>
-                    <Link style={{width: '100%', display: 'block'}} href='/terms'><div>Terms</div></Link>
-                    <div style={{display: 'flex'}}>
-                        <a style={{padding: 10}} href={`https://www.facebook.com/timetospare.org.uk/`}>
-                          <span style={styles.contactIcon}>
-                            <Avatar
-                              icon={<FontIcon className="fab fa-facebook-f fa-2x" />}
-                              color={'white'}
-                              backgroundColor={'#3b5998'}
-                              size={50}
-                              style={style}
-                            />
-                        </span>
-                      </a>
-                      <a style={{padding: 10}} href={`https://www.instagram.com/timetospare.org.uk/`}>
-                      <span style={styles.contactIcon}>
-                        <Avatar
-                          icon={<FontIcon className="fab fa-instagram fa-2x" />}
-                          color={'white'}
-                          backgroundColor={'#fb3958'}
-                          size={50}
-                          style={style}
-                        />
-                      </span>
-                    </a>
-                    </div>
+
+                    <Link style={{width: '100%', display: 'block', cursor: 'pointer'}} href='/terms'><div>Terms</div></Link>
+
                   </div>
                 </div>
 

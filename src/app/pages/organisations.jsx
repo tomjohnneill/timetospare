@@ -8,172 +8,14 @@ import Dialog from 'material-ui/Dialog';
 import App from "../components/App"
 import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
+import {List, ListItem} from 'material-ui/List';
 import AddNote from '../components/addNote.jsx';
 import {buttonStyles, headerStyles} from '../components/styles.jsx';
+import Checkbox from 'material-ui/Checkbox';
 
 let db = fire.firestore()
 
-const areas = [
-  "Dover Big Local",
-  "Kingsbrook and Cauldwell",
-"North West Ipswich",
-"Leecliffe (Leeming and Aycliffe)",
-"Ramsey",
-"Allenton",
-"Growing Together (Northampton East)",
-"Warsop Parish",
-"Mablethorpe, Trusthorpe and Sutton on Sea (Coastal Communities Challenge) ",
-"Wormholt and White City",
-"North Brixton",
-"South Bermondsey",
-"People's Empowerment Alliance of Custom House (PEACH)",
-"Hackney Wick",
-"Barnfield",
-"Mottingham",
-"William Morris",
-"Heston West",
-"Gateshead",
-"Gaunless Gateway",
-"East Cleveland Villages",
-"Ewanrigg",
-"Barrow Island",
-"Shadsworth with Whitebirk",
-"Rudheath and Witton",
-"Northwood",
-"Clubmoor",
-"Clarksfield, Greenacres and Littlemoor",
-"Little Hulton",
-"Leigh West",
-"Marsh and Micklefield",
-"Fratton",
-"Harefield, Midanbury and Townhill Park (Big Local SO18)",
-"Dartford",
-"Northfleet North",
-"Par Bay",
-"Littlemoor",
-"Toothill",
-"Radstock and Westfield",
-"Three Parishes - Gobowen, St Martins and Weston Rhyn",
-"Stoke North",
-"East Coseley",
-"Grace Mary to Lion Farm",
-"Firs and Bromford",
-"Horsefair, Broadwaters and Greenhill (Big Local DY10)",
-"Thurnscoe",
-"Dewsbury Moor",
-"Woodlands Speaks",
-"Greatfield",
-"Winterton",
-"Warwick Ahead",
-"Canvey’s Big Local £1 million",
-"Ravensthorpe and Westwood",
-"Wormley and Turnford",
-"Heart of Pitsea",
-"Birchwood",
-"Kingswood and Hazel Leys",
-"Langold, Costhorpe and Carlton",
-"St Matthew's Estate",
-"Slade Green",
-"London Road area of Broad Green",
-"Clapham Junction, West Battersea (Big Local SW11)",
-"Hanwell, Copley Close",
-"Bountagu (Bounces-Montagu)",
-"Noel Park Estate",
-"Chinbrook Estate",
-"North Meets South",
-"Central Jarrow",
-"Whitley Bay",
-"Dyke House",
-"3 Together",
-"Blackpool Revoe",
-"Tonge with the Haulgh",
-"Gannow",
-"Windmill Hill",
-"Collyhurst",
-"Bradley",
-"St Oswald and Netherton (L30 Million Project)",
-"Ridge Hill",
-"Prospect Estate",
-"Conniburrow",
-"North East Hastings",
-"Heart of Sidley",
-"Eastern Sheppey",
-"Arches Local (Central Chatham, Luton Arches)",
-"Whitleigh",
-"Worle",
-"Podsmead",
-"Birchfield",
-"Brereton",
-"Hill Top and Caldwell",
-"Church Hill",
-"Brookside",
-"Mossley",
-"Scotlands and Bushbury Hill",
-"Barrowcliff",
-"Thurcroft",
-"Greenmoor",
-"North Cleethorpes",
-"Hawksworth Wood Estate, the Abbeydales and the Vespers (HAVA)",
-"Rastrick",
-"Elmton, Creswell and Hodthorpe",
-"Central Boston",
-"Kirk Hallam",
-"Grassland and Hasmoor",
-"Farley Hill",
-"Catton Grove",
-"Riverside Community",
-"Grange",
-"Wembley Central",
-"Somers Town",
-"Elthorne Estates",
-"World's End Estate and Lots Road area",
-"Plaistow South",
-"Aberfeldy",
-"St James Street Area",
-"Peabody Avenue and Churchill Gardens Estate (Big Local SW1)",
-"North Ormesby",
-"CELL - Lynemouth, Cresswell, Ellington and Linton",
-"Roseworth Ward",
-"Distington",
-"West End, Morecambe",
-"Inner East Preston",
-"Kirkholt",
-"Wargrave",
-"Brinnington",
-"Sale West",
-"Latch Ford",
-"Beechwood, Ballantyne and Bidston Village ",
-"Sompting",
-"Dover Town",
-"Devonshire West",
-"Wecock Farm",
-"Whitley",
-"Newington, Ramsgate",
-"Lawrence Weston",
-"St Peter's and the Moors",
-"Bourne Estate",
-"Woolavington and Puriton Villages Together",
-"Welsh House Farm",
-"Heath Big Local",
-"Ansley Village, New Arley and OId Arley (Leys Millionnaires)",
-"Hateley Cross (Hateley Heath and Stone Cross)",
-"Cars Area, Smith's Wood, Solihull",
-"Palfrey",
-"Goldthorpe with Bolton-on-Dearne",
-"Keighley Valley",
-"Withernsea",
-"Selby Town",
-"Westfield Estate",
-"Tang Hall"
-]
 
-var images = [
-  'https://localtrust.org.uk/assets/images/areas/Kingsbrook_527.jpg'
-  ,'https://localtrust.org.uk/assets/images/areas/bigevent%20029%20527px.jpg',
-  'https://hadrianswallcountry.co.uk/sites/default/files/Gateshead%202.JPG',
-  'https://www.hackneywicked.co.uk/wp-content/uploads/2015/06/PubWide-1.jpg',
-  'https://www.visitcumbria.com/photos/simon/barrow-6794.jpg,'
-]
 
 export const applyDrag = (arr, dragResult) => {
   const { removedIndex, addedIndex, payload } = dragResult;
@@ -201,29 +43,9 @@ export const generateItems = (count, creator) => {
   return result;
 };
 
-const lorem = `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`;
-
-const columnNames = ["Your favourites", "Not so popular", "Others"];
+const columnNames = ["Your favourites", "Not so popular", "New Issues"];
 const columnColors = ["#d0f0c0", "#FFCCCB", null];
 
-const cardColors = [
-  "azure",
-  "beige",
-  "bisque",
-  "blanchedalmond",
-  "burlywood",
-  "cornsilk",
-  "gainsboro",
-  "ghostwhite",
-  "ivory",
-  "khaki"
-];
-const pickColor = () => {
-  let rand = Math.floor(Math.random() * 10);
-  return cardColors[rand];
-};
 
 class Cards extends Component {
   constructor() {
@@ -236,27 +58,90 @@ class Cards extends Component {
       scene: {
         type: "container",
         props: {
-          orientation: "vertical"
+          orientation: "horizontal"
         },
         children: generateItems(3, i => ({
           id: `column${i}`,
           type: "container",
           name: columnNames[i],
-          background: columnColors[i],
-          style: {width: "100%"},
           props: {
-            orientation: "horizontal",
+            orientation: "vertical",
             className: "card-container"
           },
-          children: generateItems(+(Math.random() * 20).toFixed() + 5, j => ({
-            type: "draggable",
-            id: `${i}${j}`,
-            data: areas[j],
-            image: images[j % 5]
-          }))
-        }))
+          children: [
+
+          ]
+        })
+        )
       }
     };
+    console.log(this.state)
+  }
+
+  /*
+  children: generateItems(+(Math.random() * 10).toFixed() + 5, j => ({
+    type: "draggable",
+    id: `${i}${j}`,
+    props: {
+      className: "card",
+      style: { backgroundColor: pickColor() }
+    },
+    data: lorem.slice(0, Math.floor(Math.random() * 150) + 30)
+  })
+  */
+
+  componentDidMount(props) {
+    db.collection("OrgData").where("managedBy", "==", Router.query.view)
+    .orderBy('lastInteraction', "desc")
+    .limit(20)
+    .get().then((querySnapshot) => {
+      querySnapshot.forEach((orgDoc) => {
+        var data = orgDoc.data()
+        var body = {
+          type: "draggable",
+          id : orgDoc.id,
+          props: {
+            className: "card",
+            id: orgDoc.id
+          },
+          data: data.details.name,
+          date: data.lastInteraction
+        }
+        console.log(body)
+        console.log(orgDoc.data())
+        var currentOrgs = this.state.scene.children[0].children ? this.state.scene.children[0].children : []
+        currentOrgs.push(body)
+        var scene = this.state.scene
+        scene.children[0].children = currentOrgs
+        this.setState({scene: scene})
+      })
+    })
+
+    db.collection("OrgData").where("managedBy", "==", Router.query.view)
+    .orderBy('lastInteraction', "asc")
+    .limit(20)
+    .get().then((querySnapshot) => {
+      querySnapshot.forEach((orgDoc) => {
+        var data = orgDoc.data()
+        var body = {
+          type: "draggable",
+          id : orgDoc.id,
+          props: {
+            className: "card",
+            id: orgDoc.id
+          },
+          data: data.details.name,
+          date: data.lastInteraction
+        }
+        console.log(body)
+        console.log(orgDoc.data())
+        var currentOrgs = this.state.scene.children[1].children ? this.state.scene.children[1].children : []
+        currentOrgs.push(body)
+        var scene = this.state.scene
+        scene.children[1].children = currentOrgs
+        this.setState({scene: scene})
+      })
+    })
   }
 
   handleSaveNote = (note) => {
@@ -277,15 +162,22 @@ class Cards extends Component {
     })
   }
 
+
   render() {
     console.log(this.state)
     return (
       <App>
+        <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '0 30% 90% 0%',
+          transform: 'skewX(-10deg)', backgroundColor: '#000AB2', left: -250,
+           width: '20vw', height: '100vw'}}/>
+           <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '30% 0 0 90%',
+             transform: 'skewX(-10deg)', backgroundColor: '#000AB2', right: -250,
+              width: '30vw', height: '100vw'}}/>
         <Dialog
           open={this.state.dialogOpen}
-
           onRequestClose={() => this.setState({dialogOpen:false})}>
-          <h2 style={{textAlign: 'left'}}>How come {this.state.selectedDropped} belongs in this category?</h2>
+          <h2 style={{textAlign: 'left', fontSize: '30px', fontWeight: 200}}>
+            Why does {this.state.selectedDropped} belong in this category?</h2>
           <div style={{textAlign: 'left'}}>
             <AddNote
               handleCancelNote={() => this.setState({dialogOpen: false})}
@@ -293,86 +185,70 @@ class Cards extends Component {
               />
           </div>
         </Dialog>
-        <div style={{textAlign: 'left'}} className="card-scene">
-          <div style={headerStyles.desktop}>
-            Your linked organisations
+        <div style={{display: 'flex', justifyContent: 'center', minHeight: '100vh'}}>
+          <div style={{maxWidth: 1200}}>
+            <div style={headerStyles.desktop}>
+              Your linked organisations
+            </div>
+            <div style ={{width: 100, height: 4, backgroundColor: '#000AB2', marginBottom: 30}}/>
+            <div className="card-scene" style={{display: 'flex', textAlign: 'left'}}>
+
+              <Container
+                orientation="horizontal"
+                onDrop={this.onColumnDrop}
+                dragHandleSelector=".column-drag-handle"
+              >
+                {this.state.scene.children.map(column => {
+                  return (
+                    <Draggable key={column.id}>
+                      <div className={column.props.className}>
+                        <div className="card-column-header" style={{marginBottom: 10}}>
+                          <span className="column-drag-handle">&#x2630;</span>
+                          {column.name}
+                        </div>
+                        <Container
+                          {...column.props}
+                          groupName="col"
+                          onDragStart={e => console.log("drag started", e)}
+                          onDragEnd={e => console.log("drag end", e)}
+                          onDrop={e => this.onCardDrop(column.id, e)}
+                          getChildPayload={index =>
+                            this.getCardPayload(column.id, index)
+                          }
+                          dragClass="card-ghost"
+                          dropClass="card-ghost-drop"
+                          onDragEnter={() => {
+                            console.log("drag enter:", column.id);
+                          }}
+                          onDragLeave={() => {
+                            console.log("drag leave:", column.id);
+                          }}
+                          onDropReady={p => console.log('Drop ready: ', p)}
+                        >
+                          {column.children && column.children.map(card => {
+                            return (
+                              <Draggable style={{display: 'block'}} key={card.id}
+                                id={card.id}>
+                                <ListItem
+
+                                  style={{backgroundColor: 'white', marginBottom: 6, borderBottom: '1px solid #DBDBDB'}}
+                                  primaryText={card.data}
+                                  secondaryText={card.date.toLocaleString('en-gb',
+                                    {weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'})}
+                                  />
+                              </Draggable>
+                            );
+                          })}
+                        </Container>
+                      </div>
+                    </Draggable>
+                  );
+                })}
+              </Container>
           </div>
-          <Container
-            orientation="vertical"
-            onDrop={this.onColumnDrop}
-            dragHandleSelector=".column-drag-handle"
-          >
-            {this.state.scene.children.map(column => {
-              return (
-                <Draggable style={{display: 'block'}} key={column.id}>
-                  <div className={column.props.className} style={{backgroundColor: column.background}}>
-                    <div className="card-column-header">
-                      <span className="column-drag-handle">&#x2630;</span>
-                      {column.name}
-                    </div>
-                    <Container
-                      {...column.props}
-                      style={{display: 'flex', flexWrap: 'wrap', overflow: 'hidden', backgroundColor: column.background}}
-                      groupName="col"
-                      onDragStart={e => console.log("drag started", e)}
-                      onDragEnd={e => console.log("drag end", e)}
-                      onDrop={e => this.onCardDrop(column.id, e)}
-                      getChildPayload={index =>
-                        this.getCardPayload(column.id, index)
-                      }
-                      dragClass="card-ghost"
-                      dropClass="card-ghost-drop"
-                      onDragEnter={() => {
-                        console.log("drag enter:", column.id);
-                      }}
-                      onDragLeave={() => {
-                        console.log("drag leave:", column.id);
-                      }}
-                      onDropReady={p => console.log('Drop ready: ', p)}
-                    >
-                      {column.children.map(card => {
-                        return (
-                          <Draggable key={card.id}>
-                            <Link prefetch href={`/organisation?targetorganisation=${card.data}&organisation=${this.props.url.query.organisation}`}>
-                              <div style={{position: 'relative', cursor: 'pointer'}} {...card.props}>
-                                <div
-                                  style={{margin: 10, borderRadius: '50%', cursor: 'pointer',
-                                    objectFit: 'cover',
-                                    height: 100, width: 100, position: 'relative'}}/>
-                                <div
-                                  className='orgButton'
-                                  style={{position: 'absolute', height: 100,
-                                    width: '100px',
-                                    display: 'flex', alignItems: 'center',
-                                    backgroundColor: 'white',
-                                    fontWeight: 200, color: 'black', fontSize: '14px',
-                                    border: '1px solid black', padding: 5,
-                                    boxShadow: '0 1px 1px rgba(0,0,0,0.12), 0 1px 1px rgba(0,0,0,0.24)',
-                                    borderRadius: '50%', margin: 10,
-                                    textAlign: 'center', justifyContent: 'center',
-                                   top: 0}}>
-                                   <div style={{zIndex: 2}}>
-                                     {
-                                       card.data.length < 20 ?
-                                       card.data :
-                                       card.data.slice(0,20) + '...'
-                                     }
-                                   </div>
-
-
-                                </div>
-                              </div>
-                            </Link>
-                          </Draggable>
-                        );
-                      })}
-                    </Container>
-                  </div>
-                </Draggable>
-              );
-            })}
-          </Container>
         </div>
+      </div>
+
       </App>
     );
   }

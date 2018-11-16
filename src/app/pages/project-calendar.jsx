@@ -85,6 +85,7 @@ class YourCalendar extends React.Component {
       var data = []
       querySnapshot.forEach((doc) => {
         var elem = doc.data()
+        elem._id = doc.id
         var date = new Date(elem.Date)
         elem.Name = elem.Details.name
         elem['Start Time'] = new Date(elem.Date)
