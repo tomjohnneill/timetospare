@@ -34,11 +34,11 @@ export class AdminAccounts extends React.Component {
         .then((doc) => {
           var data = doc.data()
           this.setState({organisation: doc.data()})
-          if (data.PendingAdmins) {
+          if (data && data.PendingAdmins) {
             this.getPendingAdmins(data.PendingAdmins)
           }
           var promiseArray = []
-          if (data.Admin) {
+          if (data && data.Admin) {
             Object.keys(data.Admin).forEach((admin) => {
               promiseArray.push(
                 db.collection("PersonalData")

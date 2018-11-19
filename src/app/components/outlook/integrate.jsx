@@ -42,16 +42,19 @@ export default class OutlookIntegrate extends React.Component {
         orgId = option.id
       })
       this.setState({organisation: data, orgId: orgId})
-      return db.collection("PersonalData").where("organisation", "==",this.state.orgId)
-        .where("Email", "==", this.state.user.Email)
-        .get()
-        .then((personalDataSnapshot) => {
-          var dataId
-          personalDataSnapshot.forEach((one) => {
-            dataId = one.id
+      if (this.state.orgId) {
+        return db.collection("PersonalData").where("organisation", "==",this.state.orgId)
+          .where("Email", "==", this.state.user.Email)
+          .get()
+          .then((personalDataSnapshot) => {
+            var dataId
+            personalDataSnapshot.forEach((one) => {
+              dataId = one.id
+            })
+            this.setState({personalDataId: dataId})
           })
-          this.setState({personalDataId: dataId})
-        })
+      }
+
     })
 
   }

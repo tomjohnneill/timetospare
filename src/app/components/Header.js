@@ -10,7 +10,6 @@ import RaisedButton from 'material-ui/RaisedButton';
 import Popover from 'material-ui/Popover';
 import Subheader from 'material-ui/Subheader';
 import Divider from 'material-ui/Divider';
-import DataLink from 'data-prefetch-link'
 import Avatar from 'material-ui/Avatar';
 import IconButton from 'material-ui/IconButton';
 import MediaQuery from 'react-responsive';
@@ -346,7 +345,7 @@ export default class Header extends React.Component {
                                            <Home/>
                                          </div>
                                        </Link>
-                                       <Link prefetch href={`/project-calendar?organisation=${this.state.organisation}`}>
+                                       <Link prefetch href={`/project-calendar?view=${this.state.organisation}`}>
                                          <div
                                            className='header-category'
                                            style={
@@ -358,7 +357,7 @@ export default class Header extends React.Component {
                                            Calendar
                                          </div>
                                        </Link>
-                                       <DataLink prefetch withData href={`/people?organisation=${this.state.organisation}`}>
+                                       <Link prefetch  href={`/people?view=${this.state.organisation}`}>
                                          <div
                                            className='header-category'
                                            style={
@@ -369,7 +368,7 @@ export default class Header extends React.Component {
                                            >
                                            People
                                          </div>
-                                       </DataLink>
+                                       </Link>
                                        <Link prefetch href={`/organisations?view=${this.state.organisation}`}>
                                          <div
                                            className='header-category'
