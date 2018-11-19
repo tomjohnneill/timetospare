@@ -9,6 +9,7 @@ import { withRouter } from 'next/router'
 import RaisedButton from 'material-ui/RaisedButton';
 import * as gtag from '../lib/gtag'
 import {buttonStyles} from './styles.jsx'
+import ErrorBoundary from './hocs/errorBoundary.jsx';
 
 var injectTapEventPlugin = require("react-tap-event-plugin");
 try {
@@ -55,7 +56,10 @@ export const App = ({ children, router, href }) => (
       <div>
         <Header children={children} router={router}/>
         <div style={{height: 50}}/>
-        {children}
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
+
         {
           typeof window !== 'undefined' && localStorage.getItem('sample') == 'true' ?
           <div style={{overflowX: 'hidden',position: 'fixed',
