@@ -9,7 +9,6 @@ import Router from 'next/router'
 import {Spiral, Tick, AvatarIcon, Muscle, Star, ReviewIcon, World, Cross} from '../components/icons.jsx'
 import FontIcon from 'material-ui/FontIcon';
 import FlatButton from 'material-ui/FlatButton';
-import EmbeddedProject from '../components/embeddedproject.jsx';
 import RaisedButton from 'material-ui/RaisedButton';
 import MediaQuery from 'react-responsive';
 import Loading from '../components/loading.jsx';
@@ -385,36 +384,10 @@ class ProjectsOrganised extends React.Component {
             </div>
             <div>
               <MediaQuery minDeviceWidth={700}>
-              {this.state.projects ?
-                <div style={{display: 'flex', flexWrap: 'wrap'}}>
-                  {this.state.projects.map((project) => (
-                  <div style={{position: 'relative', padding: 20, width: '50%', boxSizing: 'border-box'}}>
-                    <EmbeddedProject noLogo={true} project={project}/>
-                      {project.Approved ? null :
-                      <div
-                        onClick={() => {Router.push(`/project?project=${project._id}`, `/projects/p/${project._id}`)}}
-                        style={{cursor: 'pointer',height: '100%', width: '100%', zIndex: 4, boxSizing: 'border-box',
-                                  position: 'absolute', paddingTop: 20, paddingRight: 40, paddingBottom: 20, borderRadius: 8, top: 0}}>
-                          <div style={{height: '100%', width: '100%', backgroundColor: 'rgba(216, 216, 216, 0.35)'}}/>
-                      </div>
-                    }
-                  </div>
-                  ))}
-                </div>
-                : null
-              }
+
               </MediaQuery>
               <MediaQuery maxDeviceWidth={700}>
-              {this.state.projects ?
-                <div>
-                  {this.state.projects.map((project) => (
-                  <div style={{padding: 20, width: '100%', boxSizing: 'border-box'}}>
-                    <EmbeddedProject noLogo={true} project={project}/>
-                  </div>
-                  ))}
-                </div>
-                : null
-              }
+              
               </MediaQuery>
 
             </div>

@@ -2113,10 +2113,6 @@ caseless@~0.12.0:
   version "0.12.0"
   resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
 
-chai-dom@^1.6.0:
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/chai-dom/-/chai-dom-1.8.1.tgz#ce7978ac93d623314742aeb6ada86c9e4d8736de"
-
 chain-function@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/chain-function/-/chain-function-1.0.1.tgz#c63045e5b4b663fb86f1c6e186adaf1de402a1cc"
@@ -2630,10 +2626,6 @@ create-react-class@^15.6.0:
     loose-envify "^1.3.1"
     object-assign "^4.1.1"
 
-cropperjs@v1.0.0-rc.3:
-  version "1.0.0-rc.3"
-  resolved "https://registry.yarnpkg.com/cropperjs/-/cropperjs-1.0.0-rc.3.tgz#50a7c7611befc442702f845ede77d7df4572e82b"
-
 cross-env@^5.1.3:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/cross-env/-/cross-env-5.2.0.tgz#6ecd4c015d5773e614039ee529076669b9d126f2"
@@ -2773,13 +2765,6 @@ dashdash@^1.12.0:
   resolved "https://registry.yarnpkg.com/dashdash/-/dashdash-1.14.1.tgz#853cfa0f7cbe2fed5de20326b8dd581035f6e2f0"
   dependencies:
     assert-plus "^1.0.0"
-
-data-prefetch-link@^1.1.2:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/data-prefetch-link/-/data-prefetch-link-1.1.3.tgz#997c773d3b36ca8cc2804339491511298c8917cc"
-  dependencies:
-    prop-types "^15.6.1"
-    prop-types-exact "^1.1.2"
 
 data-uri-to-buffer@1:
   version "1.2.0"
@@ -5665,7 +5650,7 @@ moment@2.20.1:
   version "2.20.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.20.1.tgz#d6eb1a46cbcc14a2b2f9434112c1ff8907f313fd"
 
-moment@2.x, moment@^2.18.1, moment@^2.22.1, moment@^2.22.2:
+moment@2.x, moment@^2.22.1, moment@^2.22.2:
   version "2.22.2"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.2.tgz#3c257f9839fc0e93ff53149632239eb90783ff66"
 
@@ -6006,10 +5991,6 @@ numbro@^2.0.6:
 oauth-sign@~0.9.0:
   version "0.9.0"
   resolved "https://registry.yarnpkg.com/oauth-sign/-/oauth-sign-0.9.0.tgz#47a7b016baa68b5fa0ecf3dee08a85c679ac6455"
-
-object-assign@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-3.0.0.tgz#9bedd5ca0897949bca47e7ff408062d549f587f2"
 
 object-assign@^4, object-assign@^4.0.1, object-assign@^4.1.0, object-assign@^4.1.1:
   version "4.1.1"
@@ -6681,7 +6662,7 @@ prompt@1.0.0:
     utile "0.3.x"
     winston "2.1.x"
 
-prop-types-exact@1.2.0, prop-types-exact@^1.1.2:
+prop-types-exact@1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/prop-types-exact/-/prop-types-exact-1.2.0.tgz#825d6be46094663848237e3925a98c6e944e9869"
   dependencies:
@@ -6831,7 +6812,7 @@ qs@~6.4.0:
   version "6.4.0"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.4.0.tgz#13e26d28ad6b0ffaa91312cd3bf708ed351e7233"
 
-query-string@^5.0.1, query-string@^5.1.0:
+query-string@^5.0.1:
   version "5.1.1"
   resolved "http://registry.npmjs.org/query-string/-/query-string-5.1.1.tgz#a78c012b71c17e05f2e3fa2319dd330682efb3cb"
   dependencies:
@@ -6945,28 +6926,6 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-add-to-calendar@^0.1.5:
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/react-add-to-calendar/-/react-add-to-calendar-0.1.5.tgz#ab077fe98ca0f178a5a3b70a3590d4b630c0f275"
-  optionalDependencies:
-    moment "^2.18.1"
-
-react-autosuggest@^9.3.4:
-  version "9.4.2"
-  resolved "https://registry.yarnpkg.com/react-autosuggest/-/react-autosuggest-9.4.2.tgz#18cc0bebeebda3d24328e3da301f061a444ae223"
-  dependencies:
-    prop-types "^15.5.10"
-    react-autowhatever "^10.1.2"
-    shallow-equal "^1.0.0"
-
-react-autowhatever@^10.1.2:
-  version "10.2.0"
-  resolved "https://registry.yarnpkg.com/react-autowhatever/-/react-autowhatever-10.2.0.tgz#bdd07bf19ddf78acdb8ce7ae162ac13b646874ab"
-  dependencies:
-    prop-types "^15.5.8"
-    react-themeable "^1.1.0"
-    section-iterator "^2.0.0"
-
 react-big-calendar@^0.19.1:
   version "0.19.2"
   resolved "https://registry.yarnpkg.com/react-big-calendar/-/react-big-calendar-0.19.2.tgz#f9a7847930593db1ccbad05f2683a77bd7e1c901"
@@ -6989,20 +6948,9 @@ react-copy-to-clipboard@^5.0.1:
     copy-to-clipboard "^3"
     prop-types "^15.5.8"
 
-react-cropper@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/react-cropper/-/react-cropper-1.0.1.tgz#6e5595abb8576088ab3e51ecfdcfe5f865d0340f"
-  dependencies:
-    cropperjs v1.0.0-rc.3
-    prop-types "^15.5.8"
-
 react-csv@^1.0.15-RC2:
   version "1.0.18"
   resolved "https://registry.yarnpkg.com/react-csv/-/react-csv-1.0.18.tgz#2c9e1ceda02da84fc9a6b12a54804ba5a08b8a0f"
-
-react-datasheet@^1.3.7:
-  version "1.3.9"
-  resolved "https://registry.yarnpkg.com/react-datasheet/-/react-datasheet-1.3.9.tgz#ef65ec87210ad0a22d09046f7fd371502866db05"
 
 react-day-picker@^7.1.10:
   version "7.2.4"
@@ -7071,12 +7019,6 @@ react-google-maps@^9.4.5:
     scriptjs "^2.5.8"
     warning "^3.0.0"
 
-react-instagram-embed@^1.3.4:
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/react-instagram-embed/-/react-instagram-embed-1.4.1.tgz#57032ff965cf8806549c2f1d3bb713635b48e407"
-  dependencies:
-    query-string "^5.1.0"
-
 react-is@^16.3.2:
   version "16.6.3"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.6.3.tgz#d2d7462fcfcbe6ec0da56ad69047e47e56e7eac0"
@@ -7088,10 +7030,6 @@ react-lifecycles-compat@^3.0.2:
 react-lines-ellipsis@^0.13.2:
   version "0.13.2"
   resolved "https://registry.yarnpkg.com/react-lines-ellipsis/-/react-lines-ellipsis-0.13.2.tgz#0d5726ab1f5e8107398262f5faf16e2e4de08951"
-
-react-masonry-css@^1.0.11:
-  version "1.0.11"
-  resolved "https://registry.yarnpkg.com/react-masonry-css/-/react-masonry-css-1.0.11.tgz#ba991fac2a033f49973187d524ff2cf484941d1c"
 
 react-overlays@^0.7.0:
   version "0.7.4"
@@ -7108,10 +7046,6 @@ react-prop-types@^0.4.0:
   resolved "https://registry.yarnpkg.com/react-prop-types/-/react-prop-types-0.4.0.tgz#f99b0bfb4006929c9af2051e7c1414a5c75b93d0"
   dependencies:
     warning "^3.0.0"
-
-react-proptype-conditional-require@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/react-proptype-conditional-require/-/react-proptype-conditional-require-1.0.4.tgz#69c2d5741e6df5e08f230f36bbc2944ee1222555"
 
 react-quill@^1.2.7:
   version "1.3.2"
@@ -7158,12 +7092,6 @@ react-tap-event-plugin@^3.0.2:
   dependencies:
     fbjs "^0.8.6"
 
-react-themeable@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/react-themeable/-/react-themeable-1.1.0.tgz#7d4466dd9b2b5fa75058727825e9f152ba379a0e"
-  dependencies:
-    object-assign "^3.0.0"
-
 react-transition-group@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/react-transition-group/-/react-transition-group-1.2.1.tgz#e11f72b257f921b213229a774df46612346c7ca6"
@@ -7173,15 +7101,6 @@ react-transition-group@^1.2.1:
     loose-envify "^1.3.1"
     prop-types "^15.5.6"
     warning "^3.0.0"
-
-react-twitter-embed@^1.1.3:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/react-twitter-embed/-/react-twitter-embed-1.2.1.tgz#bf69a47ab96821179c006f9e4f1dd9b46d673509"
-  dependencies:
-    babel-runtime "^6.11.6"
-    chai-dom "^1.6.0"
-    react-proptype-conditional-require "^1.0.4"
-    scriptjs "^2.5.8"
 
 react-typing-animation@^1.4.0:
   version "1.4.0"
@@ -7632,10 +7551,6 @@ scriptjs@^2.5.8:
   version "2.5.9"
   resolved "https://registry.yarnpkg.com/scriptjs/-/scriptjs-2.5.9.tgz#343915cd2ec2ed9bfdde2b9875cd28f59394b35f"
 
-section-iterator@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/section-iterator/-/section-iterator-2.0.0.tgz#bf444d7afeeb94ad43c39ad2fb26151627ccba2a"
-
 seed-random@2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/seed-random/-/seed-random-2.2.0.tgz#2a9b19e250a817099231a5b99a4daf80b7fbed54"
@@ -7749,10 +7664,6 @@ sha.js@^2.4.0, sha.js@^2.4.8:
   dependencies:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
-
-shallow-equal@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/shallow-equal/-/shallow-equal-1.0.0.tgz#508d1838b3de590ab8757b011b25e430900945f7"
 
 shallowequal@^1.0.1:
   version "1.1.0"

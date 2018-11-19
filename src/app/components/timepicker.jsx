@@ -1,5 +1,4 @@
 import React from 'react';
-import Autosuggest from 'react-autosuggest';
 import Menu from 'material-ui/Menu';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';

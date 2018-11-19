@@ -8,7 +8,6 @@ import fire from '../fire';
 import firebase from "firebase/app";
 import 'firebase/auth';
 let db = fire.firestore()
-import {changeImageAddress} from '../components/desktopproject.jsx';
 import Head from 'next/head'
 import CustomInvite from '../components/custom-invite.jsx';
 import withMui from '../components/hocs/withMui';
@@ -59,7 +58,7 @@ class Invitation extends React.Component {
             <meta property="twitter:title" content={this.props.organisation.Name + " wants you to join their team"}/>
             <meta property="og:type" content="article" />
             <meta property="og:description" content={this.props.organisation.Invite} />
-            <meta property="og:image" content={this.props.organisation['Logo'] ? changeImageAddress(this.props.organisation['Logo'], '750xauto') : null} />
+            <meta property="og:image" content={this.props.organisation['Logo'] ? this.props.organisation['Logo'] : null} />
             <meta name="twitter:card" content="summary" />
         </Head>
         <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center',

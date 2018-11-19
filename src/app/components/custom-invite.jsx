@@ -7,7 +7,6 @@ import fire from '../fire';
 import firebase from "firebase/app";
 import 'firebase/auth';
 let db = fire.firestore()
-import {changeImageAddress} from './desktopproject.jsx';
 import Head from 'next/head'
 
 const styles = {
@@ -23,6 +22,16 @@ const styles = {
   textfield: {
     height: '40px',
     fontsize: '20px'
+  }
+}
+
+const changeImageAddress = (file, size) => {
+  if (file && file.includes('https://d3kkowhate9mma.cloudfront.net')) {
+    var str = file, replacement = '/' + size + '/';
+    str = str.replace(/\/([^\/]*)$/,replacement+'$1');
+    return(str + '?pass=this')
+  } else {
+    return (file)
   }
 }
 

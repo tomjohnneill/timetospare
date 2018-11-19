@@ -11,7 +11,6 @@ import Checkbox from 'material-ui/Checkbox';
 import FlatButton from 'material-ui/FlatButton';
 import MediaQuery from 'react-responsive';
 import DocumentTitle from 'react-document-title';
-import {CharityPhotoUpload} from '../pages/editcharity.jsx';
 import Dialog from 'material-ui/Dialog';
 import fire from '../fire';
 import {buttonStyles} from './styles.jsx';
@@ -340,7 +339,7 @@ export default class OrganisationDetails extends React.Component {
             <p style={styles.header}>
             Logo*
             </p>
-            <CharityPhotoUpload changeImage={(imageUrl) => this.setState({picture: imageUrl})}/>
+            
           </div>
 
 

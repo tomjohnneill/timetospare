@@ -10,7 +10,6 @@ import Search from 'material-ui/svg-icons/action/search';
 import FlatButton from 'material-ui/FlatButton';
 import MediaQuery from 'react-responsive';
 import DocumentTitle from 'react-document-title';
-import {CharityPhotoUpload} from '../../pages/editcharity.jsx';
 import Dialog from 'material-ui/Dialog';
 
 
@@ -382,7 +381,7 @@ export default class OrganisationLookup extends React.Component{
                     null
                   }
 
-                  <CharityPhotoUpload changeImage={(imageUrl) => this.setState({picture: imageUrl})}/>
+
 
                   <div style={{padding: '6px'}}>
                     <p style={styles.header}>
@@ -663,7 +662,7 @@ export default class OrganisationLookup extends React.Component{
                     null
                   }
 
-                  <CharityPhotoUpload changeImage={(imageUrl) => this.setState({picture: imageUrl})}/>
+
 
                   <div style={{padding: '6px'}}>
                     <p style={styles.header}>

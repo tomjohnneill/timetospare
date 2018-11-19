@@ -2,12 +2,10 @@ import React from "react"
 import RaisedButton from 'material-ui/RaisedButton';
 import App from "../components/App"
 import MediaQuery from 'react-responsive';
-import EmbeddedProject from '../components/embeddedproject.jsx';
 import Search from 'material-ui/svg-icons/action/search';
 import Divider from 'material-ui/Divider';
 import Chip from 'material-ui/Chip';
 import Snackbar from 'material-ui/Snackbar';
-import Masonry from 'react-masonry-css';
 import Loading from '../components/loading.jsx';
 import SignupModal from '../components/signupmodal.jsx';
 import Router from 'next/router';

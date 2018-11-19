@@ -24,7 +24,6 @@ import {buttonStyles} from './styles.jsx'
 import Head from 'next/head'
 import Home from 'material-ui/svg-icons/action/home';
 import "../style.css"
-import 'react-datasheet/lib/react-datasheet.css';
 
 let db = fire.firestore()
 
@@ -402,16 +401,6 @@ export default class Header extends React.Component {
                                      </div>
                                    </Link>
 
-                                  <Link prefetch href='/projects'>
-                                    <div style={
-                                      this.props.router.pathname.includes('projects') ?
-                                      style.selectedCategory :
-                                      style.category}
-                                      className='header-category'
-                                      >
-                                      Projects
-                                    </div>
-                                  </Link>
                                   {
                                     this.state.organisation ?
                                     null :
@@ -564,9 +553,7 @@ export default class Header extends React.Component {
              :
              null
             }
-            <Link href='/projects'>
-              <MenuItem onClick={() => this.goToAndClose('/projects')}>Projects</MenuItem>
-            </Link>
+
             <Link href='/create-other' >
               <MenuItem onClick={this.handleCreateProject}>Start an organisation</MenuItem>
             </Link>
