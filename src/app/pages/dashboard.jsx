@@ -79,7 +79,7 @@ export class Organisation extends React.Component {
     .then((admins) => {
       console.log(this.state.orgId)
       var promiseArray = []
-      Object.keys(admins).forEach((admin) => {
+      admins && Object.keys(admins).forEach((admin) => {
         promiseArray.push(
           db.collection("PersonalData")
           .where("User", "==", admin)

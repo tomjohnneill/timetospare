@@ -24,7 +24,9 @@ export default class AddTag extends React.Component {
   componentDidMount(props) {
     db.collection("Charity").doc(this.props.organisation).get()
     .then((doc) => {
-      this.setState({existingTags: doc.data().tags})
+      if (doc.data()) {
+        this.setState({existingTags: doc.data().tags})
+      }
     })
   }
 

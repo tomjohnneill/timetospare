@@ -13,18 +13,18 @@ import Dialog from 'material-ui/Dialog';
 import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton';
 import FlatButton from 'material-ui/FlatButton';
 import CommunicationChatBubble from 'material-ui/svg-icons/av/play-arrow';
-import {buttonStyles, radioButtonStyles, textFieldStyles, chipStyles} from '../components/styles.jsx';
+import {buttonStyles, radioButtonStyles, textFieldStyles, chipStyles, headerStyles} from '../components/styles.jsx';
 import {CSVLink} from 'react-csv';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
 import {List, ListItem} from 'material-ui/List';
 import 'react-table/react-table.css'
 import ReactTable from "react-table";
-import {Tag} from '../components/icons.jsx';
+import {Tag, AvatarIcon} from '../components/icons.jsx';
 import Chip from 'material-ui/Chip';
 import AddTag from '../components/addTag.jsx';
 import TextField from 'material-ui/TextField';
-
+import OrganisationAutocomplete from '../components/organisation-autocomplete.jsx';
 
 let db = fire.firestore()
 
@@ -110,8 +110,8 @@ export class People extends React.Component {
   componentDidMount (props) {
     Router.prefetch('/member')
     console.log(this.state)
-    this.setState({organisation: Router.query.organisation, tagType: 'existing'})
-    if (Router.query.organisation) {
+    this.setState({organisation: Router.query.view, tagType: 'existing'})
+    if (Router.query.view) {
       if (typeof window !== 'undefined' && localStorage.getItem('sample') == "true") {
         var data = []
         var corsRequest = functions.httpsCallable('integrations-wrapCors');
@@ -134,7 +134,7 @@ export class People extends React.Component {
           this.setState({data: data, columns: getColumnsFromMembers(data)})
         })
       } else {
-        db.collection("PersonalData").where("organisation", "==", Router.query.organisation)
+        db.collection("PersonalData").where("organisation", "==", Router.query.view)
         .get().then((querySnapshot) => {
           var data = []
           querySnapshot.forEach((member) => {
@@ -145,7 +145,7 @@ export class People extends React.Component {
               elem['Last Contacted'] = elem.lastContacted.toLocaleString('en-gb',
                 {weekday: 'long', month: 'long', day: 'numeric'})
               delete elem.lastContacted
-              
+
             }
             if (elem.lists) {
               delete elem.lists
@@ -201,7 +201,7 @@ export class People extends React.Component {
                 rightIcon={<CommunicationChatBubble />}
               />
               <Divider/>
-              <Link href={`/upload-data?organisation=${this.state.organisation}`} prefetch>
+              <Link href={`/upload-data?view=${this.state.organisation}`} prefetch>
                 <ListItem
                   style={{display: 'flex', height: 80, alignItems: 'center'}}
                   primaryText="Import from csv"
@@ -210,13 +210,77 @@ export class People extends React.Component {
                   rightIcon={<CommunicationChatBubble />}
                 />
               </Link>
+              <Divider/>
+
+                <ListItem
+                  onClick={() => this.setState({onePerson: true, import: false})}
+                  style={{display: 'flex', height: 80, alignItems: 'center'}}
+                  primaryText="Add one person"
+                  leftAvatar={<Avatar><AvatarIcon/></Avatar>}
+                  rightIcon={<CommunicationChatBubble />}
+                />
 
             </List>
           </Dialog>
 
+          <Dialog
+            open={this.state.onePerson}
+            onRequestClose={() => this.setState({onePerson: false})}>
+            <div style={headerStyles.desktop}>
+              Add their details
+            </div>
+            <div>
+
+
+              <div style={{display: 'flex', alignItems: 'center', paddingBottom: 20}}>
+                <div style={{width: 20, paddingRight: 20}}>
+                  OI
+                </div>
+                <div style={{flex: 1}}>
+                  <TextField
+                    hintText={'Add their Full Name'}
+                    underlineShow={false}
+                    fullWidth={true}
+                    style={textFieldStyles.style}
+                    inputStyle={textFieldStyles.input}
+                    hintStyle={textFieldStyles.hint}
+                    />
+                </div>
+              </div>
+
+              <div style={{display: 'flex', alignItems: 'center', paddingBottom: 20}}>
+                <div style={{width: 20, paddingRight: 20}}>
+                  OI
+                </div>
+                <div style={{flex: 1}}>
+                  <TextField
+                    hintText={'Add their Email'}
+                    underlineShow={false}
+                    fullWidth={true}
+                    style={textFieldStyles.style}
+                    inputStyle={textFieldStyles.input}
+                    hintStyle={textFieldStyles.hint}
+                    />
+                </div>
+              </div>
+
+              <div style={{display: 'flex', alignItems: 'center', paddingBottom: 20}}>
+                <div style={{width: 20, paddingRight: 20}}>
+                  OI
+                </div>
+                <div style={{flex: 1}}>
+                  <OrganisationAutocomplete
+                    org={this.props.url.query.view}/>
+                </div>
+              </div>
+            </div>
+
+
+          </Dialog>
+
           <AddTag
             selection={this.state.selection}
-            organisation={this.props.url.query.organisation}
+            organisation={this.props.url.query.view}
             open={this.state.tagDialog}
             onRequestClose={() => this.setState({tagDialog:false})}/>
 
@@ -275,9 +339,9 @@ export class People extends React.Component {
                 return {
                   onClick: (e, handleOriginal) => {
                     if (localStorage.getItem('sample') == "true") {
-                      Router.push(`/member?member=${rowInfo.original._id}&organisation=none&name=${rowInfo.original['Full Name']}&team=${rowInfo.original['organisation']}`)
+                      Router.push(`/member?member=${rowInfo.original._id}&view=none&name=${rowInfo.original['Full Name']}&team=${rowInfo.original['organisation']}`)
                     } else {
-                      Router.push(`/member?member=${rowInfo.original._id}&organisation=${Router.query.organisation}&name=${rowInfo.original['Full Name']}`)
+                      Router.push(`/member?member=${rowInfo.original._id}&view=${Router.query.view}&name=${rowInfo.original['Full Name']}`)
                     }
                     if (handleOriginal) {
                       handleOriginal();

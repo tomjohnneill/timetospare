@@ -59,9 +59,10 @@ export const App = ({ children, router, href }) => (
         <ErrorBoundary>
           {children}
         </ErrorBoundary>
-
         {
-          typeof window !== 'undefined' && localStorage.getItem('sample') == 'true' ?
+          typeof window !== 'undefined' && localStorage.getItem('sample') == 'true'
+          && router.route !== '/' && router.route !== '/upload-data'
+          ?
           <div style={{overflowX: 'hidden',position: 'fixed',
             borderTop: '1px solid #DBDBDB', color: 'white',
             backgroundColor: '#000AB2', zIndex: 10, flexDirection: 'column',
@@ -79,7 +80,6 @@ export const App = ({ children, router, href }) => (
           :
           null
         }
-
         <Footer/>
       </div>
 

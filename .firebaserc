@@ -1,5 +1,5 @@
 {
   "projects": {
-    "default": "whosin-next"
+    "staging": "timetospare-staging"
   }
 }
