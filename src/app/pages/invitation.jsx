@@ -37,7 +37,7 @@ class Invitation extends React.Component {
   }
 
   static async getInitialProps({req, pathname, query}) {
-    const res =  await db.collection("Charity").doc(query.organisation).get()
+    const res =  await db.collection("Organisations").doc(query.organisation).get()
     .then((doc) => {
           var project = doc.data()
           project._id = doc.id

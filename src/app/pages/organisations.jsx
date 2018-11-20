@@ -97,6 +97,7 @@ class Cards extends Component {
     .get().then((querySnapshot) => {
       querySnapshot.forEach((orgDoc) => {
         var data = orgDoc.data()
+        console.log(data)
         var body = {
           type: "draggable",
           id : orgDoc.id,

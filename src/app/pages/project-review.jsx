@@ -133,7 +133,7 @@ class ShortReview extends React.Component {
       project._id = doc.id
       this.setState({project: project})
       if (project.Charity) {
-        db.collection("Charity").doc(project.Charity).get().then((charityDoc) => {
+        db.collection("Organisations").doc(project.Charity).get().then((charityDoc) => {
           var charity = charityDoc.data()
           charity._id = charityDoc.id
           this.setState({project: project, charity: charity, loading: false})

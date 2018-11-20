@@ -271,7 +271,7 @@ class RecentReviews extends React.Component {
       this.setState({projects: data})
       for (let i = 0; i < data.length; i++) {
         if (data[i]['Charity Number']) {
-          db.collection("Charity").doc(data[i]['Charity Number']).get().then((charityDoc) => {
+          db.collection("Organisations").doc(data[i]['Charity Number']).get().then((charityDoc) => {
             var charityData = charityDoc.data()
             console.log(charityData)
             data[i]['Charity Picture'] = charityData['Featured Image']
@@ -387,7 +387,7 @@ class ProjectsOrganised extends React.Component {
 
               </MediaQuery>
               <MediaQuery maxDeviceWidth={700}>
-              
+
               </MediaQuery>
 
             </div>

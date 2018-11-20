@@ -88,59 +88,64 @@ export class Member extends React.Component {
         console.log(data)
         this.setState({interactions: data})
       })
+    } else {
+      this.setState({interactions: [], pinned: []})
+      db.collection("Interactions")
+      .where("Member", "==", Router.query.member)
+      .where("Organisation", "==", Router.query.view)
+      .orderBy("Date", 'desc').get()
+      .then((intSnapshot) => {
+        var data = this.state.interactions ? this.state.interactions : []
+        intSnapshot.forEach((intDoc) => {
+          var elem = intDoc.data()
+          elem._id = intDoc.id
+          data.push(elem)
+        })
+        this.setState({interactions: data})
+      })
+
+      db.collection("Interactions")
+      .where("Members", "array-contains", Router.query.member)
+      .where("Organisation", "==", Router.query.view)
+      .orderBy("Date", 'desc').get()
+      .then((intSnapshot) => {
+        var data = this.state.interactions ? this.state.interactions : []
+        intSnapshot.forEach((intDoc) => {
+          var elem = intDoc.data()
+          elem._id = intDoc.id
+          data.push(elem)
+        })
+        this.setState({interactions: data})
+      })
+
+      db.collection("Interactions")
+      .where("Members", "array-contains", Router.query.member)
+      .where("Organisation", "==", Router.query.view)
+      .where("Pinned", "==", true)
+      .orderBy("Date", 'desc').get()
+      .then((pinSnapshot) => {
+        var pinnedData = this.state.pinned ? this.state.pinned : []
+        pinSnapshot.forEach((pinDoc) => {
+          var elem = pinDoc.data()
+          elem._id = pinDoc.id
+          pinnedData.push(elem)
+        })
+        this.setState({pinned: pinnedData})
+      })
+
+      db.collection("PersonalData").doc(Router.query.member).get()
+      .then((doc) => {
+        var elem = doc.data()
+        elem._id = doc.id
+        const rawData = Object.create(elem)
+        delete rawData.managedBy
+        delete rawData.User
+        delete rawData.lastContacted
+        this.setState({memberData: rawData, member: elem})
+      })
     }
 
-    this.setState({interactions: [], pinned: []})
-    db.collection("Interactions")
-    .where("Member", "==", Router.query.member)
-    .where("Organisation", "==", Router.query.organisation)
-    .orderBy("Date", 'desc').get()
-    .then((intSnapshot) => {
-      var data = this.state.interactions ? this.state.interactions : []
-      intSnapshot.forEach((intDoc) => {
-        var elem = intDoc.data()
-        elem._id = intDoc.id
-        data.push(elem)
-      })
-      this.setState({interactions: data})
-    })
 
-    db.collection("Interactions")
-    .where("Members", "array-contains", Router.query.member)
-    .where("Organisation", "==", Router.query.organisation)
-    .orderBy("Date", 'desc').get()
-    .then((intSnapshot) => {
-      var data = this.state.interactions ? this.state.interactions : []
-      intSnapshot.forEach((intDoc) => {
-        var elem = intDoc.data()
-        elem._id = intDoc.id
-        data.push(elem)
-      })
-      this.setState({interactions: data})
-    })
-
-    db.collection("Interactions")
-    .where("Members", "array-contains", Router.query.member)
-    .where("Organisation", "==", Router.query.organisation)
-    .where("Pinned", "==", true)
-    .orderBy("Date", 'desc').get()
-    .then((pinSnapshot) => {
-      var pinnedData = this.state.pinned ? this.state.pinned : []
-      pinSnapshot.forEach((pinDoc) => {
-        var elem = pinDoc.data()
-        elem._id = pinDoc.id
-        pinnedData.push(elem)
-      })
-      this.setState({pinned: pinnedData})
-    })
-
-    db.collection("PersonalData").doc(Router.query.member).get()
-    .then((doc) => {
-      var elem = doc.data()
-      elem._id = doc.id
-      const rawData = Object.create(elem)
-      this.setState({memberData: rawData, member: elem})
-    })
   }
 
   componentDidMount(props) {
@@ -170,9 +175,24 @@ export class Member extends React.Component {
         elem._id = doc.id
         const rawData = Object.create(elem)
         console.log(rawData)
-        this.setState({memberData: rawData})
+        delete rawData.managedBy
+        delete rawData.User
+        delete rawData.lastContacted
 
+        this.setState({memberData: rawData})
         this.setState({member: elem})
+        return elem
+      })
+      .then((person) => db.collection("Relationships")
+          .where('Members', "array-contains", person._id).get())
+      .then((querySnapshot) => {
+        var relArray = []
+        querySnapshot.forEach((relDoc) => {
+          var item = relDoc.data()
+          item._id = relDoc.id
+          relArray.push(item)
+        })
+        this.setState({relationships: relArray})
       })
 
     }
@@ -200,7 +220,7 @@ export class Member extends React.Component {
   };
 
   renderInteraction = (int) => {
-    console.log(int)
+
     switch(int.Type) {
       case "Event":
         return (
@@ -219,7 +239,7 @@ export class Member extends React.Component {
                 className='email-interaction'
 
                 primaryText={int.Details ?
-                  <Link prefetch href={`/project-admin?project=${int._id}&organisation=${Router.query.organisation}`}>
+                  <Link prefetch href={`/project-admin?project=${int._id}&view=${Router.query.view}`}>
                     {int.Details.name}
                   </Link>
                    : null}
@@ -231,7 +251,7 @@ export class Member extends React.Component {
                       <Avatar
                       backgroundColor={'#e91e63'}
                       icon={
-                        <Link prefetch href={`/project-admin?project=${int._id}&organisation=${Router.query.organisation}`}>
+                        <Link prefetch href={`/project-admin?project=${int._id}&view=${Router.query.view}`}>
                         <EventIcon color='white'/>
                       </Link> } />
 
@@ -341,7 +361,7 @@ export class Member extends React.Component {
   handleSaveNote = (note) => {
     this.setState({takeNote: false})
     var data = {
-      Organisation: Router.query.organisation,
+      Organisation: Router.query.view,
       Members: [Router.query.member],
       Creator: fire.auth().currentUser.uid,
       Date: new Date(),
@@ -457,7 +477,7 @@ export class Member extends React.Component {
           <AddTag
             selection={[this.state.memberData]}
             text={`Tag ${decodeURIComponent(this.props.url.query.name)}`}
-            organisation={this.props.url.query.organisation}
+            organisation={this.props.url.query.view}
             open={this.state.tagOpen}
             onTagAdded={this.handleTagAdded}
             onRequestClose={() => this.setState({tagOpen:false})}/>
@@ -528,7 +548,7 @@ export class Member extends React.Component {
                 justifyContent: 'space-between', alignItems: 'center'}}>
                 <div style={{textAlign: 'left'}}>
 
-                  <div style={{fontWeight: 200, fontSize: '40px', paddingBottom: 10,
+                  <div style={{fontWeight: 200, fontSize: '40px', paddingBottom: 10, textTransform: 'capitalize', 
                     borderBottom: '4px solid #000AB2', display: 'flex', alignItems: 'center'
                   }}>
                   <AvatarIcon style={{height: 60, paddingRight: 15}} color='#484848'/>
@@ -599,22 +619,25 @@ export class Member extends React.Component {
                      primaryTogglesNestedList={true}
                      nestedItems={
                        [<div style={{display: 'flex', flexWrap: 'wrap', padding: 10}}>
-                         {this.state.memberData && this.state.memberData.Organisations && (typeof window !== 'undefined' && localStorage.getItem('sample') != 'true') ?
-                           this.state.memberData.Organisations.map((tag) => (
-                           <Link prefetch href={`/organisation?targetorganisation=${tag}&organisation=${Router.query.organisation}`}>
-                         <Chip
+                         {this.state.relationships && (typeof window !== 'undefined' && localStorage.getItem('sample') != 'true') ?
+                           this.state.relationships.map((rel) => (
+                             rel.OrgNames && Object.keys(rel.OrgNames).map((key) => (
+                               <Link prefetch href={`/organisation?targetorganisation=${key}&view=${Router.query.view}`}>
+                                 <Chip
 
-                           style={chipStyles.chip}
-                           labelStyle={chipStyles.chipLabel}
-                           deleteIconStyle={chipStyles.deleteStyle}
-                           onRequestDelete={() => this.handleDeleteTag(tag)}
-                           >{tag}
-                         </Chip>
-                         </Link>
+                                   style={chipStyles.chip}
+                                   labelStyle={chipStyles.chipLabel}
+                                   deleteIconStyle={chipStyles.deleteStyle}
+                                   onRequestDelete={() => this.handleDeleteTag(tag)}
+                                   >{rel.OrgNames[key]}
+                                 </Chip>
+                               </Link>
+                             ))
+
                        )) : (typeof window !== 'undefined' && localStorage.getItem('sample') == 'true' && this.state.memberData && this.state.memberData.Organisations && this.state.memberData.Organisations.length > 0) ?
 
                        this.state.memberData.Organisations.map((tag) => (
-                       <Link prefetch href={`/organisation?targetorganisation=${tag.name}&team=${tag._id}&organisation=${Router.query.organisation}`}>
+                       <Link prefetch href={`/organisation?targetorganisation=${tag.name}&team=${tag._id}&view=${Router.query.view}`}>
                          <Chip
 
                            style={chipStyles.chip}
@@ -649,7 +672,7 @@ export class Member extends React.Component {
                      nestedItems={
                        [<div style={{display: 'flex', flexWrap: 'wrap', padding: 10}}>
                          {this.state.memberData && this.state.memberData.tags ? this.state.memberData.tags.map((tag) => (
-                           <Link prefetch href={`/tag?tag=${tag}&organisation=${Router.query.organisation}`}>
+                           <Link prefetch href={`/tag?tag=${tag}&view=${Router.query.view}`}>
                          <Chip
                            style={chipStyles.chip}
                            labelStyle={chipStyles.chipLabel}

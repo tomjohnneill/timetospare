@@ -115,12 +115,9 @@ export default class DataValidation extends React.Component {
 
   handleSkip = (item) => {
     var columns = this.state.columns
-    console.log(columns, item)
     var position = columns.indexOf(item)
-    console.log(position)
     var columnNames = this.state.columns ? this.state.columns : []
     columnNames[position] = {name: item.name, selected: false}
-    console.log(columnNames)
     this.setState({selected: columns[position + 1], columns: columnNames, newColumn: false})
   }
 
@@ -398,14 +395,14 @@ export default class DataValidation extends React.Component {
 
 
   handleDrop = (dropEvent) => {
-    console.log(dropEvent)
+
     var targetZone = dropEvent.dropData.target
     var highlighted = this.state.columns
     var indexOf = highlighted.map(e => e.name).indexOf(targetZone)
     highlighted[indexOf].category = dropEvent.dragData.data
-    console.log(highlighted[indexOf])
+
     this.setState({columns: highlighted})
-    console.log(this.state.columns)
+
   }
 
   handleRemoveCategory = (column) => {
@@ -416,10 +413,10 @@ export default class DataValidation extends React.Component {
   }
 
 
-  updateFromChild = (data, columns) => {
-    console.log(data)
-    this.setState({grid: data, columns: columns, stage: 'deduplication'})
-    console.log(this.state)
+  updateFromChild = (data, columns, orgs) => {
+
+    this.setState({grid: data, columns: columns, stage: 'deduplication', orgs: orgs})
+
     window.scrollTo(0, 0)
   }
 
@@ -483,7 +480,7 @@ export default class DataValidation extends React.Component {
                   labelStyle={buttonStyles.smallLabel}
                   onClick={() => {
                     this.setState({stage: 'highlight-columns'})
-                    localStorage.setItem('grid', JSON.parse(this.state.grid))
+
                     window.scrollTo(0, 0)
                   }}
                   />
@@ -504,6 +501,7 @@ export default class DataValidation extends React.Component {
       case 'deduplication': {
         return  <Deduplication
             data={this.state.grid}
+            orgs={this.state.orgs}
             columns={this.state.columns}
             goBack={() => this.setState({stage: 'org-upload'})}
           />
@@ -691,6 +689,7 @@ export default class DataValidation extends React.Component {
                overflow: 'auto'}}>
               {this.state.columns.map((item) => (
                 <ListItem  primaryText={item.name}
+                  key={item.name}
                   nestedItems={
                     this.state.grid.slice(0,5).map((row) => (
                       <ListItem
@@ -723,7 +722,6 @@ export default class DataValidation extends React.Component {
 
 
   getOrgUpload = () => {
-    console.log(this.state)
     var columns = this.state.columns
     columns.forEach((col) => {
       if (col.selected === false) {

@@ -146,7 +146,7 @@ class CharitybaseLookup extends React.Component {
 
     if (string.source === 'whosin') {
       console.log('going to our database')
-      db.collection("Charity").doc(string.Number).get().then((charityDoc) => {
+      db.collection("Organisations").doc(string.Number).get().then((charityDoc) => {
         var charity = charityDoc.data()
         this.setState({
           loading: false,
@@ -255,7 +255,7 @@ export default class OrganisationDetails extends React.Component {
       "Owner": fire.auth().currentUser.uid,
       'Featured Image': this.state.picture ? this.state.picture : null
     }
-    var docRef = db.collection("Charity").doc()
+    var docRef = db.collection("Organisations").doc()
     docRef.set(data)
     .then(() => {
       Router.push(`/import-volunteers?organisation=${docRef.id}`, `/import-volunteers/${docRef.id}`)
@@ -339,7 +339,7 @@ export default class OrganisationDetails extends React.Component {
             <p style={styles.header}>
             Logo*
             </p>
-            
+
           </div>
 
 

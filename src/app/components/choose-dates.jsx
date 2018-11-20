@@ -65,7 +65,7 @@ export default class ChooseDates extends React.Component {
         "Project Name": this.props.project.Name,
         "User": fire.auth().currentUser.uid,
         "Project Photo": this.props.project['Featured Image'],
-        "Charity": this.props.project['Charity Name'] ? this.props.project['Charity Name'] : null,
+        "Organisations": this.props.project['Charity Name'] ? this.props.project['Charity Name'] : null,
         "Charity Number": this.props.project.Charity ? this.props.project.Charity : null,
         "Name": doc.data().Name.replace(/ .*/,''),
         "Email": doc.data().Email,

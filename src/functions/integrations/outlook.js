@@ -239,7 +239,7 @@ const checkAgainstMembers = (emails, organisation, type, nextLink) => {
   })
 
 
-  return db.collection("Charity").doc(organisation).get().then((orgDoc) => orgDoc.data())
+  return db.collection("Organisations").doc(organisation).get().then((orgDoc) => orgDoc.data())
   .then((orgData) => {
     var admins = orgData.Admin
 

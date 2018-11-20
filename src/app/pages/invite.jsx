@@ -60,7 +60,7 @@ class Invite extends React.Component {
   componentDidMount(props) {
     if (Router.query.organisation) {
       this.setState({link: SITE + 'invitation?organisation=' + Router.query.organisation})
-      db.collection("Charity").doc(Router.query.organisation).get()
+      db.collection("Organisations").doc(Router.query.organisation).get()
       .then((doc) => {
         var elem = doc.data()
         elem._id = doc.id

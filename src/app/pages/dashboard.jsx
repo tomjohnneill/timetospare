@@ -63,7 +63,7 @@ export class Organisation extends React.Component {
   }
 
   getData = (uid) => {
-    db.collection("Charity").where("Admin." + uid, "==", true).get()
+    db.collection("Organisations").where("Admin." + uid, "==", true).get()
     .then((snapshot) => {
       if (snapshot.size > 0) {
         var admins
@@ -82,8 +82,7 @@ export class Organisation extends React.Component {
       admins && Object.keys(admins).forEach((admin) => {
         promiseArray.push(
           db.collection("PersonalData")
-          .where("User", "==", admin)
-          .where("Organisation", "==", this.state.orgId).limit(1)
+          .where("User", "==", admin).limit(1)
           .get()
             .then((userDocSnapshot) =>
             {
@@ -99,6 +98,7 @@ export class Organisation extends React.Component {
       return Promise.all(promiseArray)
     })
     .then((userArray) => {
+      console.log('this is all the users we could find')
       console.log(userArray)
       this.setState({users: userArray})
     })
@@ -207,7 +207,7 @@ export class Organisation extends React.Component {
                           primary={true}
                           labelStyle={buttonStyles.smallLabel}
                           style={buttonStyles.smallSize}
-                          onClick={() => Router.push(`/project-calendar?organisation=${this.state.orgId}`)}
+                          onClick={() => Router.push(`/project-calendar?view=${this.state.orgId}`)}
                           label='Calendar'/>
                       </div>
                     </span>
@@ -223,7 +223,7 @@ export class Organisation extends React.Component {
                         <RaisedButton
                           primary={true}
                           labelStyle={buttonStyles.smallLabel}
-                          onClick={() => Router.push(`/people?organisation=${this.state.orgId}`)}
+                          onClick={() => Router.push(`/people?view=${this.state.orgId}`)}
                           style={buttonStyles.smallSize}
                           label='People'/>
                       </div>
@@ -238,7 +238,7 @@ export class Organisation extends React.Component {
                         </p>
                         <RaisedButton
                           primary={true}
-                          onClick={() => Router.push(`/organisations?organisation=${this.state.orgId}`)}
+                          onClick={() => Router.push(`/organisations?view=${this.state.orgId}`)}
                           labelStyle={buttonStyles.smallLabel}
                           style={buttonStyles.smallSize}
                           label='Organisations'/>
@@ -278,7 +278,7 @@ export class Organisation extends React.Component {
                           <div style={{width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center'}}>
                             <div style={{flex: 1}}>
                               <div style={styles.tableRow}>
-                                {user.Name}
+                                {user && user.Name}
                               </div>
                             </div>
 
@@ -289,7 +289,7 @@ export class Organisation extends React.Component {
                                   style={chipStyles.chip}
                                   labelStyle={chipStyles.chipLabel}
                                   >
-                                  {user.Email}
+                                  {user && user.Email}
                                 </Chip>
                               </div>
                               <div>

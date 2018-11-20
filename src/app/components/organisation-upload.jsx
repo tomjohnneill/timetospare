@@ -41,28 +41,26 @@ export default class OrganisationUpload extends React.Component {
       this.Handsontable = require('handsontable')
       this.setState({shouldRemount: true})
     }
-    console.log(this.props.columns)
+
   }
 
   handleEdit = (changes) => {
       if (changes) {
-
         var orgs = this.state.organisations.slice()
-        console.log(orgs)
         var uniqueOrgs = uniq(orgs)
-
         this.setState({uniqueOrgs: uniqueOrgs})
       }
   }
 
   lookUpOrgs = () => {
+    console.log(this.props.columns)
     var orgIndices = []
     for (var i = 0; i < this.props.columns.length; i ++) {
-      if (this.props.columns[i].category === 'organisations') {
+      if (this.props.columns[i].category === 'Organisations') {
         orgIndices.push(i)
       }
     }
-
+    console.log(orgIndices)
     var newGrid = this.props.data
     var data = []
     newGrid.forEach((row) => {
@@ -71,16 +69,16 @@ export default class OrganisationUpload extends React.Component {
       for (let j = 0; j < row.length; j++) {
         if (this.props.columns[j].category) {
           if (dataRow[this.props.columns[j].category]) {
-            dataRow[this.props.columns[j].category].push(row[j].toLowerCase().trim())
+            dataRow[this.props.columns[j].category].push(row[j].toLowerCase().trim().replace(/(?:\r\n|\r|\n)/g, ''))
           } else {
-            dataRow[this.props.columns[j].category] = [row[j].toLowerCase().trim()]
+            dataRow[this.props.columns[j].category] = [row[j].toLowerCase().trim().replace(/(?:\r\n|\r|\n)/g, '')]
           }
         } else {
           dataRow[this.props.columns[j].name] = row[j]
         }
         if (orgIndices.includes(j)) {
           this.state.uniqueOrgs.forEach((org) => {
-            if (row[j].trim().toLowerCase().includes(org[0].trim().toLowerCase())) {
+            if (row[j].trim().toLowerCase().replace(/(?:\r\n|\r|\n)/g, '').includes(org[0].trim().toLowerCase().replace(/(?:\r\n|\r|\n)/g, ''))) {
               organisations.push(org[0])
             }
           })
@@ -94,7 +92,7 @@ export default class OrganisationUpload extends React.Component {
     this.setState({grid: newGrid, data: data})
 
     console.log(data)
-    this.props.updateDataAndColumns(data, this.props.columns)
+    this.props.updateDataAndColumns(data, this.props.columns, this.state.uniqueOrgs)
   }
 
   convertGridToData = (grid) => {
@@ -110,7 +108,7 @@ export default class OrganisationUpload extends React.Component {
 
   render() {
     const HotTable = this.HotTable
-    console.log(HotTable)
+
     return (
       <div style={{paddingLeft: 100, paddingRight: 100}}>
       <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '30% 0 0 90%',
@@ -126,7 +124,7 @@ export default class OrganisationUpload extends React.Component {
           Make sure each row only has one organisation name in it.
         </p>
         {typeof window !== 'undefined' && HotTable ?
-          <div id="org-hot-app" style={{width: '50%', paddingTop: 30, boxSizing: 'border-box',
+          <div id="org-hot-app" style={{width: '100%', paddingTop: 30, boxSizing: 'border-box',
              minWidth: '300px'}}>
             <HotTable
               data={this.state.organisations}

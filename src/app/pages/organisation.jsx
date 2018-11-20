@@ -216,7 +216,7 @@ export class Organisation extends React.Component {
 
     this.setState({takeNote: false})
     let data = {
-      Organisation: Router.query.organisation,
+      Organisation: Router.query.view,
       Members: this.state.memberIds,
       Date: new Date(),
       Type: 'Note',
@@ -239,7 +239,7 @@ export class Organisation extends React.Component {
     switch(int.Type) {
       case "Event":
         return (
-          <Link prefetch href={`/project-admin?project=${int._id}&organisation=${Router.query.organisation}`}>
+          <Link prefetch href={`/project-admin?project=${int._id}&view=${Router.query.view}`}>
             <div
               style={{ borderBottom : '1px solid #DBDBDB'}}
               >
@@ -258,7 +258,7 @@ export class Organisation extends React.Component {
                   {
                     int.Members && this.state.membersLoaded
                      ? int.Members.map((user) => (
-                       <Link  prefetch href={`/member?organisation=${Router.query.organisation}&member=${user}`}>
+                       <Link  prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
                           <Chip
                             style={chipStyles.chip}
                             labelStyle={chipStyles.chipLabel}
@@ -276,7 +276,7 @@ export class Organisation extends React.Component {
                   leftAvatar={<Avatar
                   backgroundColor={'#e91e63'}
                   icon={
-                    <Link prefetch href={`/project-admin?project=${int._id}&organisation=${Router.query.organisation}`}>
+                    <Link prefetch href={`/project-admin?project=${int._id}&view=${Router.query.view}`}>
                     <EventIcon color='white'/>
                   </Link> } />
                   } />
@@ -317,7 +317,7 @@ export class Organisation extends React.Component {
                {
                  int.Members && this.state.membersLoaded
                   ? int.Members.map((user) => (
-                    <Link  prefetch href={`/member?organisation=${Router.query.organisation}&member=${user}`}>
+                    <Link  prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
                        <Chip
                          style={chipStyles.chip}
                          labelStyle={chipStyles.chipLabel}
@@ -372,7 +372,7 @@ export class Organisation extends React.Component {
                 {
                   int.Members && this.state.membersLoaded
                    ? int.Members.map((user) => (
-                     <Link  prefetch href={`/member?organisation=${Router.query.organisation}&member=${user}`}>
+                     <Link  prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
                         <Chip
                           style={chipStyles.chip}
                           labelStyle={chipStyles.chipLabel}
@@ -454,7 +454,16 @@ export class Organisation extends React.Component {
         })
       }
       else {
-        db.collection("PersonalData")
+        db.collection("OrgData").where("managedBy", "==", Router.query.view).get()
+        .then((querySnapshot) => {
+          var data = []
+          querySnapshot.forEach((doc) => {
+            data = doc.data()
+          })
+          this.setState({organisation: data})
+        })
+
+        db.collection("Relationships")
         .where("Organisations", "array-contains", Router.query.targetorganisation)
         .get()
         .then((querySnapshot) => {
@@ -462,12 +471,19 @@ export class Organisation extends React.Component {
             var ids = []
             querySnapshot.forEach((doc) => {
               var elem = doc.data()
-              elem._id = doc.id
-              data.push(elem)
-              ids.push(elem._id)
+              console.log(elem)
+              if (elem.MemberNames) {
+                Object.keys(elem.MemberNames).forEach((key) => {
+                  console.log(key)
+                  var user = {}
+                  user._id = key
+                  user['Full Name'] = elem.MemberNames[key]
+                  data.push(user)
+                })
+              }
             })
             console.log(data)
-            this.setState({members: data, memberIds: ids})
+            this.setState({members: data})
         })
       }
     })
@@ -490,7 +506,7 @@ export class Organisation extends React.Component {
   }
 
   render() {
-    console.log(this.state.interactions)
+    console.log(this.state)
     return (
       <div>
         <App>
@@ -586,7 +602,7 @@ export class Organisation extends React.Component {
           <AddTag
             selection={[this.state.memberData]}
             text={`Add new tag`}
-            organisation={this.props.url.query.organisation}
+            organisation={this.props.url.query.view}
             open={this.state.tagOpen}
             edit
             type='interaction'
@@ -602,11 +618,11 @@ export class Organisation extends React.Component {
                 justifyContent: 'space-between', alignItems: 'center'}}>
                 <div style={{textAlign: 'left'}}>
 
-              <div style={{fontWeight: 700, fontSize: '40px', paddingBottom: 10,
+              <div style={{fontWeight: 200, fontSize: '40px', paddingBottom: 10,
                 borderBottom: '4px solid #000AB2', display: 'flex', alignItems: 'center'
               }}>
                 <OrganisationsIcon style={{height: 30, paddingRight: 15}} color='#484848'/>
-                {decodeURIComponent(this.props.url.query.targetorganisation)}
+                  {this.state.organisation && this.state.organisation.details && this.state.organisation.details.name}
               </div>
             </div>
             <RaisedButton label='Add new interaction'
@@ -631,16 +647,15 @@ export class Organisation extends React.Component {
                   border: '1px solid #DBDBDB', borderRadius: 2}}>
                 <ListItem
                   primaryText='Members'
-
                   initiallyOpen={true}
                   primaryTogglesNestedList={true}
                   nestedItems = {
-                    [<div style={{display: 'flex', flexWrap: 'wrap'}}>
+                    [<div style={{display: 'flex', flexWrap: 'wrap', padding: 10, textTransform: 'capitalize'}}>
                     {this.state.members ? this.state.members.map((member) => (
                       <Link prefetch href={localStorage.getItem('sample') == 'true' ?
-                        `/member?organisation=${Router.query.organisation}&member=${member._id}&team=${member.Team}&name=${member['Full Name']}`
+                        `/member?view=${Router.query.view}&member=${member._id}&team=${member.Team}&name=${member['Full Name']}`
                         :
-                        `/member?organisation=${Router.query.organisation}&member=${member._id}`}>
+                        `/member?view=${Router.query.view}&member=${member._id}`}>
                         <Chip
                           style={chipStyles.chip}
                           labelStyle={chipStyles.chipLabel}

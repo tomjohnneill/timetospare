@@ -29,7 +29,7 @@ export class AdminAccounts extends React.Component {
 
   componentDidMount(props) {
     if (Router.query.organisation) {
-        db.collection("Charity").doc(Router.query.organisation)
+        db.collection("Organisations").doc(Router.query.organisation)
         .get()
         .then((doc) => {
           var data = doc.data()
@@ -87,7 +87,7 @@ export class AdminAccounts extends React.Component {
         console.log(result)
       }))
 
-    promises.push(db.collection("Charity").doc(Router.query.organisation)
+    promises.push(db.collection("Organisations").doc(Router.query.organisation)
     .update("PendingAdmins", firebase.firestore.FieldValue.arrayUnion(this.state.email)))
 
     Promise.all(promises)
@@ -101,10 +101,10 @@ export class AdminAccounts extends React.Component {
   }
 
   removePendingAdmin = (email) => {
-    db.collection("Charity").doc(Router.query.organisation)
+    db.collection("Organisations").doc(Router.query.organisation)
     .update("PendingAdmins", firebase.firestore.FieldValue.arrayRemove(email))
     .then(() =>
-      db.collection("Charity").doc(Router.query.organisation).get()
+      db.collection("Organisations").doc(Router.query.organisation).get()
     )
     .then((doc) =>
       this.setState({pending: doc.data().PendingAdmins})

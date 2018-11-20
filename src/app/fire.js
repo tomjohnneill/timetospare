@@ -17,4 +17,4 @@ var stagingConfig = {
   authDomain: "timetospare-staging.firebaseapp.com"
 }
 
-export default !firebase.apps.length ? firebase.initializeApp(productionConfig) : firebase.app();
+export default !firebase.apps.length ? firebase.initializeApp(stagingConfig) : firebase.app();

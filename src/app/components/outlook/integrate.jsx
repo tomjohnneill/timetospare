@@ -33,7 +33,7 @@ export default class OutlookIntegrate extends React.Component {
   }
 
   getOrgDetails = (id) => {
-    return db.collection("Charity").where("Admin." + id, "==", true)
+    return db.collection("Organisations").where("Admin." + id, "==", true)
     .get()
     .then((querySnapshot) => {
       var data , orgId

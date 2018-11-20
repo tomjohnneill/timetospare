@@ -32,7 +32,7 @@ export class EventbriteSuccessPage extends React.Component {
     var access_token = parsedHash.access_token
     var org = localStorage.getItem('ttsOrg')
     if (org && parsedHash && !parsedHash.error) {
-      db.collection("Charity").doc(org).update({eventbrite_access_token: parsedHash.access_token})
+      db.collection("Organisations").doc(org).update({eventbrite_access_token: parsedHash.access_token})
 
     } else {
       alert('There was a slight problem')

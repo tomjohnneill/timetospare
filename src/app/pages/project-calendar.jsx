@@ -78,7 +78,7 @@ class YourCalendar extends React.Component {
   }
 
   getEventInteractions = () => {
-    db.collection("Interactions").where("Organisation", "==", Router.query.organisation)
+    db.collection("Interactions").where("Organisation", "==", Router.query.view)
     .where("Type", "==", "Event")
     .get()
     .then((querySnapshot) => {
@@ -156,9 +156,9 @@ class YourCalendar extends React.Component {
       var endMinutes = this.state.endTime.getMinutes()
       var startDate = this.state.startDate.setHours(startHours, startMinutes)
       var endDate = this.state.endDate.setHours(endHours, endMinutes)
-      Router.push(`/projectedit?organisation=${Router.query.organisation}&startDate=${startDate}&endDate=${endDate}&title=${this.state.title}`)
+      Router.push(`/projectedit?view=${Router.query.view}&startDate=${startDate}&endDate=${endDate}&title=${this.state.title}`)
     } else {
-      Router.push(`/projectedit?organisation=${Router.query.organisation}&title=${this.state.title}`)
+      Router.push(`/projectedit?view=${Router.query.view}&title=${this.state.title}`)
     }
 
 
@@ -181,7 +181,7 @@ class YourCalendar extends React.Component {
 
   handleEventClick = (event) => {
     console.log(event)
-    Router.push(`/project-admin?project=${event._id}&organisation=${Router.query.organisation}`)
+    Router.push(`/project-admin?project=${event._id}&view=${Router.query.view}`)
   }
 
   render() {

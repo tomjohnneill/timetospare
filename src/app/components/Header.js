@@ -113,10 +113,6 @@ export default class Header extends React.Component {
 
   constructor(props){
     super(props);
-    console.log(props)
-    console.log(props.router.pathname)
-
-
     this.state = {
       path: '',
       drawerOpen: false, open: false, changePasswordOpen: false, modalOpen: false, loading: true};
@@ -147,7 +143,7 @@ export default class Header extends React.Component {
         db.collection("User").doc(fire.auth().currentUser.uid).get().then((data) => {
           this.setState({user: data.data(), userPicture: data.data().Picture, loading: false})
         })
-        db.collection("Charity").where("Admin." + fire.auth().currentUser.uid, "==", true)
+        db.collection("Organisations").where("Admin." + fire.auth().currentUser.uid, "==", true)
         .get().then((snapshot) => {
           if (snapshot.size > 0) {
             snapshot.forEach((doc) => {
@@ -163,7 +159,7 @@ export default class Header extends React.Component {
       db.collection("User").doc(fire.auth().currentUser.uid).get().then((data) => {
         this.setState({user: data.data(), userPicture: data.data().Picture, loading: false})
       })
-      db.collection("Charity").where("Admin." + fire.auth().currentUser.uid, "==", true)
+      db.collection("Organisations").where("Admin." + fire.auth().currentUser.uid, "==", true)
       .get().then((snapshot) => {
         if (snapshot.size > 0) {
           snapshot.forEach((doc) => {
@@ -264,10 +260,6 @@ export default class Header extends React.Component {
   }
 
 
-  handleNewPledge = (e) => {
-    console.log('handleNewPledge fired')
-
-  }
 
   handleCreateProject = (e) => {
     e.preventDefault()
@@ -289,7 +281,6 @@ export default class Header extends React.Component {
   }
 
   render() {
-    console.log(this.props.router.pathname)
   return(
 
       <div >
@@ -522,7 +513,6 @@ export default class Header extends React.Component {
          style={{textAlign: 'left'}}
           onRequestChange={(drawerOpen) => {
             this.setState({drawerOpen: drawerOpen})
-            console.log('request changed')
           }}
           docked={false}
           open={this.state.drawerOpen}>

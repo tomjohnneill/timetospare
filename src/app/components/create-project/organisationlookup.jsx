@@ -170,7 +170,7 @@ export default class OrganisationLookup extends React.Component{
 
     if (string.source === 'whosin') {
       console.log('going to our database')
-      db.collection("Charity").doc(string.Number).get().then((charityDoc) => {
+      db.collection("Organisations").doc(string.Number).get().then((charityDoc) => {
         var charity = charityDoc.data()
         this.setState({
           loading: false,
@@ -247,7 +247,7 @@ export default class OrganisationLookup extends React.Component{
       Router.push('/create-project?stage=1')
     }
     else if (this.state.charityNumber) {
-      db.collection("Charity").doc(this.state.charityNumber.toString()).set(charityBody, {merge: true})
+      db.collection("Organisations").doc(this.state.charityNumber.toString()).set(charityBody, {merge: true})
       .then(docRef => {
         charityBody._id = this.state.charityNumber.toString()
         localStorage.setItem('charity', JSON.stringify(charityBody))
@@ -256,7 +256,7 @@ export default class OrganisationLookup extends React.Component{
       .catch(error => {this.setState({error: error}); alert(error); console.log(error)})
 
     } else {
-      db.collection("Charity").add(charityBody)
+      db.collection("Organisations").add(charityBody)
       .then(docRef => {
         charityBody._id = docRef.id
         localStorage.setItem('charity', JSON.stringify(charityBody))

@@ -144,9 +144,10 @@ export default class Footer extends React.Component {
               <div style={{flex: 2, marginLeft: 24, display: 'flex', justifyContent: 'center'}}>
                 <div style={{width: '100%'}}>
 
-                  <div style={{display: 'block'}}>
+                  <div style={{width: '100%', display: 'block', cursor: 'pointer'}}
+                    style={{display: 'block'}}>
 
-                    <Link style={{width: '100%', display: 'block', cursor: 'pointer'}} href='/terms'><div>Terms</div></Link>
+                    <Link  href='/terms'><div>Terms</div></Link>
 
                   </div>
                 </div>

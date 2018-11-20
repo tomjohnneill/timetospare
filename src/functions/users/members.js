@@ -16,7 +16,7 @@ const makeNewUserAdmin = functions.firestore
 
       const newValue = snap.data();
       if (newValue.Email) {
-        return db.collection("Charity").where("PendingAdmins", "array-contains", newValue.Email)
+        return db.collection("Organisations").where("PendingAdmins", "array-contains", newValue.Email)
         .get()
         .then((querySnapshot) => {
           if (querySnapshot.size > 0) {
@@ -30,7 +30,7 @@ const makeNewUserAdmin = functions.firestore
                 Email: newValue.Email,
                 Organisation: orgDoc.id
               }).then(() =>
-                db.collection("Charity").doc(orgDoc.id).update({
+                db.collection("Organisations").doc(orgDoc.id).update({
                   "PendingAdmins": FieldValue.arrayRemove(newValue.Email),
                   ["Admin." + context.params.userId] : true
                 })

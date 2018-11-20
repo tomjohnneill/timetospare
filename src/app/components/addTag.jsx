@@ -22,7 +22,7 @@ export default class AddTag extends React.Component {
   }
 
   componentDidMount(props) {
-    db.collection("Charity").doc(this.props.organisation).get()
+    db.collection("Organisations").doc(this.props.organisation).get()
     .then((doc) => {
       if (doc.data()) {
         this.setState({existingTags: doc.data().tags})
@@ -35,7 +35,7 @@ export default class AddTag extends React.Component {
       db.collection("Interactions").doc(this.props.interaction).
       update("tags", firebase.firestore.FieldValue.arrayUnion(this.state.tag))
     } else {
-      var sfDocRef = db.collection("Charity").doc(this.props.organisation)
+      var sfDocRef = db.collection("Organisations").doc(this.props.organisation)
       db.runTransaction((transaction) =>
         transaction.get(sfDocRef)
           .then((sfDoc) => {

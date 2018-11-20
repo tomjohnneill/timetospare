@@ -134,13 +134,14 @@ export class People extends React.Component {
           this.setState({data: data, columns: getColumnsFromMembers(data)})
         })
       } else {
-        db.collection("PersonalData").where("organisation", "==", Router.query.view)
+        db.collection("PersonalData").where("managedBy", "==", Router.query.view)
         .get().then((querySnapshot) => {
           var data = []
           querySnapshot.forEach((member) => {
             var elem = member.data()
             elem._id = member.id
-            delete elem.organisation
+            delete elem.managedBy
+            delete elem.User
             if (elem.lastContacted) {
               elem['Last Contacted'] = elem.lastContacted.toLocaleString('en-gb',
                 {weekday: 'long', month: 'long', day: 'numeric'})

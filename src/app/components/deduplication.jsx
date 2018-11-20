@@ -14,6 +14,8 @@ import * as firebase from 'firebase';
 import 'handsontable/dist/handsontable.full.css';
 import {styles} from './data-validation'
 
+let db = fire.firestore()
+
 function arraysEqual(a, b) {
   if (a === b) return true;
   if (a == null || b == null) return false;
@@ -53,6 +55,25 @@ export default class Deduplication extends React.Component {
     }
 
     this.findDuplicates(this.props.data)
+
+    /*
+    if (Router.query.view) {
+      db.collection("OrgData").where("managedBy", "==", Router.query.view).get()
+      .then((querySnapshot) => {
+        var data = []
+        querySnapshot.forEach((doc) => {
+          var elem = doc.data()
+          if (elem.details && elem.details.name) {
+            data.push(elem.details.name)
+          }
+        })
+        var allOrgs = data.concat(this.props.orgs)
+        this.setState({allOrgs: allOrgs})
+      })
+    } else {
+
+    }
+    */
   }
 
 
@@ -146,7 +167,6 @@ export default class Deduplication extends React.Component {
       if (column[item] > 1) {
         var possibleDuplicates = []
         var matchingLines = data.filter(obj => obj[columnName] && obj[columnName].includes(item))
-        //data.slice(0, 30).forEach((row) => console.log(row[columnName]))
         matchingLines.forEach((row) => {
           possibleDuplicates.push(data.indexOf(row))
         })
@@ -177,20 +197,14 @@ export default class Deduplication extends React.Component {
     var baseName = null
     duplicateGroup.forEach((index) => {
       var dataRow = this.props.data.slice(index, index + 1)
-      console.log(dataRow)
       if (dataRow && dataRow[0]) {
         if (!baseName) {
-
           baseName = dataRow[0]['Full Name']
-
         } else {
-
           if (!arraysEqual(baseName, dataRow[0]['Full Name'])) {
-
             rowNamesMatch = false
           }
         }
-        console.log(baseName)
       } else {
         rowNamesMatch = false
       }
@@ -276,7 +290,6 @@ export default class Deduplication extends React.Component {
 
     if (rows.length > 1) {
       var grid = this.getGridFromIndices(rows, true)
-      console.log('function in mergeRows was successful')
       var richestRowIndex = this.getRichestRowIndex(grid)
 
       var masterRow = []
@@ -305,8 +318,6 @@ export default class Deduplication extends React.Component {
           toBeDeleted.push(row)
         }
       })
-      console.log(mergedRows)
-      console.log(toBeDeleted)
       this.setState({mergedRows: mergedRows, toBeDeleted: toBeDeleted})
 
       var position = duplicates.indexOf(rows)
@@ -325,11 +336,176 @@ export default class Deduplication extends React.Component {
     return newGrid
   }
 
+  addToUploadList = (row, uploadList) => {
+    var body = {}
+    var orgs
+    var valid = false
+    Object.keys(row).forEach((key) => {
+      if (row[key].length > 0) {
+        if (typeof row[key] === 'object') {
+          row[key].forEach((option) => {
+            if (option.length > 0) {
+              valid = true
+            }
+          })
+        } else {
+          valid = true
+        }
+      }
+    })
+
+    if (valid) {
+      Object.keys(row).forEach((key) => {
+        body[key] = row[key]
+      })
+      if (Router.query.view) {
+        body.managedBy = Router.query.view
+      }
+      uploadList.push(body)
+    }
+    return uploadList
+  }
+
+  batchUpload = (records) => {
+    var orgKeys = {}
+    var editedOrgs = []
+    this.props.orgs.forEach((one) => {
+      editedOrgs.push({
+        managedBy: Router.query.view,
+        details :{
+          name: one
+        }
+      })
+    })
+
+    var orgUpdates = []
+    editedOrgs.map((org) => {
+      orgUpdates.push(db.collection("OrgData").where("managedBy", "==", Router.query.view)
+        .where("details.name", "==", org.details.name).get()
+        .then((orgSnapshot) => {
+          if (!orgSnapshot.size > 0) {
+            return false
+          } else {
+            var id
+            orgSnapshot.forEach((doc) => {
+              id = doc.id
+            })
+            return id
+          }
+        })
+        .then((id) => {
+          if (id) {
+            var orgRef = db.collection("OrgData").doc(id)
+            return db.collection("OrgData").doc(id).update(org).then(() => orgRef)
+          } else {
+            return db.collection("OrgData").add(org)
+          }
+        })
+        .then((docRef) => {
+          return ({name: org.details.name, _id: docRef.id})
+        })
+      )
+    })
+
+
+    return Promise.all(orgUpdates).then((results) => {
+      results.forEach((key) => {
+        orgKeys[key.name] = key._id
+      })
+    }).then(() => {
+      var updates = []
+      records.forEach((record) => {
+        var orgs = record.organisations
+        delete record.organisations
+        console.log(orgs)
+        var emailChecks = []
+        record.Email && record.Email.forEach((email) => {
+          emailChecks.push(db.collection("PersonalData")
+          .where("Email", "array-contains", email)
+          .where("managedBy", "==", Router.query.view)
+          .get()
+          .then((resultSnapshot) => {
+            if (!resultSnapshot.size > 0) {
+              return false
+            } else {
+              var id
+              resultSnapshot.forEach((doc) => {
+                id = doc.id
+              })
+              return id
+            }
+          }))
+        })
+
+        updates.push(
+          Promise.all(emailChecks)
+          .then((results) => {
+            console.log(results)
+            var userMergeId = false
+            results.forEach((one) => {
+              if (one !== false) {
+                userMergeId = one
+              }
+            })
+            return userMergeId
+          })
+          .then((mergeId) => {
+            if (mergeId) {
+              var docRef = db.collection("PersonalData").doc(mergeId)
+              return db.collection("PersonalData").doc(mergeId)
+              .update(record).then(() => docRef)
+            } else {
+              return db.collection("PersonalData").add(record)
+            }
+          })
+          .then((docRef) => {
+            var addRelationships = []
+            console.log('Organisations:')
+            console.log(orgs)
+            console.log('OrgKeys:')
+            console.log(orgKeys)
+            orgs && orgs.forEach((org) => {
+              let orgDataId = orgKeys[org]
+              addRelationships.push(db.collection("Relationships").doc().set({
+                  MemberNames: {
+                    [docRef.id] : record['Full Name']
+                  },
+                  Members: [docRef.id],
+                  OrgNames: {
+                    [orgDataId] : org
+                  },
+                  Organisations: [orgDataId]
+                })
+              )
+            })
+            return Promise.all(addRelationships)
+          })
+        )
+
+      })
+
+      return Promise.all(updates)
+      .then(() => alert('Update worked'))
+    })
+  }
+
+  handleUpload = () => {
+    var data = this.props.data
+    var toBeUploaded = []
+    data.forEach((row) => {
+      if (!this.state.toBeDeleted.includes(data.indexOf(row))) {
+        this.addToUploadList(row, toBeUploaded)
+      }
+    })
+    this.state.mergedRows.map((row) => {
+      this.addToUploadList(row, toBeUploaded)
+    })
+    console.log(toBeUploaded)
+    this.batchUpload(toBeUploaded)
+
+  }
+
   render() {
-
-    console.log(this.state)
-    console.log(this.props)
-
     return (
       <div style={{display: 'flex'}}>
 
@@ -381,8 +557,7 @@ export default class Deduplication extends React.Component {
             style={buttonStyles.smallSize}
             labelStyle={buttonStyles.smallLabel}
             primary={true}
-            disabled={true}
-
+            onClick={this.handleUpload}
             label='Next'/>
         </div>
       </div>
