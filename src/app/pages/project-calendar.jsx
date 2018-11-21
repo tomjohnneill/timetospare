@@ -92,7 +92,6 @@ class YourCalendar extends React.Component {
         elem['End Time'] = new Date(date.setHours(date.getHours() + 4))
         data.push(elem)
       })
-      console.log(data)
       var events = this.state.events ? this.state.events : []
       events = events.concat(data)
       this.setState({events: events})
@@ -124,7 +123,6 @@ class YourCalendar extends React.Component {
 
   setAsOpen = (slot) => {
     this.setState({open: true, startDate: slot.start, endDate: slot.end})
-    console.log(slot)
   }
 
   setTime = (time) => {
@@ -141,7 +139,6 @@ class YourCalendar extends React.Component {
     var endTime = new Date(2018, 1, 1, hours, minutes)
     endTime.setHours(endTime.getHours()+1)
     this.setState({startTime: startTime, endTime: endTime})
-    console.log(endTime )
   }
 
   formatDate = (date) => {
@@ -165,7 +162,6 @@ class YourCalendar extends React.Component {
   }
 
   eventStyleGetter = (event, start, end, isSelected) => {
-    console.log(event);
     var style = {
         backgroundColor: '#FFCB00',
         borderRadius: 2,
@@ -180,7 +176,6 @@ class YourCalendar extends React.Component {
   }
 
   handleEventClick = (event) => {
-    console.log(event)
     Router.push(`/project-admin?project=${event._id}&view=${Router.query.view}`)
   }
 

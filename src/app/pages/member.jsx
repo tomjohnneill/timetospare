@@ -72,7 +72,7 @@ export class Member extends React.Component {
       })
       .then(() => corsRequest({url: 'https://fantasy.premierleague.com/drf/fixtures/'}))
       .then(responseData => {
-        console.log(responseData)
+
         var data = []
         responseData.data.forEach((fixture) => {
           if (fixture.team_a === parseInt(Router.query.team) || fixture.team_h === parseInt(Router.query.team)) {
@@ -85,7 +85,7 @@ export class Member extends React.Component {
             })
           }
         })
-        console.log(data)
+
         this.setState({interactions: data})
       })
     } else {
@@ -163,7 +163,7 @@ export class Member extends React.Component {
                 _id: team.id
               }]
             }
-            console.log(teamData)
+
             this.setState({memberData: teamData})
           }
         })
@@ -174,7 +174,7 @@ export class Member extends React.Component {
         var elem = doc.data()
         elem._id = doc.id
         const rawData = Object.create(elem)
-        console.log(rawData)
+
         delete rawData.managedBy
         delete rawData.User
         delete rawData.lastContacted
@@ -204,8 +204,6 @@ export class Member extends React.Component {
   }
 
   handleOptionsClick = (event, int) => {
-    console.log('clicked')
-    console.log(int)
     this.setState({
       optionsOpen: true,
       targetedInt: int,
@@ -261,7 +259,7 @@ export class Member extends React.Component {
 
         )
       case "Invited":
-      console.log(int.Type)
+
         return (
           <div>
             <ListItem
@@ -439,11 +437,6 @@ export class Member extends React.Component {
 
   render() {
     const ReactQuill = this.ReactQuill
-    console.log(this.state)
-    if (this.state.interactions[0]) {
-
-      console.log(this.renderInteraction(this.state.interactions[0]))
-    }
     return (
       <div>
         <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '30% 0 0 90%',
@@ -548,7 +541,7 @@ export class Member extends React.Component {
                 justifyContent: 'space-between', alignItems: 'center'}}>
                 <div style={{textAlign: 'left'}}>
 
-                  <div style={{fontWeight: 200, fontSize: '40px', paddingBottom: 10, textTransform: 'capitalize', 
+                  <div style={{fontWeight: 200, fontSize: '40px', paddingBottom: 10, textTransform: 'capitalize',
                     borderBottom: '4px solid #000AB2', display: 'flex', alignItems: 'center'
                   }}>
                   <AvatarIcon style={{height: 60, paddingRight: 15}} color='#484848'/>

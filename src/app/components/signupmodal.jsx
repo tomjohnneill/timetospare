@@ -37,7 +37,7 @@ const styles = {
 export default  class SignupModal extends React.Component {
   constructor(props) {
     super(props)
-    console.log(this.props)
+
     this.state = {type: this.props.type ? this.props.type : 'signup', loading: false, pwned: null,
       forgotPassword: false, sendPasswordClicked: false}
   }
@@ -145,10 +145,6 @@ export default  class SignupModal extends React.Component {
     }
   }
 
-  onSignInSubmit = () => {
-    console.log('phone thing')
-  }
-
   handlePhoneAuth = () => {
     if (!this.state.phoneClicked) {
       this.setState({phoneClicked: true})
@@ -163,15 +159,14 @@ export default  class SignupModal extends React.Component {
       } else {
         var phoneNumber = phoneRaw
       }
-      console.log(phoneNumber)
+
       this.setState({phoneNumberInState: phoneNumber})
       var appVerifier = window.recaptchaVerifier;
-      console.log(phoneNumber)
-      console.log(appVerifier)
+
 
       fire.auth().currentUser.linkWithPhoneNumber(phoneNumber, appVerifier)
           .then((confirmationResult) => {
-            console.log(confirmationResult)
+
             // SMS sent. Prompt user to type the code from the message, then sign the
             // user in with confirmationResult.confirm(code).
             window.confirmationResult = confirmationResult;
@@ -185,12 +180,12 @@ export default  class SignupModal extends React.Component {
   }
 
   handleConfirmPhone = () => {
-      console.log(this.state.confirmationCode)
+
       var credential = firebase.auth.PhoneAuthProvider.credential(window.confirmationResult.verificationId, this.state.confirmationCode);
       fire.auth().currentUser.updatePhoneNumber(credential)
       .then((result) => {
           // User signed in successfully.
-          console.log(result)
+
           if (this.props.onComplete) {
             db.collection("User").doc(fire.auth().currentUser.uid).update({
               phoneNumber: this.state.phoneNumberInState
@@ -207,7 +202,7 @@ export default  class SignupModal extends React.Component {
   }
 
   loadRecaptcha = () => {
-    console.log('times up')
+
     window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(this.recaptcha, {
        'size': 'normal',
        'callback': function (response) {
@@ -390,7 +385,6 @@ export default  class SignupModal extends React.Component {
                         onClick={() => fire.auth().sendPasswordResetEmail(this.state.email, {
                           url: window.location.href
                         }).then(() => {
-                          console.log('sending new password')
                           this.setState({sendPasswordClicked: true})
                         })}
                         >Send a reminder?</b>

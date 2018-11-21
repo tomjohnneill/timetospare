@@ -34,8 +34,7 @@ export default class Table extends React.Component {
   }
 
   componentDidMount(props) {
-    console.log('mounted')
-    console.log(this.props.organisation)
+
     if (this.props.organisation) {
       var data = []
       var columns = []
@@ -54,7 +53,6 @@ export default class Table extends React.Component {
             })
             .then(response => response.json())
             .then((memberArray) => {
-              console.log(memberArray)
               if (memberArray) {
                 this.setState({data: memberArray})
               }
@@ -63,12 +61,12 @@ export default class Table extends React.Component {
           )
         }
       })
-      db.collection("Charity").doc(this.props.organisation).get().then((doc) => {
+      db.collection("Organisations").doc(this.props.organisation).get().then((doc) => {
         var lists = doc.data().lists
-        console.log(lists)
+
         Object.keys(lists).forEach((key) => {
           db.collection("Lists").doc(key).get().then((listDoc) => {
-            console.log(listDoc.data())
+
             if (listDoc.data().Columns) {
               listDoc.data().Columns.forEach((column) => {
                 columns.push({id: column.name, Header: column.name, accessor: column.name})
@@ -82,7 +80,7 @@ export default class Table extends React.Component {
   }
 
   render() {
-    console.log(this.state)
+
     return (
       <div>
         {this.state.columns && this.state.data ?
@@ -90,12 +88,7 @@ export default class Table extends React.Component {
           getTdProps={(state, rowInfo, column, instance) => {
             return {
               onClick: (e, handleOriginal) => {
-                console.log("A Td Element was clicked!");
-                console.log("it produced this event:", e);
-                console.log("It was in this column:", column);
-                console.log("It was in this row:", rowInfo);
-                console.log(rowInfo.original)
-                console.log("It was in this table instance:", instance);
+
 
                 // IMPORTANT! React-Table uses onClick internally to trigger
                 // events like expanding SubComponents and pivots.

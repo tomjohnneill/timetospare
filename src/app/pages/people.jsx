@@ -65,7 +65,7 @@ const getColumnsFromMembers = (members) => {
     var keys = Object.keys(member)
     keys.forEach((key) => {
       if (!rawKeys.includes(key) && key !== '_id' && key !== 'tags') {
-        console.log(key, typeof member[key])
+
         if (typeof member[key] === 'object') {
           rawKeys.push(key)
           columns.push({
@@ -85,7 +85,7 @@ const getColumnsFromMembers = (members) => {
       }
      })
   })
-  console.log(columns)
+
   return columns
 }
 
@@ -93,7 +93,7 @@ export class People extends React.Component {
   constructor(props) {
     super(props);
     this.state = {}
-    console.log(this.props)
+
     if (this.props.members) {
       this.state = {members: this.props.members}
     }
@@ -102,14 +102,13 @@ export class People extends React.Component {
 
 
   static async getInitialProps({req, pathname, query}) {
-    console.log(req)
-    console.log('called initial props')
+
 
   }
 
   componentDidMount (props) {
     Router.prefetch('/member')
-    console.log(this.state)
+
     this.setState({organisation: Router.query.view, tagType: 'existing'})
     if (Router.query.view) {
       if (typeof window !== 'undefined' && localStorage.getItem('sample') == "true") {
@@ -117,7 +116,7 @@ export class People extends React.Component {
         var corsRequest = functions.httpsCallable('integrations-wrapCors');
         corsRequest({url: 'https://fantasy.premierleague.com/drf/elements/'})
         .then(responseData => {
-          console.log(responseData)
+
           responseData.data.forEach((player) => {
             data.push({
               '_id': player.id,
@@ -153,7 +152,7 @@ export class People extends React.Component {
             }
             data.push(elem)
           })
-          console.log(data)
+
           this.setState({data: data, columns: getColumnsFromMembers(data)})
         })
       }
@@ -171,7 +170,7 @@ export class People extends React.Component {
   }
 
   handleSaveSelection = (records) => {
-    console.log(this.state.filtered)
+
     var selection = this.selectTable.getResolvedState().sortedData
     this.setState({selection: selection, tagDialog: true})
 
@@ -180,7 +179,7 @@ export class People extends React.Component {
 
 
   render() {
-    console.log(this.state)
+
     const currentRecords = this.selectTable && this.selectTable.getResolvedState().sortedData;
 
     return (

@@ -69,16 +69,16 @@ export default class OrganisationUpload extends React.Component {
       for (let j = 0; j < row.length; j++) {
         if (this.props.columns[j].category) {
           if (dataRow[this.props.columns[j].category]) {
-            dataRow[this.props.columns[j].category].push(row[j].toLowerCase().trim().replace(/(?:\r\n|\r|\n)/g, ''))
+            dataRow[this.props.columns[j].category].push(row[j].toLowerCase().trim().replace(/(\r\n|\n|\r)/gm, ''))
           } else {
-            dataRow[this.props.columns[j].category] = [row[j].toLowerCase().trim().replace(/(?:\r\n|\r|\n)/g, '')]
+            dataRow[this.props.columns[j].category] = [row[j].toLowerCase().trim().replace(/(\r\n|\n|\r)/gm, '')]
           }
         } else {
           dataRow[this.props.columns[j].name] = row[j]
         }
         if (orgIndices.includes(j)) {
           this.state.uniqueOrgs.forEach((org) => {
-            if (row[j].trim().toLowerCase().replace(/(?:\r\n|\r|\n)/g, '').includes(org[0].trim().toLowerCase().replace(/(?:\r\n|\r|\n)/g, ''))) {
+            if (row[j].trim().toLowerCase().replace(/(\r\n|\n|\r)/gm, '').includes(org[0].trim().toLowerCase().replace(/(\r\n|\n|\r)/gm, ''))) {
               organisations.push(org[0])
             }
           })
@@ -91,8 +91,13 @@ export default class OrganisationUpload extends React.Component {
 
     this.setState({grid: newGrid, data: data})
 
+    var cleanOrgs = []
+    this.state.uniqueOrgs.forEach((orgArray) => {
+      cleanOrgs.push(orgArray[0])
+    })
+    console.log(cleanOrgs)
     console.log(data)
-    this.props.updateDataAndColumns(data, this.props.columns, this.state.uniqueOrgs)
+    this.props.updateDataAndColumns(data, this.props.columns, cleanOrgs)
   }
 
   convertGridToData = (grid) => {
@@ -107,6 +112,8 @@ export default class OrganisationUpload extends React.Component {
   }
 
   render() {
+    console.log(this.state)
+
     const HotTable = this.HotTable
 
     return (

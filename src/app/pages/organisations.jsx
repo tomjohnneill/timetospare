@@ -75,7 +75,7 @@ class Cards extends Component {
         )
       }
     };
-    console.log(this.state)
+
   }
 
   /*
@@ -97,7 +97,7 @@ class Cards extends Component {
     .get().then((querySnapshot) => {
       querySnapshot.forEach((orgDoc) => {
         var data = orgDoc.data()
-        console.log(data)
+
         var body = {
           type: "draggable",
           id : orgDoc.id,
@@ -108,8 +108,7 @@ class Cards extends Component {
           data: data.details.name,
           date: data.lastInteraction
         }
-        console.log(body)
-        console.log(orgDoc.data())
+
         var currentOrgs = this.state.scene.children[0].children ? this.state.scene.children[0].children : []
         currentOrgs.push(body)
         var scene = this.state.scene
@@ -134,8 +133,7 @@ class Cards extends Component {
           data: data.details.name,
           date: data.lastInteraction
         }
-        console.log(body)
-        console.log(orgDoc.data())
+
         var currentOrgs = this.state.scene.children[1].children ? this.state.scene.children[1].children : []
         currentOrgs.push(body)
         var scene = this.state.scene
@@ -165,7 +163,7 @@ class Cards extends Component {
 
 
   render() {
-    console.log(this.state)
+
     return (
       <App>
         <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '0 30% 90% 0%',
@@ -210,21 +208,14 @@ class Cards extends Component {
                         <Container
                           {...column.props}
                           groupName="col"
-                          onDragStart={e => console.log("drag started", e)}
-                          onDragEnd={e => console.log("drag end", e)}
+
                           onDrop={e => this.onCardDrop(column.id, e)}
                           getChildPayload={index =>
                             this.getCardPayload(column.id, index)
                           }
                           dragClass="card-ghost"
                           dropClass="card-ghost-drop"
-                          onDragEnter={() => {
-                            console.log("drag enter:", column.id);
-                          }}
-                          onDragLeave={() => {
-                            console.log("drag leave:", column.id);
-                          }}
-                          onDropReady={p => console.log('Drop ready: ', p)}
+
                         >
                           {column.children && column.children.map(card => {
                             return (
@@ -269,7 +260,7 @@ class Cards extends Component {
   }
 
   onCardDrop(columnId, dropResult) {
-    console.log(this.state)
+
     if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
       const scene = Object.assign({}, this.state.scene);
       const column = scene.children.filter(p => p.id === columnId)[0];
@@ -284,7 +275,7 @@ class Cards extends Component {
       });
 
     }
-    console.log(dropResult)
+
     this.setState({dialogOpen: true,   selectedDropped: dropResult.payload.data
     })
 

@@ -77,7 +77,7 @@ export class Organisation extends React.Component {
       }
     })
     .then((admins) => {
-      console.log(this.state.orgId)
+
       var promiseArray = []
       admins && Object.keys(admins).forEach((admin) => {
         promiseArray.push(
@@ -98,8 +98,8 @@ export class Organisation extends React.Component {
       return Promise.all(promiseArray)
     })
     .then((userArray) => {
-      console.log('this is all the users we could find')
-      console.log(userArray)
+
+
       this.setState({users: userArray})
     })
 
@@ -113,7 +113,7 @@ export class Organisation extends React.Component {
     Router.prefetch(`/project-calendar`)
     Router.prefetch(`/volunteer-preview`)
     fire.auth().onAuthStateChanged((user) => {
-      console.log(user)
+
       if (user === null) {
       }
       else {
@@ -177,7 +177,7 @@ export class Organisation extends React.Component {
                         <div style={{backgroundColor: 'rgb(255,249,196)', marginTop: 10, padding: 10, borderRadius: 4,
                           display: 'flex', alignItems: 'center',
                             margin: 10, border: '1px solid rgb(253, 216, 53)'}}>
-                            <img src='https://pbs.twimg.com/profile_images/1041676563727581184/PZdTbu06.jpg'
+                            <img src='https://www.causevox.com/wp-content/uploads/2018/06/Eventbrite-logo.png'
                               style={{height: 30, paddingRight: 20}}/>
                             <span style={{flex: 1}}>Get events from Eventbrite</span>
                             {
@@ -275,7 +275,10 @@ export class Organisation extends React.Component {
                       {
                         this.state.users ?
                         this.state.users.map((user) => (
-                          <div style={{width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center'}}>
+                          user ?
+                          <div
+                            key={user && user.Email}
+                            style={{width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center'}}>
                             <div style={{flex: 1}}>
                               <div style={styles.tableRow}>
                                 {user && user.Name}
@@ -303,6 +306,8 @@ export class Organisation extends React.Component {
                               </div>
                             </div>
                           </div>
+                          :
+                          null
                         ))
                         :
                         null

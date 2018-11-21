@@ -88,9 +88,6 @@ export class PhotoUpload extends React.Component {
   }
 
   upload(file, rej) {
-    console.log(this.state)
-    console.log(file)
-    console.log(rej)
 
     fetch('https://3ymyhum5sh.execute-api.eu-west-2.amazonaws.com/prod/getS3Url')
       .then(response => response.json())
@@ -99,12 +96,10 @@ export class PhotoUpload extends React.Component {
         var imageUrl = 'https://d3kkowhate9mma.cloudfront.net/' + stripped
 
 
-        console.log(changeImageAddress(imageUrl, '250xauto'))
         this.setState({imageUrl: imageUrl})
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
             if (xhr.readyState == XMLHttpRequest.DONE) {
-                console.log(xhr.responseText);
                 var body = {
                   'Picture': imageUrl
                 }
@@ -124,9 +119,6 @@ export class PhotoUpload extends React.Component {
   }
 
   render() {
-    console.log(this.props)
-
-
     return (
       <div>
         <Dropzone key={'photos'} onDrop={this.upload.bind(this)}  style={{}}>
@@ -200,7 +192,6 @@ class RecentlySupported extends React.Component {
     .limit(10).get().then((querySnapshot) => {
       var data = []
       querySnapshot.forEach((doc) => {
-        console.log(doc.data())
         var elem = doc.data()
         elem['_id'] = doc.id
         data.push(elem)
@@ -262,7 +253,6 @@ class RecentReviews extends React.Component {
     .limit(10).get().then((querySnapshot) => {
       var data = []
       querySnapshot.forEach((doc) => {
-        console.log(doc.data())
         var elem = doc.data()
         elem['_id'] = doc.id
         data.push(elem)
@@ -273,10 +263,8 @@ class RecentReviews extends React.Component {
         if (data[i]['Charity Number']) {
           db.collection("Organisations").doc(data[i]['Charity Number']).get().then((charityDoc) => {
             var charityData = charityDoc.data()
-            console.log(charityData)
             data[i]['Charity Picture'] = charityData['Featured Image']
             data[i]['Charity Name'] = charityData['Name']
-            console.log(data)
             this.setState({projects: data})
           })
         }
@@ -345,7 +333,6 @@ class ProjectsOrganised extends React.Component {
     db.collection("Project").where("Creator", "==", this.props.userId).get().then((querySnapshot) => {
 
       querySnapshot.forEach((doc) => {
-        console.log(doc.data())
         var elem = doc.data()
         elem['_id'] = doc.id
         if (!elem.Charity || (fire.auth().currentUser && fire.auth().currentUser.uid === this.props.userId)) {
@@ -353,15 +340,12 @@ class ProjectsOrganised extends React.Component {
           this.setState({projects: data, loading: false})
         }
       });
-      console.log(data)
-
     })
 
 
     db.collection("Project").where("Admin." + this.props.userId , "==", this.props.userId).get().then((querySnapshot) => {
 
       querySnapshot.forEach((doc) => {
-        console.log(doc.data())
         var elem = doc.data()
         elem['_id'] = doc.id
         if (!elem.Charity || (fire.auth().currentUser && fire.auth().currentUser.uid === this.props.userId)) {
@@ -369,7 +353,6 @@ class ProjectsOrganised extends React.Component {
           this.setState({projects: data, loading: false})
         }
       });
-      console.log(data)
 
     })
   }
@@ -403,7 +386,6 @@ class Profile extends React.Component {
   constructor(props) {
     super(props);
     this.state = {user: {}, loading: true, slideIndex: 0}
-    console.log(this.props)
   }
 
   componentDidMount(props) {
@@ -422,7 +404,6 @@ class Profile extends React.Component {
             userId = null
           }
           this.setState({userId: userId, publicProfile: publicProfile})
-          console.log(this.state)
           var user = user ? user : {}
             db.collection("User").doc(userId).collection("public").doc(userId).get().then((publicDoc) => {
               var publicData = publicDoc.data()
@@ -451,8 +432,6 @@ class Profile extends React.Component {
 
 
   render() {
-    console.log(this.state)
-
     return (
       <App className='block'>
         {this.state.loading ?

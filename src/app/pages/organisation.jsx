@@ -138,7 +138,6 @@ export class Organisation extends React.Component {
 
       })
     } else {
-      console.log('executed the bit for real data')
       this.setState({interactions: [], pinned: []})
       db.collection("Interactions")
       .where("Organisations", "array-contains", Router.query.targetorganisation)
@@ -258,7 +257,9 @@ export class Organisation extends React.Component {
                   {
                     int.Members && this.state.membersLoaded
                      ? int.Members.map((user) => (
-                       <Link  prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
+                       <Link
+                         key={user._id}
+                          prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
                           <Chip
                             style={chipStyles.chip}
                             labelStyle={chipStyles.chipLabel}
@@ -416,7 +417,7 @@ export class Organisation extends React.Component {
         var corsRequest = functions.httpsCallable('integrations-wrapCors');
         corsRequest({url: 'https://fantasy.premierleague.com/drf/elements/'})
         .then(responseData => {
-          console.log(responseData)
+
           responseData.data.forEach((player) => {
             if (player.team === parseInt(Router.query.team)) {
 
@@ -428,7 +429,7 @@ export class Organisation extends React.Component {
                     Note: player.news
                   }
                 })
-                console.log(news)
+
 
               }
 
@@ -471,10 +472,10 @@ export class Organisation extends React.Component {
             var ids = []
             querySnapshot.forEach((doc) => {
               var elem = doc.data()
-              console.log(elem)
+
               if (elem.MemberNames) {
                 Object.keys(elem.MemberNames).forEach((key) => {
-                  console.log(key)
+
                   var user = {}
                   user._id = key
                   user['Full Name'] = elem.MemberNames[key]
@@ -482,12 +483,12 @@ export class Organisation extends React.Component {
                 })
               }
             })
-            console.log(data)
+
             this.setState({members: data})
         })
       }
     })
-    console.log(this.props.url)
+
     this.updateData()
   }
 
@@ -506,7 +507,7 @@ export class Organisation extends React.Component {
   }
 
   render() {
-    console.log(this.state)
+
     return (
       <div>
         <App>

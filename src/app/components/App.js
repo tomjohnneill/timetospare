@@ -4,7 +4,6 @@ import Footer from "./footer.jsx"
 import Router from 'next/router';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import "../style.css"
 import { withRouter } from 'next/router'
 import RaisedButton from 'material-ui/RaisedButton';
 import * as gtag from '../lib/gtag'

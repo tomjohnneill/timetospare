@@ -293,7 +293,6 @@ export default class Header extends React.Component {
 
           style={this.props.router.pathname.includes('/embed/') ? style.embedAppBar :
             this.props.router.pathname === '/why' ? style.whyAppBar : style.appBar}
-          iconClassNameLeft='mobile-nav-bar'
           iconElementLeft={
             <div>
               <MediaQuery minDeviceWidth={700}>

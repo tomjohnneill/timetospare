@@ -49,7 +49,6 @@ export default class AddTag extends React.Component {
         .then(() => {
           var promiseArray = []
           this.props.selection.forEach((member) => {
-            console.log(member)
             var docRef = db.collection("PersonalData").doc(member._original ? member._original._id : member._id)
             var promise = db.runTransaction((transaction) =>
                 transaction.get(docRef)
@@ -84,7 +83,7 @@ export default class AddTag extends React.Component {
   }
 
   render() {
-    console.log(this.props.selection)
+    
     return (
       <div>
         <Dialog
