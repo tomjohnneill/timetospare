@@ -47,36 +47,6 @@ class YourCalendar extends React.Component {
     this.state = {}
   }
 
-  getProjects = (uid) => {
-    db.collection("Project").where("Creator", "==", uid).get()
-    .then((querySnapshot) => {
-      var data = []
-      querySnapshot.forEach((doc) => {
-        var elem = doc.data()
-        elem._id = doc.id
-        if (elem['Start Time']) {
-          data.push(elem)
-        }
-        db.collection("Project").doc(doc.id).collection("SubProject").get()
-        .then((subProjectSnapshot) => {
-          if (subProjectSnapshot.size > 0) {
-            subProjectSnapshot.forEach((subDoc) => {
-              var subElem = subDoc.data()
-              subElem._id = subDoc.id
-              subElem.Name = elem.Name
-              subElem.Location = elem.Location
-              subElem.Geopoint = elem.Geopoint
-              data.push(subElem)
-            })
-          }
-        })
-      })
-      var events = this.state.events ? this.state.events : []
-      events = events.concat(data)
-      this.setState({events: events})
-    })
-  }
-
   getEventInteractions = () => {
     db.collection("Interactions").where("Organisation", "==", Router.query.view)
     .where("Type", "==", "Event")
@@ -96,6 +66,22 @@ class YourCalendar extends React.Component {
       events = events.concat(data)
       this.setState({events: events})
     })
+
+    db.collection("Events").where("managedBy", "==", Router.query.view)
+    .get()
+    .then((querySnapshot) => {
+      var data = []
+      querySnapshot.forEach((doc) => {
+        var elem = doc.data()
+        elem._id = doc.id
+        var date = new Date(elem.Date)
+        elem.Name = elem.name.text
+        data.push(elem)
+      })
+      var events = this.state.events ? this.state.events : []
+      events = events.concat(data)
+      this.setState({events: events})
+    })
   }
 
   componentDidMount(props) {
@@ -107,14 +93,14 @@ class YourCalendar extends React.Component {
 
       } else {
         if (!this.state.events) {
-          this.getProjects(fire.auth().currentUser.uid)
+
           this.getEventInteractions()
         }
       }
     })
     if (fire.auth().currentUser) {
         if (!this.state.events) {
-          this.getProjects(fire.auth().currentUser.uid)
+
           this.getEventInteractions()
         }
 
@@ -162,7 +148,7 @@ class YourCalendar extends React.Component {
   }
 
   eventStyleGetter = (event, start, end, isSelected) => {
-    var style = {
+    var publicStyle = {
         backgroundColor: '#FFCB00',
         borderRadius: 2,
         margin: 2,
@@ -170,9 +156,23 @@ class YourCalendar extends React.Component {
         border: '0px',
         display: 'block'
     }
-    return {
-        style: style
-    };
+    var calendarStyle = {
+        backgroundColor: '#000AB2',
+        borderRadius: 2,
+        margin: 2,
+        color: 'white',
+        border: '0px',
+        display: 'block'
+    }
+    if (event.source == 'Eventbrite') {
+      return {
+        style: publicStyle
+      }
+    } else {
+      return {
+        style: calendarStyle
+      }
+    }
   }
 
   handleEventClick = (event) => {
@@ -292,8 +292,8 @@ class YourCalendar extends React.Component {
                     defaultDate={new Date()}
                     style={{backgroundColor: 'white'}}
                     events={this.state.events}
-                    startAccessor='Start Time'
-                    endAccessor='End Time'
+                    startAccessor='start'
+                    endAccessor='end'
                     eventPropGetter={this.eventStyleGetter}
                     onSelectEvent={this.handleEventClick}
                     onSelectSlot={(slotInfo, e) =>

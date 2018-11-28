@@ -8,53 +8,6 @@ const handle = app.getRequestHandler()
 
 const server = express();
 
-server.get('/projects/p/:project', (request, response) => {
-      const actualPage = '/project'
-      const queryParams = { project: request.params.project }
-      app.render(request, response, actualPage, queryParams)
-    })
-
-server.get('/projects/p/:project/admin', (request, response) => {
-      const actualPage = '/admin'
-      const queryParams = { project: request.params.project}
-      app.render(request, response, actualPage, queryParams)
-    })
-
-server.get('/projects/p/:project/admin/:tab', (request, response) => {
-      const actualPage = '/admin'
-      const queryParams = { project: request.params.project, tab: request.params.tab}
-      app.render(request, response, actualPage, queryParams)
-    })/
-
-server.get('/projects/p/:project/joined', (request, response) => {
-      const actualPage = '/joined'
-      const queryParams = { project: request.params.project}
-      app.render(request, response, actualPage, queryParams)
-    })
-
-server.get('/projects/p/:project/declined', (request, response) => {
-      const actualPage = '/declined'
-      const queryParams = { project: request.params.project}
-      app.render(request, response, actualPage, queryParams)
-    })
-
-server.get('/projects/p/:project/completed', (request, response) => {
-      const actualPage = '/project'
-      const queryParams = { project: request.params.project, completed: 'true'}
-      app.render(request, response, actualPage, queryParams)
-    })
-
-server.get('/projects/p/:project/review', (request, response) => {
-      const actualPage = '/project-review'
-      const queryParams = { project: request.params.project }
-      app.render(request, response, actualPage, queryParams)
-    })
-
-server.get('/projects/p/:project/review/:status', (request, response) => {
-      const actualPage = '/review-status'
-      const queryParams = { project: request.params.project, status: request.params.status }
-      app.render(request, response, actualPage, queryParams)
-    })
 
 server.get('/profile/:user', (request, response) => {
       const actualPage = '/profile'
@@ -62,30 +15,10 @@ server.get('/profile/:user', (request, response) => {
       app.render(request, response, actualPage, queryParams)
     })
 
-server.get('/groups/:groupId', (request, response) => {
-      const actualPage = '/group'
-      const queryParams = { groupId: request.params.groupId }
-      app.render(request, response, actualPage, queryParams)
-    })
-
-server.get('/charity/:charityId', (request, response) => {
-      console.log('should be project')
-      const actualPage = '/charity'
-      const queryParams = { charityId: request.params.charityId }
-      app.render(request, response, actualPage, queryParams)
-    })
-
-server.get('/volunteer-preview/:organisation', (request, response) => {
-      const actualPage = '/volunteer-preview'
-      const queryParams = { organisation: request.params.organisation }
-      app.render(request, response, actualPage, queryParams)
-    })
-
-server.get('/csv-upload/:organisation', (request, response) => {
-      const actualPage = '/csv-upload'
-      const queryParams = { organisation: request.params.organisation }
-      app.render(request, response, actualPage, queryParams)
-    })
+server.get('/', (req, res) => {
+  res.set('Vary', 'User-Agent')
+  return handle(req, res)
+});
 
 server.get('*', (req, res) => handle(req, res));
 

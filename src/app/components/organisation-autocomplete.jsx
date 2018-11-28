@@ -81,7 +81,7 @@ export default class OrganisationAutocomplete extends React.Component {
             underlineShow={false}
             hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
             onUpdateInput={this.handleUpdateInput}
-            onNewRequest={this.handleNewRequest}
+            onNewRequest={this.props.handleNewRequest}
             style={styles.inputStyle}
             dataSource={this.state.orgs}
             openOnFocus={true}

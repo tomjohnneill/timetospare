@@ -8,7 +8,7 @@ import {sendCustomEmail, receiveReply} from './messaging/emails.js';
 import {sendCustomSMS} from './messaging/sms.js';
 import {sendInviteEmail} from './transactional/signup.js';
 import {outlookAuth,scrapeOutlookEmails} from './integrations/outlook.js';
-import {getEventbriteOrganisations, getEventAttendees} from './integrations/eventbrite.js';
+import {getEventbriteOrganisations, getEventAttendees, getEventList} from './integrations/eventbrite.js';
 import {wrapCors} from './integrations/cors.js';
 
 /*
@@ -57,6 +57,7 @@ const integrations = {
   scrapeOutlookEmails,
   getEventbriteOrganisations,
   getEventAttendees,
+  getEventList,
   wrapCors
 }
 

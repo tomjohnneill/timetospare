@@ -39,7 +39,7 @@ const outlookAuth = functions.region('europe-west1').https.onRequest((req, res) 
     {
       access_token = data.access_token
       refresh_token = data.refresh_token
-    return res.redirect(SITE + `/dashboard?access_token=${access_token}&refresh_token=${refresh_token}`)
+    return res.redirect(SITE + `/integrations/categorise?access_token=${access_token}&refresh_token=${refresh_token}`)
   })
 })
 

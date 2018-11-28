@@ -31,7 +31,18 @@ let db = fire.firestore()
 var randomColor = require('randomcolor')
 let functions = fire.functions('europe-west1')
 
+var colorMap = () => {
+  var color = []
+  for (var i = 0; i < 500; i ++ ) {
+    color.push(randomColor({luminosity: 'light'}))
+  }
+  return color
+}
+
+var orgColorMap = {}
+
 const ChipArray = (props) => (
+
           <div
             style={{
               width: '100%',
@@ -40,7 +51,8 @@ const ChipArray = (props) => (
               flexWrap: 'wrap',
             }}
           >
-            {typeof props.data.value === 'object' ?
+            {typeof props.data.value === 'object' && props.data.value.length > 1?
+
               props.data.value.map((entry) => (
                 <Chip style={chipStyles.chip}
                   backgroundColor={props.color}
@@ -49,11 +61,24 @@ const ChipArray = (props) => (
                 </Chip>
               ))
               :
-              <Chip style={chipStyles.chip}
-                backgroundColor={props.color}
-                labelStyle={chipStyles.chipLabel}>
+              typeof props.data.value === 'object' && props.data.column.Header.toLowerCase() == 'organisations' ?
+
+              props.data.value.map((entry) => (
+                <Chip style={chipStyles.chip}
+                  backgroundColor={orgColorMap[entry.toLowerCase()]}
+                  labelStyle={chipStyles.chipLabel}>
+                  {entry}
+                </Chip>
+              ))
+              :
+              typeof props.data.value === 'object' && props.data.column.Header.toLowerCase() == 'full name' ?
+              <div style={{textTransform: 'capitalize'}}>
                 {props.data.value}
-              </Chip>
+                </div>
+              :
+              <div>
+                {props.data.value && props.data.value.toString()}
+                </div>
             }
           </div>
 )
@@ -72,11 +97,12 @@ const getColumnsFromMembers = (members) => {
             id: key,
             Header: key,
             accessor: key,
-            Cell: row => (
-              <ChipArray
-                color={randomColor({luminosity: 'light'})}
-                data={row}/>
-            )
+            Cell: row => {
+              console.log(row)
+              console.log(orgColorMap)
+              return (<ChipArray
+                data={row}/>)
+            }
           })
         } else {
           rawKeys.push(key)
@@ -93,7 +119,6 @@ export class People extends React.Component {
   constructor(props) {
     super(props);
     this.state = {}
-
     if (this.props.members) {
       this.state = {members: this.props.members}
     }
@@ -147,11 +172,13 @@ export class People extends React.Component {
               delete elem.lastContacted
 
             }
-            if (elem.lists) {
-              delete elem.lists
-            }
+            delete elem.Organisations
             data.push(elem)
+            elem.organisations && elem.organisations.forEach((org) => {
+              orgColorMap[org.toLowerCase()] = randomColor({luminosity: 'light'})
+            })
           })
+
 
           this.setState({data: data, columns: getColumnsFromMembers(data)})
         })

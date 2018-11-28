@@ -63,7 +63,7 @@ export class Organisation extends React.Component {
   }
 
   getData = (uid) => {
-    db.collection("Organisations").where("Admin." + uid, "==", true).get()
+    return db.collection("Organisations").where("Admin." + uid, "==", true).get()
     .then((snapshot) => {
       if (snapshot.size > 0) {
         var admins
@@ -172,7 +172,13 @@ export class Organisation extends React.Component {
                             <img src='https://upload.wikimedia.org/wikipedia/commons/0/0b/Microsoft_Outlook_2013_logo.svg'
                               style={{height: 30, paddingRight: 20}}/>
                             <span style={{flex: 1}}>Get emails from outlook</span>
-                            <OutlookIntegrate/>
+                            <RaisedButton
+                              label='Scrape Emails'
+                              labelStyle={buttonStyles.smallLabel}
+                              style={buttonStyles.smallSize}
+                              primary={true}
+                              onClick={() => Router.push('/integrations/categorise')}
+                              />
                         </div>
                         <div style={{backgroundColor: 'rgb(255,249,196)', marginTop: 10, padding: 10, borderRadius: 4,
                           display: 'flex', alignItems: 'center',

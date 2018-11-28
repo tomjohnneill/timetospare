@@ -366,7 +366,46 @@ export default class Deduplication extends React.Component {
     return uploadList
   }
 
-  batchUpload = (records) => {
+
+  checkIfUserExists = (index, record, userRefs) => {
+    var emailChecks = []
+    record.Email && record.Email.forEach((email) => {
+      emailChecks.push(db.collection("PersonalData")
+        .where("Email", "array-contains", email)
+        .where("managedBy", "==", Router.query.view)
+        .get()
+        .then((resultSnapshot) => {
+          if (!resultSnapshot.size > 0) {
+            return false
+          } else {
+            var docRef
+            resultSnapshot.forEach((doc) => {
+              docRef = doc
+            })
+            return docRef
+          }
+        })
+      )
+    })
+    return Promise.all(emailChecks)
+      .then((results) => {
+        var docRef = false
+        results.forEach((one) => {
+          if (one !== false) {
+            docRef = one
+          }
+        })
+        var usableDoc
+        if (!docRef) {
+          usableDoc = db.collection("PersonalData").doc()
+        } else {
+          usableDoc = db.collection("PersonalData").doc(docRef.id)
+        }
+        userRefs.push({index: index, ref: usableDoc})
+      })
+  }
+
+  testUpload = (records) => {
     var orgKeys = {}
     var editedOrgs = []
     this.props.orgs.forEach((one) => {
@@ -378,116 +417,73 @@ export default class Deduplication extends React.Component {
       })
     })
 
-    var orgUpdates = []
+    var checksList = []
+    var updatesMasterList = []
+
+    var userRefs = []
+    var orgUpdateObjects = {}
+
     editedOrgs.map((org) => {
-      orgUpdates.push(db.collection("OrgData").where("managedBy", "==", Router.query.view)
+      checksList.push(db.collection("OrgData").where("managedBy", "==", Router.query.view)
         .where("details.name", "==", org.details.name).get()
         .then((orgSnapshot) => {
           if (!orgSnapshot.size > 0) {
-            return false
+            return db.collection("OrgData").doc()
           } else {
-            var id
+            var docRef
             orgSnapshot.forEach((doc) => {
-              id = doc.id
+              docRef = doc
             })
-            return id
-          }
-        })
-        .then((id) => {
-          if (id) {
-            var orgRef = db.collection("OrgData").doc(id)
-            return db.collection("OrgData").doc(id).update(org).then(() => orgRef)
-          } else {
-            return db.collection("OrgData").add(org)
+            return docRef
           }
         })
         .then((docRef) => {
-          return ({name: org.details.name, _id: docRef.id})
+          orgUpdateObjects[org.details.name] = {ref: docRef, data: org }
         })
       )
-    })
-
-
-    return Promise.all(orgUpdates).then((results) => {
-      results.forEach((key) => {
-        orgKeys[key.name] = key._id
       })
-    }).then(() => {
-      var updates = []
-      records.forEach((record) => {
-        var orgs = record.organisations
-        delete record.organisations
-        console.log(orgs)
-        var emailChecks = []
-        record.Email && record.Email.forEach((email) => {
-          emailChecks.push(db.collection("PersonalData")
-          .where("Email", "array-contains", email)
-          .where("managedBy", "==", Router.query.view)
-          .get()
-          .then((resultSnapshot) => {
-            if (!resultSnapshot.size > 0) {
-              return false
-            } else {
-              var id
-              resultSnapshot.forEach((doc) => {
-                id = doc.id
-              })
-              return id
-            }
-          }))
-        })
-
-        updates.push(
-          Promise.all(emailChecks)
-          .then((results) => {
-            console.log(results)
-            var userMergeId = false
-            results.forEach((one) => {
-              if (one !== false) {
-                userMergeId = one
-              }
-            })
-            return userMergeId
-          })
-          .then((mergeId) => {
-            if (mergeId) {
-              var docRef = db.collection("PersonalData").doc(mergeId)
-              return db.collection("PersonalData").doc(mergeId)
-              .update(record).then(() => docRef)
-            } else {
-              return db.collection("PersonalData").add(record)
-            }
-          })
-          .then((docRef) => {
-            var addRelationships = []
-            console.log('Organisations:')
-            console.log(orgs)
-            console.log('OrgKeys:')
-            console.log(orgKeys)
-            orgs && orgs.forEach((org) => {
-              let orgDataId = orgKeys[org]
-              addRelationships.push(db.collection("Relationships").doc().set({
-                  MemberNames: {
-                    [docRef.id] : record['Full Name']
-                  },
-                  Members: [docRef.id],
-                  OrgNames: {
-                    [orgDataId] : org
-                  },
-                  Organisations: [orgDataId]
-                })
-              )
-            })
-            return Promise.all(addRelationships)
-          })
+    for (let i = 0; i < records.length; i ++) {
+      checksList.push(
+          this.checkIfUserExists(i, records[i], userRefs)
         )
-
+    }
+    Promise.all(checksList).then(() => {
+      userRefs.forEach((elem) => {
+        console.log(elem)
+        console.log(elem.ref)
+        let record = records[elem.index]
+        elem.ref.set(record, {merge: true})
+        if (record.organisations) {
+          var orgNames = {}, orgIds = []
+          record.organisations.forEach((org) => {
+            orgNames[orgUpdateObjects[org].ref.id] = org
+            orgIds.push(orgUpdateObjects[org].ref.id)
+          })
+          db.collection("Relationships").doc().set({
+              MemberNames: {
+                [elem.ref.id] : record['Full Name']
+              },
+              Members: [elem.ref.id],
+              OrgNames: orgNames,
+              Organisations: orgIds
+            })
+        }
       })
 
-      return Promise.all(updates)
-      .then(() => alert('Update worked'))
+      Object.values(orgUpdateObjects).forEach((orgObj) => {
+        console.log(orgObj)
+        db.collection("OrgData").doc(orgObj.ref.id).set(orgObj.data, {merge: true})
+
+      })
+      Router.push(`/people?view=${Router.query.view}`)
     })
   }
+
+
+
+
+
+
 
   handleUpload = () => {
     var data = this.props.data
@@ -501,7 +497,7 @@ export default class Deduplication extends React.Component {
       this.addToUploadList(row, toBeUploaded)
     })
     console.log(toBeUploaded)
-    this.batchUpload(toBeUploaded)
+    this.testUpload(toBeUploaded)
 
   }
 

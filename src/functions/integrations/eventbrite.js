@@ -11,7 +11,7 @@ var FieldValue = admin.firestore.FieldValue
 const getEventbriteOrganisations = functions.region('europe-west1').https.onCall((data, context) => {
     var sdk
     console.log(data)
-    return db.collection("Charity").doc(data.organisation).get().then((docSnapshot) => {
+    return db.collection("Organisations").doc(data.organisation).get().then((docSnapshot) => {
       console.log(docSnapshot.data())
        sdk = eventbrite({token: docSnapshot.data().eventbrite_access_token});
        console.log(sdk)
@@ -21,9 +21,21 @@ const getEventbriteOrganisations = functions.region('europe-west1').https.onCall
     .catch((err) => console.log(err))
 })
 
+const getEventList = functions.region('europe-west1').https.onCall((data,context) => {
+  var sdk
+  return db.collection("Organisations").doc(data.organisation).get().then((docSnapshot) => {
+    return docSnapshot.data()
+  }).then((orgData) => {
+     sdk = eventbrite({token: orgData.token});
+     return sdk.request(`/organizations/${orgData.eventbriteOrgId}/events/?expand=venue`)
+  })
+  .then((result) => result)
+  .catch((err) => console.log(err))
+})
+
 const getEventAttendees = functions.region('europe-west1').https.onCall((data, context) => {
     var sdk
-    return db.collection("Charity").doc(data.organisation).get().then((docSnapshot) => {
+    return db.collection("Organisations").doc(data.organisation).get().then((docSnapshot) => {
       return docSnapshot.data().eventbrite_access_token
     }).then((token) => {
        sdk = eventbrite({token: token});
@@ -40,9 +52,6 @@ const getAllAttendees = (sdk, eventList, organisation) => {
       sdk.request(`/events/${event.id}/attendees/`).then((eventData) => {
         let attendeeList = eventData.attendees
         attendeeList.forEach((attendee) => {
-          console.log(attendee)
-          console.log(attendee.profile)
-          console.log(attendee.profile.email)
           promiseList.push(
             db.collection("PersonalData").where("Email", "array-contains", attendee.profile.email)
             .where("organisation", "==", organisation)
@@ -50,12 +59,6 @@ const getAllAttendees = (sdk, eventList, organisation) => {
             .then((docSnapshot) => {
               if (docSnapshot.size > 0) {
                 docSnapshot.forEach((doc) => {
-                  console.log(doc.data())
-                  console.log(event.start.utc)
-                  console.log(event.name)
-                  console.log([doc.id])
-                  console.log(organisation)
-                  console.log(doc.data().Organisations)
                   let body = {
                     Date: new Date(event.start.utc),
                     'Start Time': new Date(event.start.utc),
@@ -85,4 +88,4 @@ const getAllAttendees = (sdk, eventList, organisation) => {
     .catch((err) => console.log(err))
 }
 
-export {getEventbriteOrganisations, getEventAttendees}
+export {getEventbriteOrganisations, getEventAttendees, getEventList}

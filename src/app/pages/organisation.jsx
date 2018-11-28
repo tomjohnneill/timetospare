@@ -30,6 +30,7 @@ import MoreVert from 'material-ui/svg-icons/navigation/more-vert'
 import Delete from 'material-ui/svg-icons/action/delete'
 import Close from 'material-ui/svg-icons/navigation/close'
 import IconButton from 'material-ui/IconButton';
+import {classifyIntsByDate, runThroughInts} from './member.jsx'
 
 let db = fire.firestore()
 
@@ -139,24 +140,12 @@ export class Organisation extends React.Component {
       })
     } else {
       this.setState({interactions: [], pinned: []})
-      db.collection("Interactions")
-      .where("Organisations", "array-contains", Router.query.targetorganisation)
-      .where("Pinned", "==", true)
-      .orderBy("Date", 'desc').get()
-      .then((pinSnapshot) => {
-        var pinnedData = this.state.pinned ? this.state.pinned : []
-        pinSnapshot.forEach((pinDoc) => {
-          var elem = pinDoc.data()
-          elem._id = pinDoc.id
-          pinnedData.push(elem)
-        })
-        this.setState({pinned: pinnedData})
-      })
 
-      db.collection("Interactions")
+
+      this.unsubscribe = db.collection("Interactions")
       .where("Organisations", "array-contains", Router.query.targetorganisation)
-      .orderBy("Date", 'desc').get()
-      .then((intSnapshot) => {
+      .orderBy("Date", 'desc').onSnapshot(
+        (intSnapshot) => {
         var data = []
         var promises = []
         intSnapshot.forEach((intDoc) => {
@@ -455,12 +444,9 @@ export class Organisation extends React.Component {
         })
       }
       else {
-        db.collection("OrgData").where("managedBy", "==", Router.query.view).get()
-        .then((querySnapshot) => {
-          var data = []
-          querySnapshot.forEach((doc) => {
-            data = doc.data()
-          })
+        db.collection("OrgData").doc(Router.query.targetorganisation).get()
+        .then((doc) => {
+          var data = doc.data()
           this.setState({organisation: data})
         })
 
@@ -767,7 +753,7 @@ export class Organisation extends React.Component {
                   <div>
 
                     {this.state.interactions && this.state.interactions.length > 0 ?
-                      this.state.interactions.map((int) => (
+                      runThroughInts(this.state.interactions).map((int) => (
                       int.Pinned ? null : this.renderInteraction(int)
                     ))
                       :
