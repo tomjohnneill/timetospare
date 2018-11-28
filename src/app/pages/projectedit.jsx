@@ -21,6 +21,7 @@ import AddPhoto from 'material-ui/svg-icons/image/add-a-photo';
 import Top from 'material-ui/svg-icons/editor/vertical-align-top';
 import Lock from 'material-ui/svg-icons/action/lock';
 import People from 'material-ui/svg-icons/social/people';
+import OrganisationsIcon from 'material-ui/svg-icons/communication/business';
 import DatePicker from 'material-ui/DatePicker';
 import Dialog from 'material-ui/Dialog';
 import moment from 'moment'
@@ -34,6 +35,7 @@ import {formatDateHHcolonMM} from '../components/timepicker.jsx';
 import fire from '../fire';
 import Avatar from 'material-ui/Avatar';
 import {List, ListItem} from 'material-ui/List';
+import OrganisationAutocomplete from '../components/organisation-autocomplete.jsx';
 
 let db = fire.firestore()
 
@@ -284,43 +286,24 @@ class ProjectEdit extends React.Component {
 
 
     var body = {
-      'Start Time' : this.state.startDate,
-      'End Time' : this.state.endDate,
-      'Admin' : {
-        [fire.auth().currentUser.uid] : true
+      'start' : this.state.startDate,
+      'end' : this.state.endDate,
+      name:  {
+        html: this.state.title ? this.state.title : null,
+        text: this.state.title ? this.state.title : null,
       },
-      Name: this.state.title ? this.state.title : null,
-      Description: this.state.story ? this.state.story : null,
-      Summary: this.state.tagline ? this.state.tagline : null,
-      Creator: fire.auth().currentUser.uid,
-      'Target People': this.state.min ? this.state.min : null,
-      'Maximum People': this.state.max ? this.state.max : null,
-      'Featured Image': localStorage.getItem('coverPhoto') ? localStorage.getItem('coverPhoto') :null,
+      managedBy: Router.query.view,
+      picture: localStorage.getItem('coverPhoto') ? localStorage.getItem('coverPhoto') :null,
+      description: this.state.story ? this.state.story : null,
+      summary: this.state.tagline ? this.state.tagline : null,
       'Location': this.state.address ? this.state.address : null,
       Geopoint: this.state.geopoint ? this.state.geopoint : null,
       created: new Date(),
-      Tags: this.state.tags ? this.state.tags : null,
-      Invited: this.state.users ? this.state.users : null,
-      Lists : this.state.lists ? this.state.lists : null
     }
     console.log(body)
-    db.collection("Project").add(body).then((docRef) => {
-      this.state.users.forEach((user) => {
-        let interactionDoc = db.collection("Interactions").doc()
-        batch.set(interactionDoc, {
-          Type: 'Invited',
-          Member: user._id,
-          Organisation: Router.query.organisation,
-          Date: new Date(),
-          Project: docRef.id,
-          Details : {
-            Name : this.state.title,
-            Summary: this.state.tagline
-          }
-        })
-      })
-      batch.commit()
-      Router.push(`/project?project=${docRef.id}`, `/projects/p/${docRef.id}`)
+    db.collection("Events").add(body).then((docRef) => {
+
+      Router.back()
     })
   }
 
@@ -574,92 +557,9 @@ class ProjectEdit extends React.Component {
                   </div>
                 </div>
                 <div style={{padding: 15}}>
-                  <div style={{width: '100%', boxSizing: 'border-box'}}>
-                    <p style={{marginTop: 0}}>
-                      How many people are you looking for?
-                    </p>
-                    <div style={{display: 'flex'}}>
-                    <div style={{flex: 1, paddingRight: '6px'}}>
-                      <div style={editStyles.container}>
-                        <Bottom style={editStyles.icon} color={'#484848'}/>
-                        <div style={{flex: 1}}>
-                          <TextField fullWidth={true}
-                            inputStyle={styles.inputStyle}
-                            underlineShow={false}
-                            value={this.state.min}
-                            onChange={(e, nv) => this.handleChangeItem('min', nv)}
-                            type='number'
-                            hintText='Minimum'
-                            hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
-                            key='invite'
-                            style={styles.whiteTextfield}/>
-                        </div>
-                      </div>
-                    </div>
-                    <div style={{flex: 1, paddingLeft: '6px'}}>
-                      <div style={editStyles.container}>
-                        <Top style={editStyles.icon} color={'#484848'}/>
-                        <div style={{flex: 1}}>
-                          <TextField fullWidth={true}
-                            inputStyle={styles.inputStyle}
-                            underlineShow={false}
-                            hintText={'Maximum'}
-                            value={this.state.max}
-                            onChange={(e, nv) => this.handleChangeItem('max', nv)}
-                            hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
-                            key='max'
-                            type='number'
-                            errorStyle={{marginTop: 6, color: orange500, textAlign: 'center'}}
-                            errorText={this.state.max && this.state.min
-                                && Number(this.state.max) < Number(this.state.min) ? 'You just set max < min' : null}
-                            value={this.state.max}
-                            key='invite'
-                            style={styles.whiteTextfield}/>
-                        </div>
-                      </div>
-                    </div>
-                    </div>
-                  </div>
-                  <p>Project privacy</p>
-                    <div style={editStyles.container}>
-                      <Lock style={editStyles.icon} color={'#484848'}/>
-                      <div style={{flex: 1}}>
-                        <DropDownMenu
-                          style={{textAlign: 'left', height: 40}}
-                          labelStyle={{backgroundColor: 'white', height: 40, border: '1px solid #aaa',
-                            borderRadius: 4, display: 'flex', alignItems: 'center'}}
-                          iconStyle={{height: 40}}
-                          selectedMenuItemStyle={ {backgroundColor: '#f5f5f5', color: '#000AB2'} }
-                          onChange={(e, key, value) => this.handleChangeItem('visibility', value)}
-                          value={this.state.visibility ? this.state.visibility : 'public'}
-                          underlineStyle={{border: 'none'}}
-                          menuStyle={{textAlign: 'left'}}
-                            >
-                          <MenuItem value={'public'} primaryText={<div><b>Public</b>: Publish to the front page</div>} />
-                          <MenuItem value={'limited'} primaryText={<div><b>Limited</b>: Anyone with the link can see</div>} />
-                          <MenuItem value={'private'} primaryText={<div><b>Private</b>: Only specific people can access</div>} />
-                        </DropDownMenu>
-                      </div>
-                    </div>
 
-                  <p>Invite individual volunteers</p>
-                  { this.state.lists ?
-                    <div>
-                      <p>Choose list to see</p>
-                        <DropDownMenu
-                          style={{backgroundColor: 'white', textAlign: 'left'}}
-                          menuStyle={{textAlign: 'left'}}
-                          value={this.state.value} onChange={this.handleChange}>
-                          {
-                            this.state.lists.map((list) => {
-                                <MenuItem value={list._id} primaryText={list.Name} />
-                            })
-                          }
-                        </DropDownMenu>
-                    </div>
-                    :
-                    null
-                  }
+
+                  <p>Invite individual people</p>
                     <div style={editStyles.container}>
                       <People style={editStyles.icon} color={'#484848'}/>
                       <div style={{flex: 1}}>
@@ -704,6 +604,31 @@ class ProjectEdit extends React.Component {
                       }
                       </div>
                     </div>
+
+                    <p>Attach to organisations</p>
+                      <div style={editStyles.container}>
+                        <OrganisationsIcon style={editStyles.icon} color={'#484848'}/>
+                        <div style={{flex: 1}}>
+                          {
+                            this.state.users && this.state.users.length > 0 ?
+                            <div style={{display: 'flex', flexWrap: 'wrap', paddingBottom: 6}}>
+                              {this.state.users.map((user) => (
+                                <Chip style={{margin: 4, backgroundColor: '#FFCB00'}}
+                                  onRequestDelete={() => this.removePerson(user._id, user['Full Name'], user.Email)}
+                                  >
+                                  {user['Full Name']}
+                                </Chip>
+                              ))}
+                            </div>
+                            :
+                            null
+                          }
+                          <OrganisationAutocomplete
+                            handleNewRequest={this.addOneOrg}
+                            org={this.props.url.query.view}/>
+
+                        </div>
+                      </div>
                 </div>
               </div>
             </div>

@@ -48,24 +48,7 @@ class YourCalendar extends React.Component {
   }
 
   getEventInteractions = () => {
-    db.collection("Interactions").where("Organisation", "==", Router.query.view)
-    .where("Type", "==", "Event")
-    .get()
-    .then((querySnapshot) => {
-      var data = []
-      querySnapshot.forEach((doc) => {
-        var elem = doc.data()
-        elem._id = doc.id
-        var date = new Date(elem.Date)
-        elem.Name = elem.Details.name
-        elem['Start Time'] = new Date(elem.Date)
-        elem['End Time'] = new Date(date.setHours(date.getHours() + 4))
-        data.push(elem)
-      })
-      var events = this.state.events ? this.state.events : []
-      events = events.concat(data)
-      this.setState({events: events})
-    })
+
 
     db.collection("Events").where("managedBy", "==", Router.query.view)
     .get()
@@ -78,9 +61,7 @@ class YourCalendar extends React.Component {
         elem.Name = elem.name.text
         data.push(elem)
       })
-      var events = this.state.events ? this.state.events : []
-      events = events.concat(data)
-      this.setState({events: events})
+      this.setState({events: data})
     })
   }
 
@@ -271,7 +252,7 @@ class YourCalendar extends React.Component {
 
             {
               this.state.events ?
-              <div style={{height: '80vh', width: '80vw'}}>
+              <div style={{height: '80vh', width: '100%', boxSizing: 'border-box', padding: '0px 15px'}}>
                 <h2 style={{textAlign: 'left', width: '100%', display: 'flex', justifyContent: 'space-between'}}>
                   <div style={{width: '80%', fontSize: '30px', fontWeight: 200}}>
                     {this.state.onboarding ? 'Pick a date, and add a project' : 'Your project calendar'}
@@ -281,7 +262,7 @@ class YourCalendar extends React.Component {
                     padding: 0, height: 56, backgroundColor: '#000AB2',
                   borderRadius: '50%', width: 56}}
                     tooltip='Create project'
-                    onClick={() => Router.push('/projectedit') }
+                    onClick={() => Router.push(`/projectedit?view=${Router.query.view}`) }
                      iconStyle={{zIndex: 4, height: 24, padding: 0, width: 24, color: 'white'}}>
                     <AddCircle/>
                   </IconButton>
