@@ -7,7 +7,7 @@ import {updateContactRecord,  makeNewUserAdmin} from './users/members.js';
 import {sendCustomEmail, receiveReply} from './messaging/emails.js';
 import {sendCustomSMS} from './messaging/sms.js';
 import {sendInviteEmail} from './transactional/signup.js';
-import {outlookAuth,scrapeOutlookEmails} from './integrations/outlook.js';
+import {outlookAuth,scrapeOutlookEmails, scrapeCalendarEvents} from './integrations/outlook.js';
 import {getEventbriteOrganisations, getEventAttendees, getEventList} from './integrations/eventbrite.js';
 import {wrapCors} from './integrations/cors.js';
 
@@ -55,6 +55,7 @@ const transactional = {
 const integrations = {
   outlookAuth,
   scrapeOutlookEmails,
+  scrapeCalendarEvents,
   getEventbriteOrganisations,
   getEventAttendees,
   getEventList,

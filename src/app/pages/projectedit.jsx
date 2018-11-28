@@ -469,34 +469,7 @@ class ProjectEdit extends React.Component {
                           style={{width:100, height: 40}} container="inline" />
                     </div>
                 </div>
-                <div style={{paddingLeft: 64, paddingBottom: 10}}>
-                  <DropDownMenu
-                    style={{textAlign: 'left', height: 40}}
-                    onChange={(e, key, value) => this.handleChangeItem('recurring', value)}
-                    labelStyle={{backgroundColor: 'white', height: 40, border: '1px solid #aaa',
-                      borderRadius: 2, display: 'flex', alignItems: 'center'}}
-                    iconStyle={{height: 40}}
-                    underlineStyle={{border: 'none'}}
-                    selectedMenuItemStyle={ {backgroundColor: '#f5f5f5', color: '#000AB2', fontWeight: 'bold'} }
-                    menuStyle={{textAlign: 'left'}}
-                    value={this.state.recurring ? this.state.recurring : 'norepeat'} >
-                    <MenuItem value={'norepeat'} primaryText='Does not repeat' />
-                    <MenuItem value={'daily'} primaryText='Daily' />
-                    <MenuItem value={'weekly'} primaryText={`Weekly on ${this.state.startDate.toLocaleDateString('en-GB', { weekday: 'long' })}`} />
-                    <MenuItem value={'weekday'} primaryText='Every weekday' />
-                    <MenuItem
-                      onClick={() => this.setState({customOpen: true})}
-                      value={'custom'} primaryText='Pick dates' />
 
-                  </DropDownMenu>
-                  <Dialog
-                    open={this.state.customOpen}
-                    onRequestClose={() => this.setState({customOpen: false, recurring: 'norepeat'})}
-                    >
-                    <p style={{fontWeight: 700}}>Custom repeat project</p>
-                    Repeat
-                  </Dialog>
-                </div>
               </div>
               <div style={{paddingTop: 15, height: 74, display: 'flex', alignItems: 'center'}}>
                 <RaisedButton primary={true} label='Save'
@@ -571,37 +544,6 @@ class ProjectEdit extends React.Component {
                     </div>
                   </div>
 
-                  <div style={{display: 'flex', alignItems: 'top', padding: 10,
-                  boxSizing: 'border-box'}}>
-                    <Category style={{paddingTop: 10, width: 54, height: 20}} color={'#484848'}/>
-                    <div style={{flex: 1}}>
-                      <div style={editStyles.wrapper}>
-                        {this.state.tags.map((tag) => (
-                          <Chip
-                            key={tag}
-                            style={editStyles.selectedChip}
-                            backgroundColor={'#65A1e7'}
-                            onRequestDelete={() => this.handleRequestDelete(tag)}
-                          >
-                            {tag}
-                          </Chip>
-                        ))}
-                      </div>
-
-
-                      <div style={editStyles.wrapper}>
-                        {this.state.allTags.map((tag) => (
-                          <Chip
-                            key={tag}
-                            style={editStyles.chip}
-                            onTouchTap={() => this.handleAddTag(tag)}
-                          >
-                            {tag}
-                          </Chip>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
 
                   <div style={{display: 'flex', alignItems: 'top', padding: 10,
                   boxSizing: 'border-box'}}>

@@ -93,19 +93,38 @@ export class EventbriteSuccessPage extends React.Component {
     console.log(localStorage)
     var access_token = parsedHash.access_token
     var org = localStorage.getItem('ttsOrg')
-    if (org && parsedHash && !parsedHash.error) {
+    if (org && parsedHash && !parsedHash.error && access_token) {
       db.collection("Organisations").doc(org).update({eventbrite_access_token: parsedHash.access_token})
 
-    } else {
-      alert('There was a slight problem')
     }
     if (access_token) {
       this.getEventbriteOrgs()
     }
+
+    if (org && !access_token) {
+      db.collection("Organisations").doc(org).get()
+      .then((doc) => {
+        var data = doc.data()
+        this.setState({organisation: data})
+        return data
+      })
+      .then((data) => {
+        if (data.eventbriteOrgId) {
+          this.getEventbriteList(data.eventbriteOrgId)
+        } else {
+          localStorage.setItem('ttsOrg', this.props.organisation)
+
+          var client_id = 'CVMW6D7X3KP4GSF2JB'
+
+          window.location.href = `https://www.eventbrite.com/oauth/authorize?response_type=token&client_id=${client_id}`
+        }
+      })
+    }
+
     console.log(localStorage)
   }
 
-  getEventbriteOrgs = () => {
+  getEventbriteOrgs = (data) => {
     var getEventbriteOrgs = functions.httpsCallable('integrations-getEventbriteOrganisations')
     getEventbriteOrgs({organisation: localStorage.getItem('ttsOrg')}).then((result) => {
       this.setState({organisations: result.data})
@@ -113,7 +132,10 @@ export class EventbriteSuccessPage extends React.Component {
   }
 
   getEventbriteList = (org) => {
+
+    console.log(org)
     var getEventList = functions.httpsCallable('integrations-getEventList')
+    console.log({organisation: localStorage.getItem('ttsOrg'), eventbriteOrgId: org.id})
     getEventList({organisation: localStorage.getItem('ttsOrg'), eventbriteOrgId: org.id}).then((result) => {
       console.log(result)
       this.setState({events: result.data.events})

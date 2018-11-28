@@ -26,7 +26,7 @@ const getEventList = functions.region('europe-west1').https.onCall((data,context
   return db.collection("Organisations").doc(data.organisation).get().then((docSnapshot) => {
     return docSnapshot.data()
   }).then((orgData) => {
-     sdk = eventbrite({token: orgData.token});
+     sdk = eventbrite({token: orgData.eventbrite_access_token});
      return sdk.request(`/organizations/${orgData.eventbriteOrgId}/events/?expand=venue`)
   })
   .then((result) => result)

@@ -116,7 +116,7 @@ export class ProjectAdmin extends React.Component {
     Router.prefetch('/member')
 
     console.log(this.state)
-    this.setState({organisation: Router.query.organisation, tagType: 'existing'})
+    this.setState({organisation: Router.query.view, tagType: 'existing'})
 
     if (Router.query.sample) {
       var corsRequest = functions.httpsCallable('integrations-wrapCors');
@@ -148,34 +148,43 @@ export class ProjectAdmin extends React.Component {
       })
     }
 
-    else if (Router.query.organisation) {
+    else if (Router.query.view) {
+      db.collection("Events").doc(Router.query.project).get()
+      .then((eventDoc) => {
+        var elem = eventDoc.data()
+        console.log(elem)
+      })
+
       db.collection("Interactions").doc(Router.query.project)
       .get().then((doc) => {
         var data = []
         var intData = doc.data()
         this.setState({project: intData})
         console.log(intData)
-        intData.Members.forEach((member) => {
-          db.collection("PersonalData").doc(member).get().then((memberDoc) => {
-            var raw = memberDoc.data()
-            var elem = {}
-            var columns = ['Full Name', 'Email', 'Organisations', 'lastContacted']
-            columns.forEach((key) => {
-              if (raw[key]) {
-                elem[key] = raw[key]
+        if (intData && intData.Members) {
+          intData.Members.forEach((member) => {
+            db.collection("PersonalData").doc(member).get().then((memberDoc) => {
+              var raw = memberDoc.data()
+              var elem = {}
+              var columns = ['Full Name', 'Email', 'Organisations', 'lastContacted']
+              columns.forEach((key) => {
+                if (raw[key]) {
+                  elem[key] = raw[key]
+                }
+              })
+              if (elem.lastContacted) {
+                elem['Last Contacted'] = elem.lastContacted.toLocaleString('en-gb',
+                  {weekday: 'long', month: 'long', day: 'numeric'})
+                delete elem.lastContacted
               }
+              elem._id = memberDoc.id
+              data.push(elem)
+              this.setState({data: data, columns: getColumnsFromMembers(data)})
             })
-            if (elem.lastContacted) {
-              elem['Last Contacted'] = elem.lastContacted.toLocaleString('en-gb',
-                {weekday: 'long', month: 'long', day: 'numeric'})
-              delete elem.lastContacted
-            }
-            elem._id = memberDoc.id
-            data.push(elem)
-            this.setState({data: data, columns: getColumnsFromMembers(data)})
-          })
 
-        })
+          })
+        }
+
         console.log(data)
       })
     }
@@ -249,7 +258,7 @@ export class ProjectAdmin extends React.Component {
                   getTdProps={(state, rowInfo, column, instance) => {
                     return {
                       onClick: (e, handleOriginal) => {
-                        Router.push(`/member?member=${rowInfo.original._id}&organisation=${Router.query.organisation}&name=${rowInfo.original['Full Name']}`)
+                        Router.push(`/member?member=${rowInfo.original._id}&view=${Router.query.view}&name=${rowInfo.original['Full Name']}`)
                         if (handleOriginal) {
                           handleOriginal();
                         }

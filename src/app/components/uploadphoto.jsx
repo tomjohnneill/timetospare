@@ -9,6 +9,7 @@ import CircularProgress from 'material-ui/CircularProgress';
 import MediaQuery from 'react-responsive';
 import {Cross} from './icons.jsx'
 import IconButton from 'material-ui/IconButton'
+import {buttonStyles} from './styles.jsx';
 import CloudUpload from 'material-ui/svg-icons/file/cloud-upload';
 
 const styles = {
@@ -177,7 +178,7 @@ export default class UploadPhoto extends React.Component{
                                   <RaisedButton label='Change Photo'
                                     style={{padding: 0, position: 'absolute', top: 'calc(50% - 20px)', right: 'calc(50% - 98px)', height: 40, zIndex: 10}}
                                     icon={<CloudUpload />}
-                                    labelStyle={{textTransform: 'none', fontWeight: 700, fontSize: '18px'}}
+                                    labelStyle={buttonStyles.smallLabel}
                                     primary={true}
                                     />
                                   :

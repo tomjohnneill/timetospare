@@ -144,8 +144,11 @@ const keepEmail = (email, people, type) => {
   }
 }
 
-const attachDataToEmail = (email, people, type) => {
+const keepEvent = (calendarEvent, people) => {
 
+}
+
+const attachDataToEmail = (email, people, type) => {
   if (type === 'received') {
     var details = []
     email.ToRecipients.forEach((person) => {
@@ -174,6 +177,17 @@ const attachDataToEmail = (email, people, type) => {
     }
     return ({email: email, details: uniqDetails})
   }
+}
+
+const attachDataToEvent = (calendarEvent, people) => {
+  var details = []
+  calendarEvent.Attendees.forEach((attendee) => {
+    details.push(people[attendee.EmailAddress.Address].details)
+  })
+  if (details.length > 0) {
+    uniqDetails =  uniqObjs(details, '_id')
+  }
+  return ({email: email, details: uniqDetails})
 }
 
 const checkIfExists = (person, organisation, adminList) => {
@@ -224,9 +238,8 @@ const checkIfExists = (person, organisation, adminList) => {
     })
 }
 
-const checkAgainstMembers = (emails, organisation, type, nextLink) => {
+const emailPeople = (emails) => {
   var people = {}
-  var promises = []
   emails.forEach((email) => {
     let from = email.Sender.EmailAddress.Address
     people[from] = {exists: false}
@@ -237,6 +250,30 @@ const checkAgainstMembers = (emails, organisation, type, nextLink) => {
       people[person.EmailAddress.Address] = {exists: false}
     })
   })
+
+  return people
+}
+
+const calendarPeople = (events) => {
+  var people = {}
+  events.forEach((event) => {
+    event.Attendees.forEach((attendee) => {
+      people[attendee.EmailAddress.Address] = {exists: false}
+    })
+  })
+  return people
+}
+
+const checkAgainstMembers = (items, organisation, type, nextLink, element) => {
+  var promises = []
+
+  var people
+  if (element == 'Emails') {
+    people = emailPeople(items)
+  } else if (element === 'Calendar') {
+    people = calendarPeople(items)
+  }
+
 
 
   return db.collection("Organisations").doc(organisation).get().then((orgDoc) => orgDoc.data())
@@ -262,21 +299,29 @@ const checkAgainstMembers = (emails, organisation, type, nextLink) => {
     })
     .then((people) => {
       var data = []
+      if (element === 'Emails') {
+        items.forEach((email) => {
+          if (keepEmail(email, people, type)) {
+            console.log('email has been kept', email)
+            data.push(attachDataToEmail(email, people, type))
+          }
+        })
+      } else if (element === 'Calendar') {
+        items.forEach((email) => {
+          if (keepEvent(email, people)) {
 
-      emails.forEach((email) => {
+            data.push(attachDataToEvent(email, people))
+          }
+        })
+      }
 
-        if (keepEmail(email, people, type)) {
-          console.log('email has been kept', email)
-          data.push(attachDataToEmail(email, people, type))
-        }
-      })
       return ({data: data, nextLink: nextLink})
     })
   })
 
 }
 
-const checkAuthorisation = (response, context, link) => {
+const checkAuthorisation = (response, context, link, passedFunction) => {
   console.log('response', response)
   console.log('response status', response.status)
   if (response.status === 200) {
@@ -292,12 +337,15 @@ const checkAuthorisation = (response, context, link) => {
         .then((token) =>
           {
             console.log(token)
-            return getMessages(link, token)
+            console.log(link)
+            return passedFunction(link, token)
             .then(response => {
               if (response.status === 200) {
                 return response.json()
               } else {
+                console.log(response.json())
                 throw "Refresh token not authorised"
+
               }
             })
           }
@@ -332,14 +380,59 @@ const scrapeOutlookEmails = functions.region('europe-west1').https.onCall((data,
           data.access_token)
       })
       .then(response =>
-        checkAuthorisation(response, context, link)
+        checkAuthorisation(response, context, link, getMessages)
       )
       .then((newData) => {
         console.log(newData)
-        return checkAgainstMembers(newData.value, data.organisation, 'received', newData["@odata.nextLink"])
+        return checkAgainstMembers(newData.value, data.organisation, 'received', newData["@odata.nextLink"], 'Emails')
       })
       .catch((err) => console.log(err))
 })
 
+const getCalendarEvents = (link, access_token) => {
+  console.log('link', link)
+  console.log('access_token', access_token)
+  return fetch(link, {
+      method: 'GET',
+      headers:
+      {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${access_token}`
+     }
+    })
+}
 
-export { outlookAuth,  scrapeOutlookEmails}
+const scrapeCalendarEvents = functions.region('europe-west1').https.onCall((data, context) => {
+  var today = new Date()
+  var interactions = []
+  var lastUpdated, fromDate, toDate, link
+    return db.collection("User").doc(context.auth.uid).get().then((doc) => {
+      lastUpdated = doc.data().last_scraped_outlook
+      return lastUpdated
+    }).then((lastUpdated) => {
+      var toDate = encodeURIComponent(new Date().toISOString())
+      if (lastUpdated) {
+        fromDate = encodeURIComponent(lastUpdated.toISOString())
+      } else {
+        fromDate = encodeURIComponent(new Date(today.setMonth(today.getMonth() - 1)).toISOString());
+      }
+      if (data.link) {
+        link = data.link
+      } else {
+        link = `https://outlook.office.com/api/v2.0/me/calendarview?startdatetime=${fromDate}&endDateTime=${toDate}&$top=50`
+      }
+        return getCalendarEvents(link,
+          data.access_token)
+      })
+      .then(response =>
+        checkAuthorisation(response, context, link, getCalendarEvents)
+      )
+      .then((newData) => {
+        console.log(newData)
+        return checkAgainstMembers(newData.value, data.organisation, null, newData["@odata.nextLink"], 'Calendar')
+      })
+      .catch((err) => console.log(err))
+
+})
+
+export { outlookAuth,  scrapeOutlookEmails, scrapeCalendarEvents}
