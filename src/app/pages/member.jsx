@@ -618,11 +618,23 @@ export class Member extends React.Component {
       interactions.splice(position, 1)
       this.setState({interactions: interactions, pinned: pinned})
     } else {
-      db.collection("Interactions").doc(this.state.targetedInt._id).update({Pinned: true})
+      this.setState({optionsOpen: false})
+      db.collection("Interactions").doc(this.state.targetedInt._id)
+      .update({Pinned: !this.state.targetedInt.Pinned})
     }
   }
 
   render() {
+    var pinned = []
+    if (this.state.interactions) {
+      this.state.interactions.forEach((int) => {
+        if (int.Pinned) {
+          pinned.push(int)
+        }
+      })
+    }
+
+
     const ReactQuill = this.ReactQuill
     return (
       <div>
@@ -701,7 +713,8 @@ export class Member extends React.Component {
                 primaryText="Remove from this member" leftIcon={<Close/>} />
               <MenuItem
                 onClick={() => this.handlePin(this.state.targetedInt)}
-                primaryText="Pin this" leftIcon={<Pin/>} />
+                primaryText={`${this.state.targetedInt && this.state.targetedInt.Pinned
+                  ? 'Unpin' : 'Pin'} this`} leftIcon={<Pin/>} />
             </Menu>
           </Popover>
           <AddTag
@@ -934,12 +947,12 @@ export class Member extends React.Component {
               <div style={{textAlign: 'left'}}>
 
                 <div style={{padding: '00px 0px'}}>
-                  {this.state.pinned && this.state.pinned.length > 0 ?
-                    <div style={{marginBottom: 20}}>
+                  {pinned && pinned.length > 0 ?
+                    <div style={{marginBottom: 50}}>
                       <div style={{fontWeight: 200, fontSize: '20px', paddingBottom: 20}}>
                           Important info
                         </div>
-                      {this.state.pinned.map((int) => (
+                      {pinned.map((int) => (
                       this.renderInteraction(int)
                     ))}
 
