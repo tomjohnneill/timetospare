@@ -350,6 +350,28 @@ export class People extends React.Component {
 
 
   render() {
+    console.log(this.state.data)
+    console.log(this.state.columns)
+    var datagrid = []
+    if (this.state.data) {
+      var headerRow = []
+      this.state.columns.forEach((column) => {
+        headerRow.push(column.accessor)
+      })
+      datagrid.push(headerRow)
+      this.state.data.forEach((row) => {
+        var rowGrid = []
+        headerRow.forEach((column) => {
+          if (row[column]) {
+            rowGrid.push(row[column].toString())
+          } else {
+            rowGrid.push("")
+          }
+        })
+        datagrid.push(rowGrid)
+      })
+      console.log(datagrid)
+    }
 
     const currentRecords = this.selectTable && this.selectTable.getResolvedState().sortedData;
 
@@ -429,12 +451,12 @@ export class People extends React.Component {
                 }
 
                 <div style={{width: 20}}/>
-                {typeof window !== 'undefined' ?
+                {typeof window !== 'undefined' && datagrid.length > 0 ?
                 <CSVLink
-                  filename={"my-volunteers.csv"}
+                  filename={`${new Date().toJSON().slice(0,10)} Contacts.csv`}
                   target=""
                   rel='noopener'
-                  data={this.state.data ? this.state.data : [{"data": "empty"}]}>
+                  data={datagrid}>
                   <RaisedButton
                     primary={true}
                     style={buttonStyles.smallSize}
