@@ -30,10 +30,12 @@ import Popover from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
 import EventIcon from 'material-ui/svg-icons/action/event';
+import SearchIcon from 'material-ui/svg-icons/action/search';
 import MoreVert from 'material-ui/svg-icons/navigation/more-vert'
 import Delete from 'material-ui/svg-icons/action/delete'
 import Close from 'material-ui/svg-icons/navigation/close'
 import OrganisationAutocomplete from '../components/organisation-autocomplete.jsx';
+import lunr from 'lunr'
 
 let db = fire.firestore()
 var randomColor = require('randomcolor')
@@ -143,15 +145,33 @@ export var classifyIntsByDate = (date, includedSeparators) => {
     }
 }
 
-export var runThroughInts = (ints) => {
+export var runThroughInts = (ints, searchResults) => {
+  var filteredInts = []
+  if (searchResults) {
+    var filterIds = []
+    searchResults.forEach((result) => {filterIds.push(result.ref)})
+    ints.forEach((int) => {
+      if (filterIds.includes(int._id)) {
+        filteredInts.push(int)
+      }
+    })
+  } else {
+    filteredInts = ints
+  }
   var includedSeparators = []
-  ints.forEach((int) => {
+  filteredInts.forEach((int) => {
     classifyIntsByDate(int.Date, includedSeparators)
   })
-  console.log(ints)
-  console.log(includedSeparators)
-  ints = ints.concat(includedSeparators)
-  return ints.sort((a,b) => (a.Date > b.Date) ? -1 : ((b.Date > a.Date) ? 1 : 0))
+
+  filteredInts = filteredInts.concat(includedSeparators)
+  return filteredInts.sort((a,b) => (a.Date > b.Date) ? -1 : ((b.Date > a.Date) ? 1 : 0))
+}
+
+function insertNum(str) {
+    var index = "~1";
+    return str.replace(/\w\b/g, function(match) {
+        return match + index;
+    });
 }
 
 export class Member extends React.Component {
@@ -267,6 +287,7 @@ export class Member extends React.Component {
           data.push(elem)
         })
         this.setState({interactions: data})
+        this.addInteractionsToIndex()
       })
 
       db.collection("PersonalData").doc(Router.query.member).get()
@@ -316,6 +337,36 @@ export class Member extends React.Component {
       optionsOpen: false,
     });
   };
+
+  addInteractionsToIndex = () => {
+    var interactions = this.state.interactions
+    if (interactions && interactions.length > 0) {
+      this.idx = lunr(function () {
+        this.ref('_id')
+        this.field('Subject')
+        this.field('Body')
+        interactions.forEach((int) => {
+          if (int.Type === 'CalendarEvent') {
+            int.Body = int.Details.BodyText
+            int.Subject = int.Details.Subject
+            this.add(int)
+          } else if (int.Type === 'Email') {
+            int.Body = int.Details.BodyText
+            int.Subject = int.Details.Subject
+            this.add(int)
+          }
+        })
+      })
+    }
+  }
+
+  searchInteractions = (e, nv) => {
+    if (this.idx) {
+      console.log(this.idx.search(insertNum(nv)))
+      this.setState({searchResults: this.idx.search(insertNum(nv))})
+    }
+  }
+
 
   renderInteraction = (int) => {
 
@@ -620,6 +671,7 @@ export class Member extends React.Component {
                   <TextField
                     hintText={'What is their role?'}
                     underlineShow={false}
+
                     fullWidth={true}
                     style={textFieldStyles.style}
                     inputStyle={textFieldStyles.input}
@@ -899,6 +951,20 @@ export class Member extends React.Component {
                   <div style={{fontWeight: 200, fontSize: '20px', paddingBottom: 20}}>
                       Your interactions
                     </div>
+                    <div style={{display: 'flex', alignItems: 'center', paddingBottom: 20}}>
+
+                      <SearchIcon style={{width: 54, height: 24}}/>
+                      <TextField
+                        hintText={'Search all interactions...'}
+                        underlineShow={false}
+                        onChange={this.searchInteractions}
+                        fullWidth={true}
+                        style={textFieldStyles.style}
+                        inputStyle={textFieldStyles.input}
+                        hintStyle={textFieldStyles.hint}
+                        />
+                    </div>
+
                   {
                     this.state.takeNote ?
                     <AddNote
@@ -918,7 +984,7 @@ export class Member extends React.Component {
 
 
                     {this.state.interactions.length > 0 ?
-                      runThroughInts(this.state.interactions).map((int) => (
+                      runThroughInts(this.state.interactions, this.state.searchResults).map((int) => (
                       int.Pinned ? null : this.renderInteraction(int)
                     ))
                       :
