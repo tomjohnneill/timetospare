@@ -621,6 +621,7 @@ export class Categorise extends React.Component {
               <div style={{width: 10}}/>
             <RaisedButton label='Save All'
               primary={true}
+              disabled={!this.state.outlookFinished}
               style={buttonStyles.smallSize}
               labelStyle={buttonStyles.smallLabel}
               onClick={() => {
