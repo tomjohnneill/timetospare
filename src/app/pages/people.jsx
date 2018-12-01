@@ -11,11 +11,13 @@ import Avatar from 'material-ui/Avatar';
 import Link from 'next/link'
 import Dialog from 'material-ui/Dialog';
 import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton';
+import Email from 'material-ui/svg-icons/communication/email';
 import FlatButton from 'material-ui/FlatButton';
 import CommunicationChatBubble from 'material-ui/svg-icons/av/play-arrow';
 import {buttonStyles, radioButtonStyles, textFieldStyles, chipStyles, headerStyles} from '../components/styles.jsx';
 import {CSVLink} from 'react-csv';
 import DropDownMenu from 'material-ui/DropDownMenu';
+import OrganisationsIcon from 'material-ui/svg-icons/communication/business';
 import MenuItem from 'material-ui/MenuItem';
 import {List, ListItem} from 'material-ui/List';
 import 'react-table/react-table.css'
@@ -113,6 +115,148 @@ const getColumnsFromMembers = (members) => {
   })
 
   return columns
+}
+
+export class AddOnePerson extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {}
+  }
+
+  handleOnePerson = (field, data) => {
+    var person = this.state.person ? this.state.person : {}
+    person[field] = data
+    this.setState({person: person})
+  }
+
+  handleOrgLookup = (one, org, three) => {
+    var person = this.state.person ? this.state.person : {}
+    if (person.Orgs) {
+      person.Orgs.push(one)
+    } else {
+      person.Orgs = [one]
+    }
+    this.setState({person: person})
+    console.log(person)
+  }
+
+  handleSavePerson = () => {
+    var person = this.state.person
+    person.managedBy = Router.query.view
+    db.collection("PersonalData").where("Email", "array-contains", person.Email[0])
+    .get().then((querySnapshot) => {
+      var _id
+      var docRef
+      if (querySnapshot.size > 0) {
+        querySnapshot.forEach((doc) => {
+          _id = doc.id
+        })
+      }
+      if (!_id) {
+        docRef = db.collection("PersonalData").doc()
+      } else {
+        docRef = db.collection("PersonalData").doc(_id)
+      }
+      return docRef.set(person, {merge: true}).then(() => docRef)
+    })
+    .then((doc) => {
+      var orgArray = []
+      var orgNames = {}
+      person.Orgs.forEach((orgObj) => {
+        orgArray.push(orgObj._id)
+        orgNames[orgObj._id] = orgObj.name
+      })
+
+      db.collection("Relationships").add({
+        MemberNames : {
+          [doc.id] : person['Full Name']
+        },
+        Members: [doc.id],
+        OrgNames : orgNames,
+        Organisations: orgArray
+      }).then(() => {
+        this.props.handleRequestClose()
+      })
+    })
+  }
+
+  render() {
+    return (
+      <Dialog
+        onRequestClose={this.props.handleRequestClose}
+        open={this.props.open}
+        actions={[<FlatButton
+          onClick={this.props.handleRequestClose}
+          style={buttonStyles.smallSize}
+          labelStyle={buttonStyles.smallLabel}
+          label='Cancel'
+          />
+        ,
+        <RaisedButton
+          primary={true}
+          onClick={this.handleSavePerson}
+          style={buttonStyles.smallSize}
+
+          labelStyle={buttonStyles.smallLabel}
+          label='Save'/>]}
+        >
+      <div>
+        <div style={headerStyles.desktop}>
+          Add their details
+        </div>
+        <div>
+
+
+          <div style={{display: 'flex', alignItems: 'center', paddingBottom: 20}}>
+            <div style={{width: 20, paddingRight: 20}}>
+              OI
+            </div>
+            <div style={{flex: 1}}>
+              <TextField
+                hintText={'Add their Full Name'}
+                underlineShow={false}
+                fullWidth={true}
+                onChange={(e, nv) => this.handleOnePerson('Full Name', [nv])}
+                style={textFieldStyles.style}
+                inputStyle={textFieldStyles.input}
+                hintStyle={textFieldStyles.hint}
+                />
+            </div>
+          </div>
+
+          <div style={{display: 'flex', alignItems: 'center', paddingBottom: 20}}>
+
+              <Email style={{width: 20, paddingRight: 20}}/>
+
+            <div style={{flex: 1}}>
+              <TextField
+                hintText={'Add their Email'}
+                underlineShow={false}
+                fullWidth={true}
+                onChange={(e, nv) => this.handleOnePerson('Email', [nv])}
+                style={textFieldStyles.style}
+                inputStyle={textFieldStyles.input}
+                hintStyle={textFieldStyles.hint}
+                />
+            </div>
+          </div>
+
+          <div style={{display: 'flex', alignItems: 'center'}}>
+
+              <OrganisationsIcon style={{width: 20, paddingRight: 20}}/>
+
+            <div style={{flex: 1}}>
+              <OrganisationAutocomplete
+                handleNewRequest={this.handleOrgLookup}
+                org={this.props.managedBy}/>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </Dialog>
+    )
+  }
 }
 
 export class People extends React.Component {
@@ -250,60 +394,13 @@ export class People extends React.Component {
             </List>
           </Dialog>
 
-          <Dialog
+
+          <AddOnePerson
             open={this.state.onePerson}
-            onRequestClose={() => this.setState({onePerson: false})}>
-            <div style={headerStyles.desktop}>
-              Add their details
-            </div>
-            <div>
+            handleRequestClose={() => this.setState({onePerson: false})}
+            managedBy={this.props.url.query.view}/>
 
 
-              <div style={{display: 'flex', alignItems: 'center', paddingBottom: 20}}>
-                <div style={{width: 20, paddingRight: 20}}>
-                  OI
-                </div>
-                <div style={{flex: 1}}>
-                  <TextField
-                    hintText={'Add their Full Name'}
-                    underlineShow={false}
-                    fullWidth={true}
-                    style={textFieldStyles.style}
-                    inputStyle={textFieldStyles.input}
-                    hintStyle={textFieldStyles.hint}
-                    />
-                </div>
-              </div>
-
-              <div style={{display: 'flex', alignItems: 'center', paddingBottom: 20}}>
-                <div style={{width: 20, paddingRight: 20}}>
-                  OI
-                </div>
-                <div style={{flex: 1}}>
-                  <TextField
-                    hintText={'Add their Email'}
-                    underlineShow={false}
-                    fullWidth={true}
-                    style={textFieldStyles.style}
-                    inputStyle={textFieldStyles.input}
-                    hintStyle={textFieldStyles.hint}
-                    />
-                </div>
-              </div>
-
-              <div style={{display: 'flex', alignItems: 'center', paddingBottom: 20}}>
-                <div style={{width: 20, paddingRight: 20}}>
-                  OI
-                </div>
-                <div style={{flex: 1}}>
-                  <OrganisationAutocomplete
-                    org={this.props.url.query.view}/>
-                </div>
-              </div>
-            </div>
-
-
-          </Dialog>
 
           <AddTag
             selection={this.state.selection}
