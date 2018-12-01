@@ -109,6 +109,15 @@ export class Organisation extends React.Component {
     })
   }
 
+  updateLastLoggedIn = (uid) => {
+    db.collection("PersonalData").where("User", "==", uid).get()
+    .then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        db.collection("PersonalData").doc(doc.id).update({lastLoggedIn: new Date()})
+      })
+    })
+  }
+
   componentDidMount(props) {
     Router.prefetch(`/project-calendar`)
     Router.prefetch(`/volunteer-preview`)
@@ -117,12 +126,12 @@ export class Organisation extends React.Component {
       if (user === null) {
       }
       else {
-        db.collection("User").doc(user.uid).update({lastLoggedIn: new Date()})
+        this.updateLastLoggedIn(user.uid)
         this.getData(user.uid)
       }
     })
     if (fire.auth().currentUser) {
-      db.collection("User").doc(fire.auth().currentUser.uid).update({lastLoggedIn: new Date()})
+      this.updateLastLoggedIn(fire.auth().currentUser.uid)
       this.getData(fire.auth().currentUser.uid)
     }
   }
@@ -310,7 +319,7 @@ export class Organisation extends React.Component {
 
                             <div style={{flex: 1}}>
                               <div style={styles.tableRow}>
-                                {user.lastLoggedIn}
+                                {user.lastLoggedIn ? user.lastLoggedIn.toString() : null}
                               </div>
                             </div>
                           </div>
