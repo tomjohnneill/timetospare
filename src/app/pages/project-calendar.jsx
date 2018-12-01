@@ -28,6 +28,8 @@ import Link from 'next/link';
 import LinesEllipsis from 'react-lines-ellipsis';
 import ShortText from 'material-ui/svg-icons/editor/short-text';
 import {formatDateHHcolonMM} from '../components/timepicker.jsx';
+import Delete from 'material-ui/svg-icons/action/delete'
+import Close from 'material-ui/svg-icons/navigation/close'
 
 var tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
@@ -188,6 +190,13 @@ class YourCalendar extends React.Component {
   });
 };
 
+  handleDeleteEvent = () => {
+    db.collection("Events").doc(this.state.targetedEvent._id).delete()
+    .then(() => {
+      this.setState({viewOpen: false})
+    })
+  }
+
   render() {
     if (this.state.targetedEvent) {
       var start = new Date(this.state.targetedEvent.start)
@@ -208,6 +217,20 @@ class YourCalendar extends React.Component {
         {
           this.state.targetedEvent ?
           <div style={{textAlign: 'left'}}>
+            <div style={{float: 'right', display: 'flex'}}>
+              <IconButton
+                onClick={this.handleDeleteEvent}
+                tooltip='Delete'
+                iconStyle={{color: 'white'}}>
+                <Delete/>
+              </IconButton>
+              <IconButton
+                tooltip='Close'
+                onClick={this.handleRequestClose}
+                 iconStyle={{color: 'white'}}>
+                <Close/>
+              </IconButton>
+            </div>
             <Link href={`/project-admin?project=${this.state.targetedEvent._id}&view=${Router.query.view}`}>
               <div style={{backgroundColor: '#000AB2', color: 'white',
                 minHeight: '50px', cursor: 'pointer',
