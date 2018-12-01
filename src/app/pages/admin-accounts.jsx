@@ -43,7 +43,7 @@ export class AdminAccounts extends React.Component {
               promiseArray.push(
                 db.collection("PersonalData")
                 .where("User", "==", admin)
-                .where("Organisation", "==", Router.query.organisation).limit(1)
+                .where("managedBy", "==", Router.query.organisation).limit(1)
                 .get()
                   .then((userDocSnapshot) =>
                   {
