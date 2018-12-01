@@ -13,37 +13,9 @@ import OutlookIntegrate from '../../components/outlook/integrate.jsx';
 import CircularProgress from 'material-ui/CircularProgress';
 import LinesEllipsis from 'react-lines-ellipsis';
 import {headerStyles, buttonStyles, chipStyles} from '../../components/styles.jsx';
+import lunr from 'lunr'
 
-const users = [
-  {
-    name: 'Tom Neill'
-  },
-  {
-    name: 'Ed Jackert'
-  },
-  {
-    name: 'Jacey Lee'
-  }
-]
-
-const orgs = [
-  {
-    name: 'Dover Big Local'
-  },
-  {
-    name: 'Heston West'
-  },
-  {
-    name: 'Ramsgate'
-  }
-]
-
-const tags = [
-  'banana',
-  'apple',
-  'orange',
-  'kiwi'
-]
+let db = fire.firestore()
 
 const editStyles = {
   container : {
@@ -64,6 +36,164 @@ const editStyles = {
   selectedChip: {
     margin: 4
   },
+  nextContainer : {
+    position: 'fixed',
+    bottom: 0,
+    height: 80,
+    zIndex: 5,
+    display: 'flex',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingRight: 100,
+    boxSizing: 'border-box',
+    left: 0
+  }
+}
+
+class ClassifiedInteraction extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {visible: false}
+  }
+
+  componentDidMount (props) {
+    setTimeout(
+        () => {
+            this.setState({visible: true});
+        },
+        100
+    );
+  }
+
+  render() {
+    return (
+      <Card
+        expandable={true}
+        key={this.props.data.details.Subject}
+        style={{textAlign: 'left', marginBottom: 20, boxShadow: 'none',
+        opacity: this.state.visible ? 100 : 0,
+        transition: 'opacity 0.5s',
+        borderBottom: '1px solid #DBDBDB'}}>
+        <CardHeader
+          title={this.props.data.email ? this.props.data.email.Subject : this.props.data.event.Subject}
+          actAsExpander={true}
+          showExpandableButton={true}
+          subtitle={this.props.type}
+          avatar={<Avatar>H</Avatar>}
+        />
+
+      <CardText expandable={true}>
+          <div style={{display: 'flex'}}>
+            <div style={{flex: 1, paddingRight: 20}}>
+              <div style={{display: 'flex'}}>
+                <ShortText style={editStyles.icon} color={'#484848'}/>
+                <div style={{display: 'flex', flexWrap: 'wrap', textTransform: 'capitalize'}}>
+                  {
+                    this.props.data && this.props.data.details.map((user) => (
+                      user ?
+                      <Chip style={chipStyles.chip}
+                        deleteIconStyle={chipStyles.deleteStyle}
+                        onRequestDelete={() => this.handleDeleteUser(user)}
+                        labelStyle={chipStyles.chipLabel}>
+                        {user['Full Name']}
+                      </Chip>
+                      :
+                      null
+                    ))
+                  }
+                </div>
+              </div>
+
+              <div style={{display: 'flex', paddingTop: 16}}>
+                <div style={{width: 54}}>
+                  <ShortText style={editStyles.icon} color={'#484848'}/>
+                </div>
+                <div style={{flex: 1}}>
+
+                  <LinesEllipsis
+                    text={this.props.data.email ? this.props.data.email.Body.Content :
+                            this.props.data.event.Body.Content}
+                    maxLine='3'
+                    ellipsis='...'
+                    trimRight
+                    basedOn='words'/>
+
+                </div>
+
+              </div>
+            </div>
+            <div style={{flex: 1}}>
+              <div style={{display: 'flex'}}>
+                <div style={{width: 54}}>
+                  <ShortText style={editStyles.icon} color={'#484848'}/>
+                </div>
+                <div style={{flex: 1}}>
+                  <div style={{display: 'flex', flexWrap: 'wrap'}}>
+                    {
+                      this.props.data && this.props.data.details.map((user) => (
+
+                            user && user.RELATIONSHIPS && user.RELATIONSHIPS.map((rel) => (
+                              rel.OrgNames && Object.values(rel.OrgNames).map((org) => (
+                                <Chip style={chipStyles.chip}
+                                  deleteIconStyle={chipStyles.deleteStyle}
+                                  onRequestDelete={() => this.handleDeleteOrg(user, org)}
+                                  labelStyle={chipStyles.chipLabel}>
+                                  {org}
+                                </Chip>
+                              ))
+
+
+                            ))
+
+                      ))
+                    }
+                  </div>
+                </div>
+              </div>
+              <div style={{display: 'flex', paddingTop: 16}}>
+                <div style={{width: 54}}>
+                  <ShortText style={editStyles.icon} color={'#484848'}/>
+                </div>
+                <div style={{flex: 1}}>
+                  <div style={{display: 'flex', flexWrap: 'wrap'}}>
+                    {
+                      this.props.data && this.props.data.details.map((user) => (
+                            user && user.tags && user.tags.map((tag) => (
+                              <Chip style={chipStyles.chip}
+                                deleteIconStyle={chipStyles.deleteStyle}
+                                onRequestDelete={() => this.handleDeleteTag(user, tag)}
+                                labelStyle={chipStyles.chipLabel}>
+                                {tag}
+                              </Chip>
+                            ))
+                      ))
+                    }
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </CardText>
+        <CardActions
+          expandable={true}
+          style={{textAlign: 'right'}}>
+          <FlatButton
+            labelStyle={buttonStyles.smallLabel}
+            style={buttonStyles.smallSize}
+             label="Delete" />
+          <RaisedButton
+            style={buttonStyles.smallSize}
+            labelStyle={buttonStyles.smallLabel}
+            primary={true}
+            label="Confirm" />
+
+        </CardActions>
+      </Card>
+    )
+  }
 }
 
 class InteractionCard extends React.Component {
@@ -111,9 +241,10 @@ class InteractionCard extends React.Component {
         style={{textAlign: 'left', marginBottom: 20, boxShadow: 'none',
         opacity: this.state.visible ? 100 : 0,
         transition: 'opacity 0.5s',
+        backgroundColor: this.props.data.classified ? 'teal' : null,
         borderBottom: '1px solid #DBDBDB'}}>
         <CardHeader
-          title={this.props.data.email.Subject}
+          title={this.props.data.email ? this.props.data.email.Subject : this.props.data.event.Subject}
           subtitle={this.props.type}
           avatar={<Avatar>H</Avatar>}
         />
@@ -123,7 +254,7 @@ class InteractionCard extends React.Component {
             <div style={{flex: 1, paddingRight: 20}}>
               <div style={{display: 'flex'}}>
                 <ShortText style={editStyles.icon} color={'#484848'}/>
-                <div style={{display: 'flex', flexWrap: 'wrap'}}>
+                <div style={{display: 'flex', flexWrap: 'wrap', textTransform: 'capitalize'}}>
                   {
                     this.props.data && this.props.data.details.map((user) => (
                       user ?
@@ -145,16 +276,15 @@ class InteractionCard extends React.Component {
                   <ShortText style={editStyles.icon} color={'#484848'}/>
                 </div>
                 <div style={{flex: 1}}>
-                  {this.props.data.email.Body && this.props.data.email.Body.Content ?
+
                   <LinesEllipsis
-                    text={this.props.data.email.Body.Content}
+                    text={this.props.data.email ? this.props.data.email.Body.Content :
+                            this.props.data.event.Body.Content}
                     maxLine='3'
                     ellipsis='...'
                     trimRight
                     basedOn='words'/>
-                  :
-                  null
-                  }
+
                 </div>
 
               </div>
@@ -169,13 +299,17 @@ class InteractionCard extends React.Component {
                     {
                       this.props.data && this.props.data.details.map((user) => (
 
-                            user && user.Organisations && user.Organisations.map((org) => (
-                              <Chip style={chipStyles.chip}
-                                deleteIconStyle={chipStyles.deleteStyle}
-                                onRequestDelete={() => this.handleDeleteOrg(user, org)}
-                                labelStyle={chipStyles.chipLabel}>
-                                {org}
-                              </Chip>
+                            user && user.RELATIONSHIPS && user.RELATIONSHIPS.map((rel) => (
+                              rel.OrgNames && Object.values(rel.OrgNames).map((org) => (
+                                <Chip style={chipStyles.chip}
+                                  deleteIconStyle={chipStyles.deleteStyle}
+                                  onRequestDelete={() => this.handleDeleteOrg(user, org)}
+                                  labelStyle={chipStyles.chipLabel}>
+                                  {org}
+                                </Chip>
+                              ))
+
+
                             ))
 
                       ))
@@ -231,12 +365,161 @@ export class Categorise extends React.Component {
     this.state = {outlookFinished: false}
   }
 
+
+  smartCategorise = (email, type) => {
+
+    // If there's only 1 org attached, classify it
+    if (email.details) {
+
+        var attachedOrgs = []
+
+        email.details.forEach((person) => {
+          if (person.RELATIONSHIPS) {
+            person.RELATIONSHIPS.forEach((rel) => {
+              Object.keys(rel.OrgNames).forEach((orgId) => {
+                if (!attachedOrgs.includes({_id: orgId, name: rel.OrgNames[orgId]})) {
+                  attachedOrgs.push({_id: orgId, name: rel.OrgNames[orgId]})
+                }
+              })
+            })
+          }
+        })
+
+        if (attachedOrgs.length < 2) {
+          email.classified = true
+        }
+
+        /*
+        email.details.forEach((person) => {
+          if (person.RELATIONSHIPS && person.RELATIONSHIPS.length === 1) {
+
+          }
+        })
+        */
+
+        if (type == 'email') {
+          email.email.BodyText = email.email.Body.Content
+          var idx = lunr(function () {
+            this.ref('Id')
+            this.field('Subject')
+            this.field('BodyText')
+            this.add(email.email)
+          })
+
+          var matchedOrgs = []
+          attachedOrgs.forEach((org) => {
+            var searchResults = idx.search(org.name)
+            console.log(searchResults)
+            if (searchResults.length > 0 && searchResults[0].score > 0.15) {
+              matchedOrgs.push(org)
+            }
+          })
+
+          var orgNameObject = {}
+          if (matchedOrgs.length > 0) {
+            matchedOrgs.forEach((obj) => {
+              orgNameObject[obj._id] = obj.name
+            })
+            email.details.forEach((person) => {
+              delete person.RELATIONSHIPS
+            })
+            email.details[0].RELATIONSHIPS = [{OrgNames: orgNameObject}]
+            email.classified = true
+          }
+        } else if (type == 'calendar') {
+          email.event.BodyText = email.event.Body.Content
+          var idx = lunr(function () {
+            this.ref('Id')
+            this.field('Subject')
+            this.field('BodyText')
+            this.add(email.event)
+          })
+
+          var matchedOrgs = []
+          attachedOrgs.forEach((org) => {
+            var searchResults = idx.search(org.name)
+            console.log(searchResults)
+            if (searchResults.length > 0 && searchResults[0].score > 0.15) {
+              matchedOrgs.push(org)
+            }
+          })
+
+          var orgNameObject = {}
+          if (matchedOrgs.length > 0) {
+            matchedOrgs.forEach((obj) => {
+              orgNameObject[obj._id] = obj.name
+            })
+            email.details.forEach((person) => {
+              delete person.RELATIONSHIPS
+            })
+            email.details[0].RELATIONSHIPS = [{OrgNames: orgNameObject}]
+            email.classified = true
+        }
+
+      }
+    }
+    return email
+  }
+
+  handleSaveAll = () => {
+    var batch = db.batch()
+    this.state.emails.forEach((email) => {
+      var details = email.details
+      var members = [], orgs = []
+      var orgNameObj = {}
+      details.forEach((person) => {
+        members.push(person._id)
+        person.RELATIONSHIPS.forEach((rel) => {
+          Object.keys(rel.OrgNames).forEach((key) => {
+            orgs.push(key)
+            orgNameObj[key] = rel.OrgNames[key]
+          })
+        })
+      })
+
+
+      let body = {
+        Creator : fire.auth().currentUser.uid,
+        Members: members,
+        Organisations: orgs,
+        OrgNames: orgNameObj,
+        managedBy: localStorage.getItem('ttsOrg')
+      }
+
+      if (email.email) {
+        var data = email.email
+        body.Details = data
+        body.Type = 'Email'
+        body.Date = new Date(data.SentDateTime)
+        console.log(body)
+        batch.set(db.collection("Interactions").doc(data.Id), body)
+      } else if (email.event) {
+        var data = email.event
+        body.Details = data
+        body.Type = 'CalendarEvent'
+        body.Date = new Date(data.Start.DateTime)
+        console.log(body)
+        batch.set(db.collection("Interactions").doc(data.Id), body)
+      }
+    })
+
+    batch.commit()
+  }
+
   addEmails = (result) => {
     var newEmails = result.data && result.data.data
     var currentEmails = this.state.emails ? this.state.emails : []
     newEmails.forEach((email) => {
-      currentEmails.unshift(email)
-      this.setState({emails: currentEmails})
+      if (email.email) {
+        var editedEmail = this.smartCategorise(email, 'email')
+        currentEmails.unshift(editedEmail)
+        this.setState({emails: currentEmails})
+      } else if (email.event) {
+        var editedEmail = this.smartCategorise(email, 'calendar')
+        currentEmails.unshift(editedEmail)
+        this.setState({emails: currentEmails})
+      }
+
     })
 
   }
@@ -252,6 +535,16 @@ export class Categorise extends React.Component {
   }
 
   render() {
+    var inputRequired = [], classified = []
+    if (this.state.emails) {
+      this.state.emails.forEach((email) => {
+        if (email.classified) {
+          classified.push(email)
+        } else {
+          inputRequired.push(email)
+        }
+      })
+    }
     console.log(this.state)
     return (
       <div>
@@ -264,7 +557,7 @@ export class Categorise extends React.Component {
             transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', right: -250,
              width: '30vw', height: '100vw'}}/>
            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh'}}>
-            <div style={{maxWidth: 1200, boxSizing: 'border-box', padding: 20}}>
+            <div style={{maxWidth: 1200, boxSizing: 'border-box', padding: 20, width: '100%'}}>
               <div style={headerStyles.desktop}>
                 We just need a bit of help classifying a few things...
               </div>
@@ -284,18 +577,56 @@ export class Categorise extends React.Component {
                 null
               }
               {
-                this.state.emails && this.state.emails.map((email) => (
+                inputRequired.map((email) => (
                   email ?
                   <InteractionCard
                     editDetails={this.editEmailDetailsFromChild}
                     index={this.state.emails.indexOf(email)}
-                    type='Email' data={email}/>
+                    type={email.email ? 'Email' : 'Event'} data={email}/>
                   :
                   null
                 ))
               }
+              {
+                classified.length > 0 ?
+                <h2 style={headerStyles.desktop}>
+                  Automatically classified
+                </h2>
+                :
+                null
+              }
 
+                {
+                  classified.map((email) => (
+                    email ?
+                    <ClassifiedInteraction
+                      editDetails={this.editEmailDetailsFromChild}
+                      index={this.state.emails.indexOf(email)}
+                      type={email.email ? 'Email' : 'Event'} data={email}/>
+                    :
+                    null
+                  ))
+                }
             </div>
+          </div>
+          <div style={editStyles.nextContainer}>
+            <FlatButton label='Back'
+              style={buttonStyles.smallSize}
+              labelStyle={buttonStyles.smallLabel}
+              onClick={() => {
+                this.setState({stage: null})
+                window.scrollTo(0, 0)
+              }}
+              />
+              <div style={{width: 10}}/>
+            <RaisedButton label='Save All'
+              primary={true}
+              style={buttonStyles.smallSize}
+              labelStyle={buttonStyles.smallLabel}
+              onClick={() => {
+                this.handleSaveAll()
+              }}
+              />
           </div>
         </App>
       </div>

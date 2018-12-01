@@ -294,7 +294,9 @@ class ProjectEdit extends React.Component {
       },
       managedBy: Router.query.view,
       picture: localStorage.getItem('coverPhoto') ? localStorage.getItem('coverPhoto') :null,
-      description: this.state.story ? this.state.story : null,
+      description: {
+        text: this.state.story ? this.state.story : null,
+      },
       summary: this.state.tagline ? this.state.tagline : null,
       'Location': this.state.address ? this.state.address : null,
       Geopoint: this.state.geopoint ? this.state.geopoint : null,

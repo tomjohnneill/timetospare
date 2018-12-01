@@ -65,12 +65,18 @@ export default class OutlookIntegrate extends React.Component {
 
       } else {
         this.getUserDetails(fire.auth().currentUser.uid)
-        .then(() => this.handleScrapeEmails())
+        .then(() => {
+          this.handleScrapeEmails()
+          this.handleScrapeEvents()
+        })
       }
     })
     if (fire.auth().currentUser) {
         this.getUserDetails(fire.auth().currentUser.uid)
-        .then(() => this.handleScrapeEmails())
+        .then(() => {
+          this.handleScrapeEmails()
+          this.handleScrapeEvents()
+        })
     }
 
 
@@ -83,6 +89,54 @@ export default class OutlookIntegrate extends React.Component {
     response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}&scope=
     openid+offline_access+profile+https:%2f%2foutlook.office.com%2fmail.readwrite+https:%2f%2foutlook.office.com%2fmail.readwrite.shared+https:%2f%2foutlook.office.com%2fmail.send.shared+https:%2f%2foutlook.office.com%2fcalendars.readwrite+https:%2f%2foutlook.office.com%2fcalendars.readwrite.shared+https:%2f%2foutlook.office.com%2fcontacts.readwrite+https:%2f%2foutlook.office.com%2fcontacts.readwrite.shared+https:%2f%2foutlook.office.com%2fmailboxsettings.readwrite+https:%2f%2foutlook.office.com%2fpeople.read+https:%2f%2foutlook.office.com%2fuser.readbasic.all`
   }
+
+
+  handleScrapeEvents = (link) => {
+    if (this.props.handleResult) {
+      var definedLink
+      if (link) {
+        definedLink = link
+      } else {
+        definedLink = null
+      }
+      if (Router.query.access_token ) {
+        var inviteEmail = functions.httpsCallable('integrations-scrapeOutlookEmails')
+        if (this.state.orgId) {
+          scrapeCalendarEvents({refresh_token: this.state.user.outlook_refresh_token,
+              access_token: this.state.user.outlook_access_token,
+              organisation: this.state.orgId,
+              personalDataId: this.state.personalDataId
+            }).then((result) => {
+              console.log(result)
+            })
+        } else {
+          alert("You don't belong to an organisation")
+        }
+      } else {
+        var scrapeCalendarEvents = functions.httpsCallable('integrations-scrapeCalendarEvents')
+        if (this.state.orgId && this.state.user.outlook_refresh_token) {
+
+          scrapeCalendarEvents({refresh_token: this.state.user.outlook_refresh_token,
+              access_token: this.state.user.outlook_access_token,
+              organisation: this.state.orgId,
+              personalDataId: this.state.personalDataId
+            }).then((result) => {
+              console.log(result)
+              this.props.handleResult(result)
+              if (result.data && result.data.nextLink) {
+                this.handleScrapeEvents(result.data.nextLink)
+              } else if (!result.data.nextLink) {
+                this.props.onFinish()
+              }
+            })
+
+          } else {
+            this.onIntegrateClick()
+          }
+      }
+    }
+  }
+
 
   handleScrapeEmails = (link) => {
     if (this.props.handleResult) {
@@ -105,22 +159,7 @@ export default class OutlookIntegrate extends React.Component {
         }
       } else {
         var inviteEmail = functions.httpsCallable('integrations-scrapeOutlookEmails')
-        var scrapeCalendarEvents = functions.httpsCallable('integrations-scrapeCalendarEvents')
         if (this.state.orgId && this.state.user.outlook_refresh_token) {
-
-          scrapeCalendarEvents({refresh_token: this.state.user.outlook_refresh_token,
-              access_token: this.state.user.outlook_access_token,
-              organisation: this.state.orgId,
-              personalDataId: this.state.personalDataId
-            }).then((result) => {
-              console.log(result)
-              this.props.handleResult(result)
-              if (result.data && result.data.nextLink) {
-                this.handleScrapeEmails(result.data.nextLink)
-              } else if (!result.data.nextLink) {
-                this.props.onFinish()
-              }
-            })
 
           inviteEmail({refresh_token: this.state.user.outlook_refresh_token,
               access_token: this.state.user.outlook_access_token,

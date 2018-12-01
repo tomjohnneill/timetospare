@@ -76,7 +76,7 @@ export default class OrganisationAutocomplete extends React.Component {
           <AutoComplete
             fullWidth={true}
             inputStyle={styles.inputStyle}
-            hintText="What organisations are they part of?"
+            hintText={this.props.hintText ? this.props.hintText : "What organisations are they part of?"}
             searchText={this.state.searchText}
             underlineShow={false}
             hintStyle={{ paddingLeft: '12px', bottom: '8px'}}

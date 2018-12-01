@@ -9,10 +9,12 @@ import moment from 'moment'
 import Loading from '../components/loading.jsx';
 import Dialog from 'material-ui/Dialog';
 import DropDownMenu from 'material-ui/DropDownMenu';
+import Popover from 'material-ui/Popover';
+import Menu from 'material-ui/Menu';
 import RaisedButton from 'material-ui/RaisedButton';
 import MenuItem from 'material-ui/MenuItem';
 import "react-big-calendar/lib/css/react-big-calendar.css"
-import {Clock} from '../components/icons.jsx';
+import {Clock, Place} from '../components/icons.jsx';
 import AutoComplete from 'material-ui/AutoComplete';
 import withMui from '../components/hocs/withMui';
 import TextField from 'material-ui/TextField';
@@ -22,6 +24,9 @@ import Breadcrumbs from '../components/onboarding/breadcrumbs.jsx';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import 'react-day-picker/lib/style.css';
 import {buttonStyles} from '../components/styles.jsx';
+import Link from 'next/link';
+import LinesEllipsis from 'react-lines-ellipsis';
+import ShortText from 'material-ui/svg-icons/editor/short-text';
 import {formatDateHHcolonMM} from '../components/timepicker.jsx';
 
 var tomorrow = new Date();
@@ -29,6 +34,16 @@ tomorrow.setDate(tomorrow.getDate() + 1);
 
 BigCalendar.setLocalizer(BigCalendar.momentLocalizer(moment))
 let db = fire.firestore()
+
+const editStyles = {
+  container : {
+    display: 'flex', alignItems: 'center', padding: 10,
+    boxSizing: 'border-box'
+  },
+  icon: {
+    height: 20, width: 54
+  },
+}
 
 const styles = {
   whiteTextfield : {
@@ -156,20 +171,104 @@ class YourCalendar extends React.Component {
     }
   }
 
-  handleEventClick = (event) => {
-    Router.push(`/project-admin?project=${event._id}&view=${Router.query.view}`)
+  handleEventClick = (event, clickEvent) => {
+    console.log(clickEvent)
+    console.log(event)
+    this.setState({
+      viewOpen: true,
+      targetedEvent: event,
+      anchorEl: clickEvent.currentTarget,
+    });
+    //Router.push(`/project-admin?project=${event._id}&view=${Router.query.view}`)
   }
 
+  handleRequestClose = () => {
+  this.setState({
+    viewOpen: false,
+  });
+};
+
   render() {
+    if (this.state.targetedEvent) {
+      var start = new Date(this.state.targetedEvent.start)
+      var end = new Date(this.state.targetedEvent.end)
+    }
+
     return (
       <div>
         <App>
+          <Popover
+            style={{marginLeft: 20, width: 450}}
+          open={this.state.viewOpen}
+          anchorEl={this.state.anchorEl}
+          anchorOrigin={{horizontal: 'right', vertical: 'center'}}
+          targetOrigin={{horizontal: 'left', vertical: 'center'}}
+          onRequestClose={this.handleRequestClose}
+        >
+        {
+          this.state.targetedEvent ?
+          <div style={{textAlign: 'left'}}>
+            <Link href={`/project-admin?project=${this.state.targetedEvent._id}&view=${Router.query.view}`}>
+              <div style={{backgroundColor: '#000AB2', color: 'white',
+                minHeight: '50px', cursor: 'pointer',
+                fontSize: '20px', padding: '80px 32px 0 64px'}}>
+                {this.state.targetedEvent.Name}
+              </div>
+            </Link>
+              <div>
+
+                {
+                  this.state.targetedEvent.Location ?
+                  <div style={editStyles.container}>
+                    <Place style={editStyles.icon} fill={'#484848'}/>
+                    <div style={{flex: 1}}>
+                      {this.state.targetedEvent.Location}
+                    </div>
+                  </div>
+                  :
+                  null
+                }
+
+                {
+                  this.state.targetedEvent.start ?
+                  <div style={editStyles.container}>
+                    <Clock style={editStyles.icon} fill={'#484848'}/>
+                    <div style={{flex: 1}}>
+                      {start.toLocaleDateString('en-GB', {weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric'})} -
+                      {end.toLocaleDateString('en-GB', {weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric'})}
+                    </div>
+                  </div>
+                  :
+                  null
+                }
+
+                <div style={editStyles.container}>
+                  <ShortText style={editStyles.icon} fill={'#484848'}/>
+                  <div style={{flex: 1}}>
+                    <LinesEllipsis
+                      text={this.state.targetedEvent.description.text}
+                      maxLine='3'
+                      ellipsis='...'
+                      trimRight
+                      basedOn='words'/>
+                  </div>
+                </div>
+
+
+              </div>
+
+          </div>
+          :
+          null
+        }
+
+        </Popover>
           <Dialog
             modal={false}
             paperStyle={{padding: '16px 16px 8px'}}
             open={this.state.open}
             bodyStyle={{padding: '16px 16px 8px'}}
-            contentStyle={{maxWidth: 450}}
+            contentStyle={{maxWidth: 500}}
             onRequestClose={() => this.setState({open: false})}
             >
             <div style={{display: 'flex', paddingTop: 20  }}>
@@ -204,8 +303,8 @@ class YourCalendar extends React.Component {
                   formatDate={this.formatDate}
                   disableYearSelection={true}
                   value={this.state.startDate}
-                  textFieldStyle={{width: 80, fontSize: '14px'}}
-                  style={{width:80}} container="inline" />
+                  textFieldStyle={{width: 100, fontSize: '14px'}}
+                  style={{width:100}} container="inline" />
                   <TimePicker
                     key='1'
                     textFieldStyle={{fontSize: '14px'}}
@@ -223,8 +322,8 @@ class YourCalendar extends React.Component {
                       value={this.state.endDate}
                       formatDate={this.formatDate}
                       disableYearSelection={true}
-                      textFieldStyle={{width: 80, fontSize: '14px'}}
-                      style={{width: 80}} container="inline" />
+                      textFieldStyle={{width: 100, fontSize: '14px'}}
+                      style={{width: 100}} container="inline" />
                 </div>
 
 

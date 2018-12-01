@@ -257,7 +257,7 @@ export class Member extends React.Component {
     } else {
       this.unsubscribe = db.collection("Interactions")
       .where("Members", "array-contains", Router.query.member)
-      .where("Organisation", "==", Router.query.view)
+      .where("managedBy", "==", Router.query.view)
       .orderBy("Date", 'desc')
       .onSnapshot({ includeMetadataChanges: true }, (intSnapshot) => {
         var data = []
@@ -358,6 +358,44 @@ export class Member extends React.Component {
             </div>
 
         )
+        case "CalendarEvent":
+          return (
+
+              <div
+                style={{ borderBottom : '1px solid #DBDBDB'}}
+                >
+
+                <ListItem
+                  id={int._id}
+                  rightIcon={<IconButton
+                    tooltip='Options'
+                    onClick={(e) => this.handleOptionsClick(e, int)}
+                    style={iconButtonStyles.button}><MoreVert /></IconButton>
+                  }
+                  className='email-interaction'
+
+                  primaryText={int.Details ?
+                    <Link prefetch href={`/project-admin?project=${int._id}&view=${Router.query.view}`}>
+                      {int.Details.Subject}
+                    </Link>
+                     : null}
+                  primaryTogglesNestedList={true}
+                  secondaryText={new Date(int.Date).toLocaleString('en-gb',
+                    {weekday: 'long', month: 'long', day: 'numeric'})}
+                    leftAvatar={
+
+                        <Avatar
+                        backgroundColor={'#039BE5'}
+                        icon={
+                          <Link prefetch href={`/project-admin?project=${int._id}&view=${Router.query.view}`}>
+                          <EventIcon color='white'/>
+                        </Link> } />
+
+                  }
+                   />
+              </div>
+
+          )
       case "Invited":
 
         return (

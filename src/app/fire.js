@@ -6,9 +6,9 @@ import "firebase/firestore";
 import "firebase/functions"
 
 var productionConfig = {
-  apiKey: "AIzaSyC-me9B_zYX8s9SPICGngukj_4dJAVKomE",
-  authDomain: "whosin-next.firebaseapp.com",
-  projectId: "whosin-next",
+  apiKey: "AIzaSyA8FFWoOifdusbuoYB2ksneSlPl-GwoLJo",
+  authDomain: "timetospare-123.firebaseapp.com",
+  projectId: "timetospare-123",
 };
 
 var stagingConfig = {

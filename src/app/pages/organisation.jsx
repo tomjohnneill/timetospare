@@ -274,6 +274,55 @@ export class Organisation extends React.Component {
             </div>
           </Link>
         )
+        case "CalendarEvent":
+          return (
+            <Link prefetch href={`/project-admin?project=${int._id}&view=${Router.query.view}`}>
+              <div
+                style={{ borderBottom : '1px solid #DBDBDB'}}
+                >
+                <ListItem
+                  id={int._id}
+                  rightIcon={<IconButton
+                    tooltip='Options'
+                    onClick={(e) => this.handleOptionsClick(e, int)}
+                    style={iconButtonStyles.button}><MoreVert /></IconButton>
+                  }
+                  className='email-interaction'
+                  primaryText={int.Details ? int.Details.Subject : null}
+                  primaryTogglesNestedList={true}
+                  nestedItems={[<div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
+                    {
+                      int.Members && this.state.membersLoaded
+                       ? int.Members.map((user) => (
+                         <Link
+                           key={user._id}
+                            prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
+                            <Chip
+                              style={chipStyles.chip}
+                              labelStyle={chipStyles.chipLabel}
+                              backgroundColor={this.state.interactionUsers[user] ? this.state.interactionUsers[user].color : null}>
+                               {this.state.interactionUsers[user] ? this.state.interactionUsers['Full Name'] : null}
+                            </Chip>
+                         </Link>
+                      ))
+                      :
+                      null
+                    }
+                  </div>]}
+                  secondaryText={int.Date.toLocaleString('en-gb',
+                    {weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'})}
+                    leftAvatar={<Avatar
+                    backgroundColor={'#039BE5'}
+                    icon={
+                      <Link prefetch href={`/project-admin?project=${int._id}&view=${Router.query.view}`}>
+                      <EventIcon color='white'/>
+                    </Link> } />
+                    } />
+
+              </div>
+            </Link>
+          )
+
       case "Invited":
 
         return (

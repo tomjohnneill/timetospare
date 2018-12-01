@@ -1,5 +1,6 @@
 {
   "projects": {
-    "staging": "timetospare-staging"
+    "staging": "timetospare-staging",
+    "production": "timetospare-123"
   }
 }

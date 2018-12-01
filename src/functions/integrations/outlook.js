@@ -145,7 +145,21 @@ const keepEmail = (email, people, type) => {
 }
 
 const keepEvent = (calendarEvent, people) => {
-
+  var matchedAttendees = 0
+  var admins = 0
+  calendarEvent.Attendees.forEach((person) => {
+    if (people[person.EmailAddress.Address].exists) {
+      matchedAttendees += 1
+      if (people[person.EmailAddress.Address].admin) {
+        admins += 1
+      }
+    }
+  })
+  if (matchedAttendees > 0 && admins < matchedAttendees) {
+    return true
+  } else {
+    return false
+  }
 }
 
 const attachDataToEmail = (email, people, type) => {
@@ -161,6 +175,8 @@ const attachDataToEmail = (email, people, type) => {
     var uniqDetails
     if (details.length > 0) {
       uniqDetails =  uniqObjs(details, '_id')
+    } else {
+      uniqDetails = details
     }
     return ({email: email, details: uniqDetails})
   } else if (type === 'sent') {
@@ -174,6 +190,8 @@ const attachDataToEmail = (email, people, type) => {
     var uniqDetails
     if (details.length > 0) {
       uniqDetails =  uniqObjs(details, '_id')
+    } else {
+      uniqDetails = details
     }
     return ({email: email, details: uniqDetails})
   }
@@ -184,15 +202,27 @@ const attachDataToEvent = (calendarEvent, people) => {
   calendarEvent.Attendees.forEach((attendee) => {
     details.push(people[attendee.EmailAddress.Address].details)
   })
-  if (details.length > 0) {
-    uniqDetails =  uniqObjs(details, '_id')
-  }
-  return ({email: email, details: uniqDetails})
+  return ({event: calendarEvent, details: details})
+}
+
+const getRelationships =  (memberData) => {
+  return db.collection("Relationships")
+  .where("Members", "array-contains", memberData._id).get()
+  .then((relSnapshot) => {
+    var data = []
+    relSnapshot.forEach((doc) => {
+      var elem = doc.data()
+      elem._id = doc.id
+      data.push(elem)
+    })
+    memberData.RELATIONSHIPS = data
+  })
 }
 
 const checkIfExists = (person, organisation, adminList) => {
+
   return db.collection("PersonalData")
-    .where("organisation", "==", organisation)
+    .where("managedBy", "==", organisation)
     .where("Email", "array-contains", person)
     .get()
     .then((querySnapshot) => {
@@ -202,36 +232,38 @@ const checkIfExists = (person, organisation, adminList) => {
           data = result.data()
           data._id = result.id
         })
-        return db.collection("User")
-          .where("Email", "==", person)
-          .get()
-          .then((userSnapshot) => {
-            var includesAdmin = false
-            if (userSnapshot.size > 0) {
-              userSnapshot.forEach((user) => {
-                if (adminList[user.id]) {
-                  includesAdmin = true
-                }
-              })
-            }
+        return getRelationships(data)
+          .then(() => db.collection("User")
+            .where("Email", "==", person)
+            .get()
+            .then((userSnapshot) => {
+              var includesAdmin = false
+              if (userSnapshot.size > 0) {
+                userSnapshot.forEach((user) => {
+                  if (adminList[user.id]) {
+                    includesAdmin = true
+                  }
+                })
+              }
 
-            if (includesAdmin) {
-              return ({
-                exists: true,
-                email: person,
-                details: data,
-                admin: true
-              })
-            } else {
-              return ({
-                exists: true,
-                email: person,
-                details: data,
-                admin: false
-              })
-            }
+              if (includesAdmin) {
+                return ({
+                  exists: true,
+                  email: person,
+                  details: data,
+                  admin: true
+                })
+              } else {
+                return ({
+                  exists: true,
+                  email: person,
+                  details: data,
+                  admin: false
+                })
+              }
 
-          })
+            })
+          )
       } else {
         return {exists: false}
       }
@@ -272,6 +304,7 @@ const checkAgainstMembers = (items, organisation, type, nextLink, element) => {
     people = emailPeople(items)
   } else if (element === 'Calendar') {
     people = calendarPeople(items)
+    console.log(people)
   }
 
 
@@ -404,13 +437,14 @@ const getCalendarEvents = (link, access_token) => {
 
 const scrapeCalendarEvents = functions.region('europe-west1').https.onCall((data, context) => {
   var today = new Date()
+  var aday = new Date()
   var interactions = []
   var lastUpdated, fromDate, toDate, link
     return db.collection("User").doc(context.auth.uid).get().then((doc) => {
       lastUpdated = doc.data().last_scraped_outlook
       return lastUpdated
     }).then((lastUpdated) => {
-      var toDate = encodeURIComponent(new Date().toISOString())
+      var toDate = encodeURIComponent(new Date(aday.setMonth(today.getMonth() + 6)).toISOString())
       if (lastUpdated) {
         fromDate = encodeURIComponent(lastUpdated.toISOString())
       } else {
@@ -419,7 +453,7 @@ const scrapeCalendarEvents = functions.region('europe-west1').https.onCall((data
       if (data.link) {
         link = data.link
       } else {
-        link = `https://outlook.office.com/api/v2.0/me/calendarview?startdatetime=${fromDate}&endDateTime=${toDate}&$top=50`
+        link = `https://outlook.office.com/api/v2.0/me/calendarview?startdatetime=${fromDate}&enddatetime=${toDate}&$top=50`
       }
         return getCalendarEvents(link,
           data.access_token)

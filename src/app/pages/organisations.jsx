@@ -7,11 +7,20 @@ import Router from 'next/router';
 import Dialog from 'material-ui/Dialog';
 import App from "../components/App"
 import RaisedButton from 'material-ui/RaisedButton';
+import MoreVert from 'material-ui/svg-icons/navigation/more-vert'
 import FlatButton from 'material-ui/FlatButton';
+import IconButton from 'material-ui/IconButton';
 import {List, ListItem} from 'material-ui/List';
 import AddNote from '../components/addNote.jsx';
-import {buttonStyles, headerStyles} from '../components/styles.jsx';
+import {buttonStyles, headerStyles, iconButtonStyles} from '../components/styles.jsx';
 import Checkbox from 'material-ui/Checkbox';
+import Delete from 'material-ui/svg-icons/action/delete'
+import Close from 'material-ui/svg-icons/navigation/close'
+import Popover from 'material-ui/Popover';
+import Menu from 'material-ui/Menu';
+import MenuItem from 'material-ui/MenuItem';
+import OrganisationAutocomplete from '../components/organisation-autocomplete.jsx';
+import {ReviewIcon, NoteIcon, Tag, Pin} from '../components/icons.jsx';
 
 let db = fire.firestore()
 
@@ -93,7 +102,7 @@ class Cards extends Component {
   componentDidMount(props) {
     db.collection("OrgData").where("managedBy", "==", Router.query.view)
     .orderBy('lastInteraction', "desc")
-    .limit(20)
+    .limit(10)
     .get().then((querySnapshot) => {
       querySnapshot.forEach((orgDoc) => {
         var data = orgDoc.data()
@@ -119,7 +128,7 @@ class Cards extends Component {
 
     db.collection("OrgData").where("managedBy", "==", Router.query.view)
     .orderBy('lastInteraction', "asc")
-    .limit(20)
+    .limit(10)
     .get().then((querySnapshot) => {
       querySnapshot.forEach((orgDoc) => {
         var data = orgDoc.data()
@@ -161,16 +170,55 @@ class Cards extends Component {
     })
   }
 
+  handleOptionsClick = (event, int) => {
+
+    this.setState({
+      optionsOpen: true,
+      targetedInt: int,
+      anchorEl: event.currentTarget,
+    });
+  }
+
+  handleOptionsRequestClose = () => {
+    this.setState({
+      optionsOpen: false,
+    });
+  };
+
+
 
   render() {
 
     return (
       <App>
+        <Popover
+          open={this.state.optionsOpen}
+          anchorEl={this.state.anchorEl}
+          anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+          targetOrigin={{horizontal: 'left', vertical: 'top'}}
+          onRequestClose={this.handleOptionsRequestClose}
+        >
+          <Menu style={{textAlign: 'left'}}>
+            <MenuItem primaryText="Tags"
+              onClick={() => this.setState({tagOpen: true, optionsOpen: false,
+                tags: this.state.targetedInt.tags, int: this.state.targetedInt._id})}
+                leftIcon={<Tag style={{height: 25}}/>} />
+            <MenuItem
+              onClick={() => this.setState({deleteOpen: true, optionsOpen: false})}
+              primaryText="Completely delete" leftIcon={<Delete/>} />
+            <MenuItem
+              onClick={() => this.setState({deleteOpen: true, optionsOpen: false})}
+              primaryText="Remove from this tag" leftIcon={<Close/>} />
+            <MenuItem
+              onClick={this.handlePin}
+              primaryText={`${this.state.targetedInt && this.state.targetedInt.Pinned ? 'Unpin' : 'Pin'} this`} leftIcon={<Pin/>} />
+          </Menu>
+        </Popover>
         <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '0 30% 90% 0%',
-          transform: 'skewX(-10deg)', backgroundColor: '#000AB2', left: -250,
+          transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', left: -340,
            width: '20vw', height: '100vw'}}/>
            <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '30% 0 0 90%',
-             transform: 'skewX(-10deg)', backgroundColor: '#000AB2', right: -250,
+             transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', right: -350,
               width: '30vw', height: '100vw'}}/>
         <Dialog
           open={this.state.dialogOpen}
@@ -187,7 +235,7 @@ class Cards extends Component {
         <div style={{display: 'flex', justifyContent: 'center', minHeight: '100vh'}}>
           <div style={{maxWidth: 1200}}>
             <div style={headerStyles.desktop}>
-              Your linked organisations
+              Key organisations
             </div>
             <div style ={{width: 100, height: 4, backgroundColor: '#000AB2', marginBottom: 30}}/>
             <div className="card-scene" style={{display: 'flex', textAlign: 'left'}}>
@@ -222,11 +270,13 @@ class Cards extends Component {
                               <Draggable style={{display: 'block'}} key={card.id}
                                 id={card.id}>
                                 <ListItem
-
+                                  rightIcon={<IconButton
+                                    tooltip='Options'
+                                    onClick={(e) => this.handleOptionsClick(e, card)}
+                                    style={iconButtonStyles.button}><MoreVert /></IconButton>}
                                   style={{backgroundColor: 'white', marginBottom: 6, borderBottom: '1px solid #DBDBDB'}}
                                   primaryText={card.data}
-                                  secondaryText={card.date.toLocaleString('en-gb',
-                                    {weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'})}
+
                                   />
                               </Draggable>
                             );
@@ -238,6 +288,14 @@ class Cards extends Component {
                 })}
               </Container>
           </div>
+          <div style={headerStyles.desktop}>
+            All linked organisations
+          </div>
+          <div style ={{width: 100, height: 4, backgroundColor: '#000AB2', marginBottom: 30}}/>
+            <OrganisationAutocomplete
+              hintText='Search all organisations'
+              org={this.props.url.query.view}/>
+
         </div>
       </div>
 

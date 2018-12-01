@@ -117,10 +117,12 @@ export class Organisation extends React.Component {
       if (user === null) {
       }
       else {
+        db.collection("User").doc(user.uid).update({lastLoggedIn: new Date()})
         this.getData(user.uid)
       }
     })
     if (fire.auth().currentUser) {
+      db.collection("User").doc(fire.auth().currentUser.uid).update({lastLoggedIn: new Date()})
       this.getData(fire.auth().currentUser.uid)
     }
   }
@@ -308,7 +310,7 @@ export class Organisation extends React.Component {
 
                             <div style={{flex: 1}}>
                               <div style={styles.tableRow}>
-                                Last logged in
+                                {user.lastLoggedIn}
                               </div>
                             </div>
                           </div>

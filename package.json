@@ -22,6 +22,7 @@
     "firebase-functions": "^2.0.5",
     "handsontable": "^6.0.0",
     "is-mobile": "^1.0.0",
+    "lunr": "^2.3.5",
     "mailgun-js": "^0.20.0",
     "material-ui": "^0.20.1",
     "mathjs": "^5.1.2",
