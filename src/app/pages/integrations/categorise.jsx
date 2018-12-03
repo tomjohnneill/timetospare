@@ -15,6 +15,16 @@ import LinesEllipsis from 'react-lines-ellipsis';
 import {headerStyles, buttonStyles, chipStyles} from '../../components/styles.jsx';
 import lunr from 'lunr'
 
+var chunk = (array, count) => {
+    if (count == null || count < 1) return [];
+    var result = [];
+    var i = 0, length = array.length;
+    while (i < length) {
+      result.push(array.slice( i, i += count));
+    }
+    return result;
+  };
+
 let db = fire.firestore()
 
 const editStyles = {
@@ -464,6 +474,7 @@ export class Categorise extends React.Component {
   handleSaveAll = () => {
     mixpanel.track('Scraped emails')
     var batch = db.batch()
+    var updatesToBatch = []
     this.state.emails.forEach((email) => {
       var details = email.details
       var members = [], orgs = []
@@ -493,7 +504,9 @@ export class Categorise extends React.Component {
         body.Type = 'Email'
         body.Date = new Date(data.SentDateTime)
         console.log(body)
-        batch.set(db.collection("Interactions").doc(data.Id), body)
+
+        updatesToBatch.push({docRef: db.collection("Interactions").doc(data.Id), data: body})
+
       } else if (email.event) {
         var data = email.event
         body.Details = data
@@ -501,7 +514,9 @@ export class Categorise extends React.Component {
         body.Details.EventId = data.Id
         body.Date = new Date(data.Start.DateTime)
         console.log(body)
-        batch.set(db.collection("Interactions").doc(data.Id), body)
+
+        updatesToBatch.push({docRef: db.collection("Interactions").doc(data.Id), data: body})
+
 
         var eventBody = {
           description: {
@@ -516,13 +531,25 @@ export class Categorise extends React.Component {
           },
           Location: data.Location
         }
-        batch.set(db.collection("Events").doc(data.Id), eventBody, {merge: true})
+        updatesToBatch.push({docRef: db.collection("Events").doc(data.Id), data: eventBody})
+
       }
     })
 
-    batch.commit().then(() => {
+    const batches = chunk(updatesToBatch, 450).map(postSnapshots => {
+                const writeBatch = db.batch();
+
+                postSnapshots.forEach(post => {
+                  writeBatch.set(post.docRef, post.data, {merge: true});
+                });
+
+                return writeBatch.commit();
+            });
+    return  Promise.all(batches).then(() => {
       Router.push('/dashboard')
-    })
+    });
+
+
   }
 
   addEmails = (result) => {

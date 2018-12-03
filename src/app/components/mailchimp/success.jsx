@@ -5,6 +5,7 @@ import Router from 'next/router'
 import RaisedButton from 'material-ui/RaisedButton';
 import {buttonStyles} from '../styles.jsx'
 import {List, ListItem} from 'material-ui/List';
+import fire from '../../fire.js';
 
 function encodeEmail (email) {
   return email.replace(/\./g, 'ASDFadf94nc1OKC')
@@ -23,6 +24,35 @@ export default class MailchimpSuccess extends React.Component {
       checked: {},
       members : []
     }
+  }
+
+  saveMembers = () => {
+    var data = this.state.members
+    fire.auth().currentUser.getIdToken()
+    .then((token) =>
+    fetch(`https://us-central1-whosin-next.cloudfunctions.net/users-addMember?organisation=${Router.query.organisation}`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({
+        data: data,
+        columns: columns
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data)
+      if (Router.query.onboarding)
+      { Router.push(`/volunteer-preview?organisation=${Router.query.organisation}`,
+            `/volunteer-preview/${Router.query.organisation}`)
+          } else {
+            Router.push(`/people?organisation=${Router.query.organisation}`)
+          }
+    }
+    )
+    )
   }
 
   updateCheck = (value, id) => {
@@ -114,7 +144,7 @@ export default class MailchimpSuccess extends React.Component {
       Columns: columns
       // set admins in here
     }).then(() => {
-      db.collection("Charity").doc(Router.query.organisation).update({
+      db.collection("Organisations").doc(Router.query.organisation).update({
         ['lists.' + collRef.id] : true
       })
     }).then(() => {

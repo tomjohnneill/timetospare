@@ -34,6 +34,7 @@ import SearchIcon from 'material-ui/svg-icons/action/search';
 import MoreVert from 'material-ui/svg-icons/navigation/more-vert'
 import Delete from 'material-ui/svg-icons/action/delete'
 import Close from 'material-ui/svg-icons/navigation/close'
+import ShortText from 'material-ui/svg-icons/editor/short-text';
 import OrganisationAutocomplete from '../components/organisation-autocomplete.jsx';
 import lunr from 'lunr'
 
@@ -254,6 +255,23 @@ export class Member extends React.Component {
     this.unsubscribe()
   }
 
+  getMemberData = () => {
+    return db.collection("PersonalData").doc(Router.query.member).get()
+    .then((doc) => {
+      var elem = doc.data()
+      elem._id = doc.id
+      const rawData = Object.create(elem)
+
+      delete rawData.managedBy
+      delete rawData.User
+      delete rawData.lastContacted
+      delete elem.managedBy
+      this.setState({memberData: rawData})
+      this.setState({member: elem})
+      return elem
+    })
+  }
+
   componentDidMount(props) {
     if (localStorage.getItem('sample') == 'true') {
       var corsRequest = functions.httpsCallable('integrations-wrapCors');
@@ -290,20 +308,8 @@ export class Member extends React.Component {
         this.addInteractionsToIndex()
       })
 
-      db.collection("PersonalData").doc(Router.query.member).get()
-      .then((doc) => {
-        var elem = doc.data()
-        elem._id = doc.id
-        const rawData = Object.create(elem)
 
-        delete rawData.managedBy
-        delete rawData.User
-        delete rawData.lastContacted
-
-        this.setState({memberData: rawData})
-        this.setState({member: elem})
-        return elem
-      })
+      this.getMemberData()
       .then((person) => db.collection("Relationships")
           .where('Members', "array-contains", person._id).get())
       .then((querySnapshot) => {
@@ -627,6 +633,42 @@ export class Member extends React.Component {
     }
   }
 
+  handleAddField = (e) => {
+    this.setState({
+      addFieldOpen: true,
+      fieldAnchorEl: e.currentTarget,
+      fieldValue: null,
+      fieldName: null
+    })
+  }
+
+  handleAddFieldSave = () => {
+    if (this.state.fieldValue && this.state.fieldName) {
+      db.collection("PersonalData").doc(Router.query.member).update({
+        [this.state.fieldName] : this.state.fieldValue
+      }).then(() => {
+        this.getMemberData()
+        this.setState({
+          addFieldOpen: false,
+          fieldValue: null,
+          fieldName: null
+        })
+      })
+    }
+  }
+
+  handleClickExistingField = (e, key) => {
+    console.log(key)
+    this.setState({
+      fieldAnchorEl: e.currentTarget,
+      existing: true,
+      addFieldOpen: true,
+
+      fieldValue: this.state.member[key],
+      fieldName: key
+    })
+  }
+
   render() {
     var pinned = []
     if (this.state.interactions) {
@@ -648,6 +690,62 @@ export class Member extends React.Component {
            transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', left: -250,
             width: '20vw', height: '100vw'}}/>
         <App>
+          <Popover
+            open={this.state.addFieldOpen}
+            anchorEl={this.state.fieldAnchorEl}
+            anchorOrigin={{horizontal: 'left', vertical: 'top'}}
+            targetOrigin={{horizontal: 'left', vertical: 'top'}}
+            onRequestClose={() => this.setState({addFieldOpen: false, existing: false})}
+          >
+            <div style={{padding: 20}}>
+              <div style={{display: 'flex', textAlign: 'left'}}>
+                <div style={{padding: 10, flex: 1}}>
+                  <b style={{marginBottom: 5}}>Field</b>
+                  <div style={{height: 5}}/>
+                  <TextField
+                    underlineShow={false}
+                    value={this.state.fieldName}
+                    onChange={(e, nv) => this.setState({fieldName: nv})}
+                    fullWidth={true}
+                    disabled={this.state.existing}
+                    style={textFieldStyles.style}
+                    inputStyle={textFieldStyles.input}
+                    hintStyle={textFieldStyles.hint}
+                    />
+                </div>
+                <div style={{padding: 10, flex: 1}}>
+                  <b style={{marginBottom: 5}}>Value</b>
+                  <div style={{height: 5}}/>
+                  <TextField
+                    underlineShow={false}
+                    fullWidth={true}
+                    value={this.state.fieldValue}
+                    onChange={(e, nv) => this.setState({fieldValue: nv})}
+                    style={textFieldStyles.style}
+                    inputStyle={textFieldStyles.input}
+                    hintStyle={textFieldStyles.hint}
+                    />
+                </div>
+              </div>
+              <div style={{width: '100%', display: 'flex', textAlign: 'right'}}>
+                <div styles={{float: 'right', display: 'flex'}}>
+                  <FlatButton
+                    label='Cancel'
+                    primary={true}
+                    onClick={() => this.setState({addFieldOpen: false, existing: false})}
+                    labelStyle={buttonStyles.smallLabel}
+                    style={buttonStyles.smallSize}/>
+                  <RaisedButton
+                    label='Confirm'
+                    primary={true}
+                    onClick={this.handleAddFieldSave}
+                    labelStyle={buttonStyles.smallLabel}
+                    style={buttonStyles.smallSize}/>
+                </div>
+              </div>
+            </div>
+
+          </Popover>
           <Dialog
             actions={
               <RaisedButton
@@ -663,10 +761,6 @@ export class Member extends React.Component {
               Select organisation or add new
             </div>
             <div>
-
-
-
-
               <div style={{display: 'flex', alignItems: 'center', paddingBottom: 20}}>
                 <div style={{width: 20, paddingRight: 20}}>
                   <OrganisationsIcon style={{height: 30, paddingRight: 15}} color='#484848'/>
@@ -686,7 +780,6 @@ export class Member extends React.Component {
                   <TextField
                     hintText={'What is their role?'}
                     underlineShow={false}
-
                     fullWidth={true}
                     style={textFieldStyles.style}
                     inputStyle={textFieldStyles.input}
@@ -821,46 +914,65 @@ export class Member extends React.Component {
               border: '1px solid #DBDBDB', borderRadius: 2}}>
                 <ListItem
                   primaryText='Details'
-                  leftIcon={<Add/>}
+                  leftIcon={<ShortText/>}
                   initiallyOpen={true}
+                  insetChildren={false}
                   primaryTogglesNestedList={true}
                   nestedItems={
-                    [<div>
+                    [
+                      <ListItem
+                        style={{fontWeight: 700, color: '#039BE5'}}
+                        innerDivStyle={{marginLeft: 0}}
+                        onClick={this.handleAddField}
+                        primaryText='Add field'
+                        hoverColor='rgb(225,245,254)'
+                        leftIcon={<Add color='#039BE5'/>}/>,
+                      <div>
 
                         {
                           Object.keys(this.state.member).map((key) => {
                             if (key !== '_id' && key !== 'tags' && typeof this.state.member[key] !== 'object') {
                               return (
-                                <div style={{display: 'flex', overflowX: 'hidden', alignItems: 'center',
-                                   borderBottom: '1px solid #DBDBDB'}}>
-                                  <div style={{flex: 3, padding: '5px 5px 5px 15px', alignItems: 'center'}}>
-                                    <b>{key}</b>
-                                  </div>
-                                  <div style={{flex: 7, padding: 5}}>
-                                    <Chip
+                                <ListItem
+                                  onClick={(e) => this.handleClickExistingField(e,key)}
+                                  innerDivStyle={{marginLeft: 0, padding: 0}}
+                                  children={
+                                    <div style={{display: 'flex', overflowX: 'hidden', alignItems: 'center',
+                                       borderBottom: '1px solid #DBDBDB'}}>
+                                      <div style={{flex: 3, padding: '5px 5px 5px 15px', alignItems: 'center'}}>
+                                        <b>{key}</b>
+                                      </div>
+                                      <div style={{flex: 7, padding: 5}}>
+                                        <Chip
 
-                                      style={chipStyles.chip}
-                                      labelStyle={chipStyles.chipLabel}
-                                      >
-                                      {this.state.member[key]}
-                                    </Chip>
+                                          style={chipStyles.chip}
+                                          labelStyle={chipStyles.chipLabel}
+                                          >
+                                          {this.state.member[key]}
+                                        </Chip>
 
-                                  </div>
-                                </div>
+                                      </div>
+                                    </div>
+                                  }
+
+                                  />
+
                               )
                             }
                           })
                         }
 
 
-                    </div>]
+                    </div>
+
+                  ]
 
                   }
                    style={{ borderBottom: '1px solid #DBDBDB'}}/>
 
                    <ListItem
                      primaryText='Organisations'
-                     leftIcon={<Add/>}
+                     leftIcon={<OrganisationsIcon/>}
                      initiallyOpen={true}
                      primaryTogglesNestedList={true}
                      nestedItems={
@@ -912,7 +1024,7 @@ export class Member extends React.Component {
                       style={{ borderBottom: '1px solid #DBDBDB'}}/>
                    <ListItem
                      primaryText='Tags'
-                     leftIcon={<Add/>}
+                     leftIcon={<Tag/>}
                      primaryTogglesNestedList={true}
                      nestedItems={
                        [<div style={{display: 'flex', flexWrap: 'wrap', padding: 10}}>
