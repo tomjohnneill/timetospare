@@ -484,6 +484,7 @@ export class People extends React.Component {
               getTdProps={(state, rowInfo, column, instance) => {
                 return {
                   onClick: (e, handleOriginal) => {
+                    mixpanel.track('Clicked person')
                     if (localStorage.getItem('sample') == "true") {
                       Router.push(`/member?member=${rowInfo.original._id}&view=none&name=${rowInfo.original['Full Name']}&team=${rowInfo.original['organisation']}`)
                     } else {
@@ -507,7 +508,8 @@ export class People extends React.Component {
             />
           </div>
           :
-          null}
+          <div style={{height: '100vh'}}/>
+        }
           </div>
         </App>
       </div>

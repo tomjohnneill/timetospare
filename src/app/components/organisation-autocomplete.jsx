@@ -63,6 +63,15 @@ export default class OrganisationAutocomplete extends React.Component {
     });
   }
 
+  handleNewRequest = (one, two, three) => {
+    this.props.handleNewRequest(one, two, three)
+    if (this.props.multi) {
+      this.setState({searchText: ''})
+    }
+  }
+
+
+
   render() {
     console.log(this.state)
     if (!this.state.orgs) {
@@ -81,7 +90,7 @@ export default class OrganisationAutocomplete extends React.Component {
             underlineShow={false}
             hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
             onUpdateInput={this.handleUpdateInput}
-            onNewRequest={this.props.handleNewRequest}
+            onNewRequest={this.handleNewRequest}
             style={styles.inputStyle}
             dataSource={this.state.orgs}
             openOnFocus={true}

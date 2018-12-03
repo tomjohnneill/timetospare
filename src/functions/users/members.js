@@ -48,19 +48,48 @@ const makeNewUserAdmin = functions.firestore
 const updateContactRecord = functions.firestore
     .document('Interactions/{intId}')
     .onWrite((change, context) => {
-      const newValue = change.after.exists && change.before.exists ? change.after.data() : null;
+      const newValue = change.after.data()
       var updates = []
       if (newValue && newValue.Members) {
+        console.log(newValue.Members)
         newValue.Members.forEach((member) => {
-          updates.push(db.collection("PersonalData").doc(member)
-          .update({lastInteraction: new Date()})
+          updates.push(db.collection("Interactions").where("Date", "<", new Date())
+          .where("Members", "array-contains", member)
+          .orderBy("Date", "desc").limit(1).get().then((querySnapshot) => {
+            if (querySnapshot.size > 0) {
+              var latest
+              querySnapshot.forEach((doc) => {
+                latest = new Date(doc.data().Date)
+              })
+              console.log(latest)
+              return latest
+            }
+          })
+          .then((latest) => {
+            db.collection("PersonalData").doc(member)
+            .update({lastInteraction: latest})
+          })
         )
         })
       }
       if (newValue && newValue.Organisations) {
         newValue.Organisations.forEach((org) => {
-          updates.push(db.collection("OrgData").doc(org)
-          .update({lastInteraction: new Date()})
+          updates.push(db.collection("Interactions").where("Date", "<", new Date())
+          .where("Organisations", "array-contains", org)
+          .orderBy("Date", "desc").limit(1).get().then((querySnapshot) => {
+            if (querySnapshot.size > 0) {
+              var latest
+              querySnapshot.forEach((doc) => {
+                latest = new Date(doc.data().Date)
+              })
+              console.log(latest)
+              return latest
+            }
+          })
+          .then((latest) => {
+            db.collection("OrgData").doc(org)
+            .update({lastInteraction: latest})
+          })
         )
         })
       }

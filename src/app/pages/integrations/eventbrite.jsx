@@ -168,6 +168,8 @@ export class EventbriteSuccessPage extends React.Component {
       batch.set(eventRef, body)
     })
     batch.commit().then(() => {
+      var getEventAttendees = functions.httpsCallable('integrations-getEventAttendees')
+      getEventAttendees({organisation: localStorage.getItem('ttsOrg')})
       Router.push(`/project-calendar?view=${localStorage.getItem('ttsOrg')}`)
     })
   }

@@ -462,6 +462,7 @@ export class Categorise extends React.Component {
   }
 
   handleSaveAll = () => {
+    mixpanel.track('Scraped emails')
     var batch = db.batch()
     this.state.emails.forEach((email) => {
       var details = email.details
@@ -497,13 +498,31 @@ export class Categorise extends React.Component {
         var data = email.event
         body.Details = data
         body.Type = 'CalendarEvent'
+        body.Details.EventId = data.Id
         body.Date = new Date(data.Start.DateTime)
         console.log(body)
         batch.set(db.collection("Interactions").doc(data.Id), body)
+
+        var eventBody = {
+          description: {
+            text: data.Body.Content
+          },
+          managedBy: localStorage.getItem('ttsOrg'),
+          source: 'Outlook',
+          start: new Date(data.Start.DateTime),
+          end: new Date(data.End.DateTime),
+          name: {
+            text: data.Subject,
+          },
+          Location: data.Location
+        }
+        batch.set(db.collection("Events").doc(data.Id), eventBody, {merge: true})
       }
     })
 
-    batch.commit()
+    batch.commit().then(() => {
+      Router.push('/dashboard')
+    })
   }
 
   addEmails = (result) => {

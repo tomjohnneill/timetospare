@@ -18,6 +18,7 @@ import IconButton from 'material-ui/IconButton';
 import Notes from 'material-ui/svg-icons/editor/text-fields';
 import ShortText from 'material-ui/svg-icons/editor/short-text';
 import AddPhoto from 'material-ui/svg-icons/image/add-a-photo';
+import {chipStyles} from '../components/styles.jsx';
 import Top from 'material-ui/svg-icons/editor/vertical-align-top';
 import Lock from 'material-ui/svg-icons/action/lock';
 import People from 'material-ui/svg-icons/social/people';
@@ -304,7 +305,19 @@ class ProjectEdit extends React.Component {
     }
     console.log(body)
     db.collection("Events").add(body).then((docRef) => {
-
+      this.state.selectedOrgs.forEach((org) => {
+        db.collection("Interactions").add({
+          Creator : fire.auth().currentUser.uid,
+          Date: new Date(body.start),
+          Details: {
+            Subject: body.name.text,
+            BodyText: body.description.text,
+            EventId: docRef.id
+          },
+          managedBy: Router.query.view,
+          Type: 'PlaceholderEvent'
+        })
+      })
       Router.back()
     })
   }
@@ -353,6 +366,15 @@ class ProjectEdit extends React.Component {
 
   handleStoryChange = (value) => {
     this.setState({story: value})
+  }
+
+  addOneOrg = (org) => {
+    console.log(org)
+    var selectedOrgs = this.state.selectedOrgs ? this.state.selectedOrgs : []
+    if (!selectedOrgs.includes(org)) {
+      selectedOrgs.push(org)
+    }
+    this.setState({selectedOrgs: selectedOrgs})
   }
 
   render() {
@@ -608,24 +630,28 @@ class ProjectEdit extends React.Component {
                     </div>
 
                     <p>Attach to organisations</p>
+                      {
+                        this.state.selectedOrgs && this.state.selectedOrgs.length > 0 ?
+                        <div style={{display: 'flex', flexWrap: 'wrap', paddingBottom: 6}}>
+                          {this.state.selectedOrgs.map((org) => (
+                            <Chip style={chipStyles.chip}
+                              labelStyle={chipStyles.chipLabel}
+                              deleteIconStyle={chipStyles.deleteStyle}
+                              onRequestDelete={() => this.removePerson(org._id, org.name)}
+                              >
+                              {org.name}
+                            </Chip>
+                          ))}
+                        </div>
+                        :
+                        null
+                      }
                       <div style={editStyles.container}>
                         <OrganisationsIcon style={editStyles.icon} color={'#484848'}/>
                         <div style={{flex: 1}}>
-                          {
-                            this.state.users && this.state.users.length > 0 ?
-                            <div style={{display: 'flex', flexWrap: 'wrap', paddingBottom: 6}}>
-                              {this.state.users.map((user) => (
-                                <Chip style={{margin: 4, backgroundColor: '#FFCB00'}}
-                                  onRequestDelete={() => this.removePerson(user._id, user['Full Name'], user.Email)}
-                                  >
-                                  {user['Full Name']}
-                                </Chip>
-                              ))}
-                            </div>
-                            :
-                            null
-                          }
+
                           <OrganisationAutocomplete
+                            multi
                             handleNewRequest={this.addOneOrg}
                             org={this.props.url.query.view}/>
 

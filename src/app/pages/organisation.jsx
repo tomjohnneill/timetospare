@@ -98,6 +98,10 @@ export class Organisation extends React.Component {
     this.state = {tagOpen: false, interactionUsers: {}}
   }
 
+  componentWillUnmount(props) {
+    this.unsubscribe()
+  }
+
   updateData = () => {
     if (localStorage.getItem('sample') == 'true') {
       var data = []
@@ -199,13 +203,14 @@ export class Organisation extends React.Component {
       })
     }
 
+
+
   handleSaveNote = (note) => {
     var memberIds = []
 
     this.setState({takeNote: false})
     let data = {
-      Organisation: Router.query.view,
-      Members: this.state.memberIds,
+      managedBy: Router.query.view,
       Date: new Date(),
       Type: 'Note',
       Organisations: [Router.query.targetorganisation],
@@ -294,15 +299,16 @@ export class Organisation extends React.Component {
                     {
                       int.Members && this.state.membersLoaded
                        ? int.Members.map((user) => (
-                         <Link
-                           key={user._id}
-                            prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
-                            <Chip
-                              style={chipStyles.chip}
-                              labelStyle={chipStyles.chipLabel}
-                              backgroundColor={this.state.interactionUsers[user] ? this.state.interactionUsers[user].color : null}>
-                               {this.state.interactionUsers[user] ? this.state.interactionUsers['Full Name'] : null}
-                            </Chip>
+                         <Link  prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
+                           <div style={{margin: 4, textTransform: 'capitalize'}}>
+                              <Chip
+                                style={chipStyles.chip}
+                                labelStyle={chipStyles.chipLabel}
+                                backgroundColor={this.state.interactionUsers[user].color}>
+                                {this.state.interactionUsers[user] && this.state.interactionUsers[user]['Full Name']
+                                   ? this.state.interactionUsers[user]['Full Name'][0] : null}
+                              </Chip>
+                            </div>
                          </Link>
                       ))
                       :
@@ -336,39 +342,54 @@ export class Organisation extends React.Component {
           </div>
         )
         break;
+        case "classifier":
+          return (
+            <div style={{borderBottom: '1px solid black', fontWeight: 700 ,paddingBottom: 5, paddingTop:20}}>
+              {int.text}
+            </div>
+          )
+        break;
       case "Email":
         return (
           <div style={{ borderBottom : '1px solid #DBDBDB'}}>
             <ListItem
               className='email-interaction'
               style={{marginBottom: 5 }}
-              rightIcon={<IconButton
-                tooltip='Options'
-                onClick={(e) => this.handleOptionsClick(e, int)}
-                style={iconButtonStyles.button}><MoreVert /></IconButton>}
+              nestedItems={[<div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
+                {
+                  int.Members && this.state.membersLoaded
+                   ? int.Members.map((user) => (
+                     <Link  prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
+                       <div style={{margin: 4, textTransform: 'capitalize'}}>
+                          <Chip
+                            style={chipStyles.chip}
+                            labelStyle={chipStyles.chipLabel}
+                            backgroundColor={this.state.interactionUsers[user].color}>
+                            {this.state.interactionUsers[user] && this.state.interactionUsers[user]['Full Name']
+                               ? this.state.interactionUsers[user]['Full Name'][0] : null}
+                          </Chip>
+                        </div>
+                     </Link>
+                  ))
+                  :
+                  null
+                }
+              </div>]}
+              primaryTogglesNestedList={true}
+              rightIcon={
+                <IconButton
+                  tooltip='Options'
+                  onClick={(e) => this.handleOptionsClick(e, int)}
+                  style={iconButtonStyles.button}><MoreVert />
+                </IconButton>
+            }
               primaryText={<span>Received your email: <b>{int.Details ? int.Details.Subject : ""}</b></span>}
               secondaryText={int.Date.toLocaleString('en-gb',
                 {weekday: 'long', month: 'long', day: 'numeric'})}
                 leftAvatar={<Avatar
                   backgroundColor={'#DBDBDB'}
                   icon={<Email /> } />} />
-             <div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
-               {
-                 int.Members && this.state.membersLoaded
-                  ? int.Members.map((user) => (
-                    <Link  prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
-                       <Chip
-                         style={chipStyles.chip}
-                         labelStyle={chipStyles.chipLabel}
-                         backgroundColor={this.state.interactionUsers[user].color}>
-                         {this.state.interactionUsers[user] ? this.state.interactionUsers['Full Name'] : null}
-                       </Chip>
-                    </Link>
-                 ))
-                 :
-                 null
-               }
-             </div>
+
           </div>
         )
         break;
@@ -533,16 +554,21 @@ export class Organisation extends React.Component {
 
 
   handlePin = () => {
+    this.setState({optionsOpen: false})
     var newStatus = this.state.targetedInt ? !this.state.targetedInt.Pinned : true
     db.collection("Interactions").doc(this.state.targetedInt._id).update({Pinned: newStatus})
-    .then(() => {
-      this.setState({optionsOpen: false, interactions: []})
-      this.updateData()
-    })
+
   }
 
   render() {
-
+    var pinned = []
+    if (this.state.interactions) {
+      this.state.interactions.forEach((int) => {
+        if (int.Pinned) {
+          pinned.push(int)
+        }
+      })
+    }
     return (
       <div>
         <App>
@@ -767,12 +793,12 @@ export class Organisation extends React.Component {
               <div style={{textAlign: 'left'}}>
 
                 <div style={{padding: '00px 0px'}}>
-                  {this.state.pinned && this.state.pinned.length > 0 ?
+                  {pinned && pinned.length > 0 ?
                     <div style={{marginBottom: 20}}>
                       <div style={{fontWeight: 200, fontSize: '20px', paddingBottom: 20}}>
                           Important to be aware of
                         </div>
-                      {this.state.pinned.map((int) => (
+                      {pinned.map((int) => (
                       this.renderInteraction(int)
                     ))}
 

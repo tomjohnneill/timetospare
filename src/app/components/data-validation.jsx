@@ -414,7 +414,7 @@ export default class DataValidation extends React.Component {
 
 
   updateFromChild = (data, columns, orgs) => {
-
+    console.log(data)
     this.setState({grid: data, columns: columns, stage: 'deduplication', orgs: orgs})
 
     window.scrollTo(0, 0)

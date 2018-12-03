@@ -176,6 +176,7 @@ class YourCalendar extends React.Component {
   handleEventClick = (event, clickEvent) => {
     console.log(clickEvent)
     console.log(event)
+    mixpanel.track('Clicked event')
     this.setState({
       viewOpen: true,
       targetedEvent: event,
@@ -245,7 +246,7 @@ class YourCalendar extends React.Component {
                   <div style={editStyles.container}>
                     <Place style={editStyles.icon} fill={'#484848'}/>
                     <div style={{flex: 1}}>
-                      {this.state.targetedEvent.Location}
+                      {this.state.targetedEvent.Location.toString()}
                     </div>
                   </div>
                   :

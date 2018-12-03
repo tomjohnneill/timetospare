@@ -354,6 +354,9 @@ export class Member extends React.Component {
             int.Body = int.Details.BodyText
             int.Subject = int.Details.Subject
             this.add(int)
+          } else if (int.Type === 'Note') {
+            int.Body = int.Details.Note
+            this.add(int)
           }
         })
       })
@@ -554,7 +557,7 @@ export class Member extends React.Component {
   handleSaveNote = (note) => {
     this.setState({takeNote: false})
     var data = {
-      Organisation: Router.query.view,
+      managedBy: Router.query.view,
       Members: [Router.query.member],
       Creator: fire.auth().currentUser.uid,
       Date: new Date(),

@@ -53,8 +53,13 @@ export default class Deduplication extends React.Component {
       this.Handsontable = require('handsontable')
       this.setState({shouldRemount: true})
     }
+    setTimeout(
+        () => {
+            this.findDuplicates(this.props.data);
+        },
+        200
+    );
 
-    this.findDuplicates(this.props.data)
 
     /*
     if (Router.query.view) {
@@ -89,7 +94,7 @@ export default class Deduplication extends React.Component {
   }
 
   convertRowToKeys = (row) => {
-
+    console.log('columns', this.props.columns)
     var keyedData = {}
 
     for (var i = 0; i < this.props.columns.length; i ++) {
@@ -289,7 +294,22 @@ export default class Deduplication extends React.Component {
     var position = duplicates.indexOf(rows)
 
     if (rows.length > 1) {
-      var grid = this.getGridFromIndices(rows, true)
+      let grid = this.getGridFromIndices(rows, true)
+
+      // Save org to role map
+      console.log(grid)
+      var roleOrgMap = {}
+      grid.forEach((gridRow) => {
+        var keyedRow = this.convertRowToKeys(gridRow)
+        console.log(keyedRow)
+        if (keyedRow.Roles && keyedRow.organisations) {
+          keyedRow.Roles.forEach((role) => {
+            roleOrgMap[role] = keyedRow.organisations
+          })
+        }
+      })
+      console.log(roleOrgMap)
+
       var richestRowIndex = this.getRichestRowIndex(grid)
 
       var masterRow = []
@@ -309,9 +329,13 @@ export default class Deduplication extends React.Component {
           masterRow.push(arrayData)
         }
       }
-      // var newData = this.deleteRowsByIndex(this.props.data, rows)
       var mergedRows = this.state.mergedRows ? this.state.mergedRows : []
-      mergedRows.push(this.convertRowToKeys(masterRow))
+
+      var newMergeRow = this.convertRowToKeys(masterRow)
+      newMergeRow.roleOrgMap = roleOrgMap
+
+      mergedRows.push(newMergeRow)
+      console.log(newMergeRow)
       var toBeDeleted = this.state.toBeDeleted ? this.state.toBeDeleted : []
       rows.forEach((row) => {
         if (!toBeDeleted.includes(row)) {
@@ -424,6 +448,7 @@ export default class Deduplication extends React.Component {
     var orgUpdateObjects = {}
 
     editedOrgs.map((org) => {
+      // check if organisations already exist
       checksList.push(db.collection("OrgData").where("managedBy", "==", Router.query.view)
         .where("details.name", "==", org.details.name).get()
         .then((orgSnapshot) => {
@@ -457,15 +482,24 @@ export default class Deduplication extends React.Component {
           var orgNames = {}, orgIds = []
           record.organisations.forEach((org) => {
             orgNames[orgUpdateObjects[org].ref.id] = org
-            orgIds.push(orgUpdateObjects[org].ref.id)
+            orgIds[orgUpdateObjects[org].ref.id] = true
           })
+          var roleOrgMap = {}
+          if (record.roleOrgMap) {
+            roleOrgMap = record.roleOrgMap
+          } else if (record.Roles && record.organisations) {
+            roleOrgMap[role] = record.organisations
+          }
+
           db.collection("Relationships").doc().set({
               MemberNames: {
                 [elem.ref.id] : record['Full Name']
               },
-              Members: [elem.ref.id],
+              Member: elem.ref.id,
+              MemberName: record['Full Name'],
               OrgNames: orgNames,
-              Organisations: orgIds
+              Organisations: orgIds,
+              RoleMap: roleOrgMap
             })
         }
       })
@@ -496,7 +530,6 @@ export default class Deduplication extends React.Component {
     this.state.mergedRows.map((row) => {
       this.addToUploadList(row, toBeUploaded)
     })
-    console.log(toBeUploaded)
     this.testUpload(toBeUploaded)
 
   }

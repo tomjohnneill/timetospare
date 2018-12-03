@@ -119,6 +119,7 @@ export class Organisation extends React.Component {
   }
 
   componentDidMount(props) {
+    mixpanel.track("Loaded dashboard")
     Router.prefetch(`/project-calendar`)
     Router.prefetch(`/volunteer-preview`)
     fire.auth().onAuthStateChanged((user) => {

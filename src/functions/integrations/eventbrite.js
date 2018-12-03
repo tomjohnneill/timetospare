@@ -36,10 +36,10 @@ const getEventList = functions.region('europe-west1').https.onCall((data,context
 const getEventAttendees = functions.region('europe-west1').https.onCall((data, context) => {
     var sdk
     return db.collection("Organisations").doc(data.organisation).get().then((docSnapshot) => {
-      return docSnapshot.data().eventbrite_access_token
-    }).then((token) => {
-       sdk = eventbrite({token: token});
-       return sdk.request(`/organizations/${data.eventbriteOrgId}/events/`)
+      return docSnapshot.data()
+    }).then((orgData) => {
+       sdk = eventbrite({token: orgData.eventbrite_access_token});
+       return sdk.request(`/organizations/${orgData.eventbriteOrgId}/events/`)
     })
     .then((result) => getAllAttendees(sdk, result.events, data.organisation))
     .catch((err) => console.log(err))
@@ -59,23 +59,33 @@ const getAllAttendees = (sdk, eventList, organisation) => {
             .then((docSnapshot) => {
               if (docSnapshot.size > 0) {
                 docSnapshot.forEach((doc) => {
-                  let body = {
-                    Date: new Date(event.start.utc),
-                    'Start Time': new Date(event.start.utc),
-                    'End Time' : new Date(event.end.utc),
-                    Details: {
-                      name: event.name.text,
-                      url: event.url
-                    },
-                    Members: [doc.id],
-                    Organisation: organisation,
-                    Type: 'Event',
-                    Organisations: doc.data().Organisations
-                  }
-                  console.log(body)
-                  var docRef = db.collection("Interactions").doc(event.id.toString())
-                  return docRef.set(body, {merge: true})
-
+                  db.collection("Relationships")
+                  .where("Members", "array-contains", doc.id)
+                  .get().then((relSnapshot) => {
+                    var organisations = []
+                    relSnapshot.forEach((rel) => {
+                      var elem = rel.data()
+                      elem.Organisations.forEach((org) => {
+                        organisations.push(org)
+                      })
+                    })
+                    let body = {
+                      Date: new Date(event.start.utc),
+                      'Start Time': new Date(event.start.utc),
+                      'End Time' : new Date(event.end.utc),
+                      Details: {
+                        name: event.name.text,
+                        url: event.url
+                      },
+                      Members: [doc.id],
+                      Organisations: organisations,
+                      Type: 'Event',
+                      managedBy: organisation
+                    }
+                    console.log(body)
+                    var docRef = db.collection("Interactions").doc(event.id.toString())
+                    return docRef.set(body, {merge: true})
+                  })
                 })
               }
             })

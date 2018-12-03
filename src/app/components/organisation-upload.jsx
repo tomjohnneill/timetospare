@@ -69,9 +69,11 @@ export default class OrganisationUpload extends React.Component {
       for (let j = 0; j < row.length; j++) {
         if (this.props.columns[j].category) {
           if (dataRow[this.props.columns[j].category]) {
-            dataRow[this.props.columns[j].category].push(row[j].toLowerCase().trim().replace(/(\r\n|\n|\r)/gm, ''))
+            var elem = row[j].toLowerCase().trim().replace(/(\r\n|\n|\r)/gm, '')
+            dataRow[this.props.columns[j].category].push(elem)
           } else {
-            dataRow[this.props.columns[j].category] = [row[j].toLowerCase().trim().replace(/(\r\n|\n|\r)/gm, '')]
+            var elem = row[j].toLowerCase().trim().replace(/(\r\n|\n|\r)/gm, '')
+            dataRow[this.props.columns[j].category] = [elem]
           }
         } else {
           dataRow[this.props.columns[j].name] = row[j]
@@ -84,6 +86,7 @@ export default class OrganisationUpload extends React.Component {
           })
         }
       }
+      console.log(organisations)
       dataRow.organisations = organisations
       data.push(dataRow)
     })
@@ -93,10 +96,12 @@ export default class OrganisationUpload extends React.Component {
 
     var cleanOrgs = []
     this.state.uniqueOrgs.forEach((orgArray) => {
-      cleanOrgs.push(orgArray[0])
+      cleanOrgs.push(orgArray[0].toLowerCase().replace(/(\r\n|\n|\r)/gm, ''))
     })
     console.log(cleanOrgs)
     console.log(data)
+    var newColumns = this.props.columns
+    newColumns.push({name: 'organisations'})
     this.props.updateDataAndColumns(data, this.props.columns, cleanOrgs)
   }
 
@@ -136,8 +141,7 @@ export default class OrganisationUpload extends React.Component {
             <HotTable
               data={this.state.organisations}
               contextMenu={true}
-              allowInsertColumn={false}
-              allowRemoveColumn={false}
+
               afterChange={this.handleEdit}
               colHeaders={['Organisations']}
               rowHeaders={true} width="100%" height="400" stretchH="all" />
