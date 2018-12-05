@@ -14,6 +14,7 @@ import DataValidation from '../components/data-validation';
 import {buttonStyles, headerStyles} from '../components/styles.jsx';
 import * as firebase from 'firebase';
 import Dropzone from 'react-dropzone';
+import CloudUpload from 'material-ui/svg-icons/file/cloud-upload';
 import * as Papa from 'papaparse';
 
 let db = fire.firestore()
@@ -70,18 +71,21 @@ export class UploadData extends React.Component {
             grid={this.state.grid}
             />
           :
-          <div style={{padding: 40}}>
+          <div style={{padding: 40, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
             <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '0 30% 90% 0%',
               transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', left: -150,
                width: '30vw', height: '100vw'}}/>
             <div style={headerStyles.desktop}>
-              Upload your CSV file
+              Upload a CSV file of your contacts
             </div>
           <Dropzone onDrop={this.handleDrop}>
-
-
+            <div style={{height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+              <CloudUpload/>
+            </div>
           </Dropzone>
-
+          <p style={{marginTop: 40}}>
+            We'll help you through the upload process step by step
+          </p>
 
           </div>
         }

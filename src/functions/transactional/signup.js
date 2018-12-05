@@ -16,7 +16,7 @@ const sendInviteEmail = functions.region('europe-west1').https.onCall((data, con
       subject: `${data.organisation} want you to join Time to Spare`,
       html: `<span>${data.organisation} want you to join their organisation on Time to Spare.
       <br></br>
-      Click this link to sign up: ${encodeURIComponent(data.link)}
+      Click this link to sign up: ${data.link.replace(/ /g,"%20")}
       <br></br>
       Thanks,
       <br></br>

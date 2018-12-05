@@ -63,6 +63,15 @@ export class Organisation extends React.Component {
   }
 
   getData = (uid) => {
+    db.collection("User").doc(uid).get()
+    .then((userDoc) => {
+      this.setState({user: userDoc.data()})
+      mixpanel.people.set({
+          "$email": userDoc.data().Email,    // only special properties need the $
+          "$last_login": new Date(),         // properties can be dates...
+      });
+    })
+
     return db.collection("Organisations").where("Admin." + uid, "==", true).get()
     .then((snapshot) => {
       if (snapshot.size > 0) {
@@ -82,6 +91,7 @@ export class Organisation extends React.Component {
       admins && Object.keys(admins).forEach((admin) => {
         promiseArray.push(
           db.collection("PersonalData")
+          .where("managedBy", "==", this.state.orgId)
           .where("User", "==", admin).limit(1)
           .get()
             .then((userDocSnapshot) =>
@@ -103,23 +113,24 @@ export class Organisation extends React.Component {
       this.setState({users: userArray})
     })
 
-    db.collection("User").doc(uid).get()
-    .then((userDoc) => {
-      this.setState({user: userDoc.data()})
-    })
   }
 
   updateLastLoggedIn = (uid) => {
-    db.collection("PersonalData").where("User", "==", uid).get()
-    .then((querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-        db.collection("PersonalData").doc(doc.id).update({lastLoggedIn: new Date()})
+    if (this.state.orgId) {
+      db.collection("PersonalData").where("User", "==", uid)
+      .where("managedBy", "==", this.state.orgId).get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          db.collection("PersonalData").doc(doc.id).update({lastLoggedIn: new Date()})
+        })
       })
-    })
+    }
+
   }
 
   componentDidMount(props) {
     mixpanel.track("Loaded dashboard")
+    console.log(mixpanel)
     Router.prefetch(`/project-calendar`)
     Router.prefetch(`/volunteer-preview`)
     fire.auth().onAuthStateChanged((user) => {
@@ -127,13 +138,17 @@ export class Organisation extends React.Component {
       if (user === null) {
       }
       else {
-        this.updateLastLoggedIn(user.uid)
         this.getData(user.uid)
+        mixpanel.identify(user.uid)
+        this.updateLastLoggedIn(user.uid)
+
       }
     })
     if (fire.auth().currentUser) {
-      this.updateLastLoggedIn(fire.auth().currentUser.uid)
       this.getData(fire.auth().currentUser.uid)
+      mixpanel.identify(fire.auth().currentUser.uid)
+      this.updateLastLoggedIn(fire.auth().currentUser.uid)
+
     }
   }
 

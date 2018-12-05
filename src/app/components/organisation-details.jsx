@@ -13,7 +13,7 @@ import MediaQuery from 'react-responsive';
 import DocumentTitle from 'react-document-title';
 import Dialog from 'material-ui/Dialog';
 import fire from '../fire';
-import {buttonStyles} from './styles.jsx';
+import {buttonStyles, headerStyles} from './styles.jsx';
 
 var algoliasearch = require('algoliasearch/lite')
 
@@ -237,29 +237,58 @@ export default class OrganisationDetails extends React.Component {
     this.setState({[id]: nv})
   }
 
+
   handleSubmit = () => {
-    this.setState({submitting: true})
-    var data = {
-      'Name': this.state.name ? this.state.name : this.state.searchText,
-      'Summary': this.state.activities ? this.state.activities : null,
-      'Description': this.state.activities ? this.state.activities : null ,
-      'Website': this.state.website ? this.state.website : null ,
-      'Email': this.state.email ? this.state.email : null,
-      'Address': this.state.address ? this.state.address: null,
-      'Logo': this.state.logo ? this.state.logo : null,
-      'Phone': this.state.phone ? this.state.phone : null,
-      'Postcode': this.state.postcode ? this.state.postcode : null,
-      'Facebook': this.state.facebook ? this.state.facebook : null,
-      'Instagram': this.state.instagram ? this.state.instagram : null,
-      'Twitter': this.state.twitter ? this.state.twitter: null,
-      "Owner": fire.auth().currentUser.uid,
-      'Featured Image': this.state.picture ? this.state.picture : null
+    console.log('submit clicked')
+    if (this.props.handleSave) {
+      this.setState({submitting: true})
+      var data = {
+        'Name': this.state.name ? this.state.name : this.state.searchText,
+        'Summary': this.state.activities ? this.state.activities : null,
+        'Description': this.state.activities ? this.state.activities : null ,
+        'Website': this.state.website ? this.state.website : null ,
+        'Email': this.state.email ? this.state.email : null,
+        'Address': this.state.address ? this.state.address: null,
+        'Logo': this.state.logo ? this.state.logo : null,
+        'Phone': this.state.phone ? this.state.phone : null,
+        'Postcode': this.state.postcode ? this.state.postcode : null,
+        'Facebook': this.state.facebook ? this.state.facebook : null,
+        'Instagram': this.state.instagram ? this.state.instagram : null,
+        'Twitter': this.state.twitter ? this.state.twitter: null,
+        "Owner": fire.auth().currentUser.uid,
+        "Admin": {
+          [fire.auth().currentUser.uid] : true
+        }
+      }
+      console.log(data)
+      this.props.handleSave(data)
+    } else {
+      this.setState({submitting: true})
+      var data = {
+        'Name': this.state.name ? this.state.name : this.state.searchText,
+        'Summary': this.state.activities ? this.state.activities : null,
+        'Description': this.state.activities ? this.state.activities : null ,
+        'Website': this.state.website ? this.state.website : null ,
+        'Email': this.state.email ? this.state.email : null,
+        'Address': this.state.address ? this.state.address: null,
+        'Logo': this.state.logo ? this.state.logo : null,
+        'Phone': this.state.phone ? this.state.phone : null,
+        'Postcode': this.state.postcode ? this.state.postcode : null,
+        'Facebook': this.state.facebook ? this.state.facebook : null,
+        'Instagram': this.state.instagram ? this.state.instagram : null,
+        'Twitter': this.state.twitter ? this.state.twitter: null,
+        "Owner": fire.auth().currentUser.uid,
+        "Admin": {
+          [fire.auth().currentUser.uid] : true
+        }
+      }
+      var docRef = db.collection("Organisations").doc()
+      docRef.set(data)
+      .then(() => {
+        Router.push(`/import-volunteers?organisation=${docRef.id}`, `/import-volunteers/${docRef.id}`)
+      })
     }
-    var docRef = db.collection("Organisations").doc()
-    docRef.set(data)
-    .then(() => {
-      Router.push(`/import-volunteers?organisation=${docRef.id}`, `/import-volunteers/${docRef.id}`)
-    })
+
   }
 
   handleCharityCheck = (e, status) => {
@@ -288,12 +317,12 @@ export default class OrganisationDetails extends React.Component {
     return (
       <div>
         <div style={{marginTop: '20px', textAlign: 'left'}}>
-          <div style={{padding: '10px', backgroundColor: '#F5F5F5',marginBottom: '16px'}} className='desktop-header'>
+          <div style={headerStyles.desktop}>
             Add your details
           </div>
-          <div style={{display :'flex', padding: 6,  alignItems: 'center'}}>
+          <div style ={{width: 100, height: 4, backgroundColor: '#000AB2', marginBottom: 30}}/>
+          <div style={{display :'flex',  alignItems: 'center'}}>
             <p style={{  margin: '0px',
-              padding: '6px',
 
               fontWeight: 700, width: 300}}>
               Are you a charity?
@@ -303,7 +332,7 @@ export default class OrganisationDetails extends React.Component {
 
               />
           </div>
-          <div style={{paddingLeft: 12, fontWeight: 'lighter',marginBottom: 20}}>
+          <div style={{fontWeight: 'lighter',marginBottom: 20, marginTop: 20}}>
             If you are, we can autofill some of your details for you
           </div>
 
@@ -315,8 +344,8 @@ export default class OrganisationDetails extends React.Component {
             :
             null
           }
-          <div style={{padding: '6px'}}>
-            <p style={styles.header}>
+          <div>
+            <p style={{fontWeight: 700, marginBottom: 20, marginTop: 40}}>
             Organisation Name*
             </p>
             {
@@ -335,142 +364,11 @@ export default class OrganisationDetails extends React.Component {
             }
 
           </div>
-          <div style={{padding: 6}}>
-            <p style={styles.header}>
-            Logo*
-            </p>
 
-          </div>
-
-
-
-          <div style={{display: 'flex'}}>
-            <div style={{flex: '2', padding: '6px'}}>
-              <p style={styles.header}>
-              Contact
-            </p>
-                <TextField fullWidth={true}
-                  inputStyle={styles.inputStyle}
-                  underlineShow={false}
-                  onChange={this.changeCharityInfo.bind(this, 'phone')}
-                  hintText={'Phone'}
-                  value = {this.state.phone}
-                  hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
-                  key='location1'
-                  style={styles.whiteTextfield}/>
-                <div style={{height: 10}}/>
-                <TextField fullWidth={true}
-                  inputStyle={styles.inputStyle}
-                  value = {this.state.address}
-                  underlineShow={false}
-                  onChange={this.changeCharityInfo.bind(this, 'address')}
-                  hintText={'Address'}
-                  hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
-                  key='location3'
-                style={styles.whiteTextfield}/>
-              <div style={{height: 10}}/>
-                <TextField fullWidth={true}
-                  inputStyle={styles.inputStyle}
-                  underlineShow={false}
-                  value = {this.state.postcode}
-                  onChange={this.changeCharityInfo.bind(this, 'postcode')}
-                  hintText={'Postcode'}
-                  hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
-                  key='location5'
-                style={styles.whiteTextfield}/>
-
-
-            </div>
-
-
-          </div>
-
-          <div style={{padding: '6px'}}>
-            <p style={styles.header}>
-            What does your organisation do?*
-            </p>
-            <TextField fullWidth={true}
-              inputStyle={styles.inputStyle}
-              underlineShow={false}
-              value = {this.state.activities}
-              hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
-              onChange={this.changeCharityInfo.bind(this, 'activities')}
-              key='activities'
-              multiLine={true}
-              style={styles.whiteTextfield}/>
-          </div>
-
-          <div style={{display: 'flex'}}>
-            <div style={{flex: 1, padding: '6px'}}>
-              <p style={styles.header}>
-              Email
-            </p>
-            <TextField fullWidth={true}
-              inputStyle={styles.inputStyle}
-              underlineShow={false}
-              hintText={'Email'}
-              value = {this.state.email}
-              onChange={this.changeCharityInfo.bind(this, 'email')}
-              hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
-              key='location2'
-              style={styles.whiteTextfield}/>
-            <p style={styles.header}>
-              Facebook
-            </p>
-            <TextField fullWidth={true}
-              inputStyle={styles.inputStyle}
-              underlineShow={false}
-              hintText={'Facebook'}
-              onChange={this.changeCharityInfo.bind(this, 'facebook')}
-              hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
-              key='location2'
-              style={styles.whiteTextfield}/>
-            <p style={styles.header}>
-              Instagram
-            </p>
-            <TextField fullWidth={true}
-              inputStyle={styles.inputStyle}
-              underlineShow={false}
-              hintText={'@Username'}
-              disabled={this.state.loadedFromDatabase}
-              onChange={this.changeCharityInfo.bind(this, 'instagram')}
-              hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
-              key='location2'
-              style={styles.whiteTextfield}/>
-            </div>
-            <div style={{flex: 1, padding: '6px', marginBottom: 60}}>
-              <p style={styles.header}>
-                Website
-              </p>
-            <TextField fullWidth={true}
-              inputStyle={styles.inputStyle}
-              underlineShow={false}
-              disabled={this.state.loadedFromDatabase}
-              onChange={this.changeCharityInfo.bind(this, 'website')}
-              value = {this.state.website}
-              hintText={'Website'}
-              hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
-              key='location3'
-              style={styles.whiteTextfield}/>
-            <p style={styles.header}>
-              Twitter
-            </p>
-            <TextField fullWidth={true}
-              inputStyle={styles.inputStyle}
-              underlineShow={false}
-              disabled={this.state.loadedFromDatabase}
-              hintText={'@Username'}
-              onChange={this.changeCharityInfo.bind(this, 'twitter')}
-              hintStyle={{ paddingLeft: '12px', bottom: '8px'}}
-              key='location2'
-              style={styles.whiteTextfield}/>
-            </div>
-
-          </div>
-          <div style={{height: 20}}/>
+          <div style={{height: 100}}/>
           <RaisedButton label='Save and Continue'
             disabled={this.state.submitting}
-            onTouchTap={this.handleSubmit}
+            onClick={this.handleSubmit}
             fullWidth={true}
             style={buttonStyles.bigSize} primary={true}
              labelStyle={buttonStyles.bigLabel}

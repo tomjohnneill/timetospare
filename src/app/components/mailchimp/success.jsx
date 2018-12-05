@@ -5,7 +5,6 @@ import Router from 'next/router'
 import RaisedButton from 'material-ui/RaisedButton';
 import {buttonStyles} from '../styles.jsx'
 import {List, ListItem} from 'material-ui/List';
-import fire from '../../fire.js';
 
 function encodeEmail (email) {
   return email.replace(/\./g, 'ASDFadf94nc1OKC')

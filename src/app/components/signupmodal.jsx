@@ -314,7 +314,7 @@ export default  class SignupModal extends React.Component {
                       />
                   </div>
                   <div>
-                    Or switch to <b onTouchTap={this.handleSwitchType} style={{color: '#000AB2'}}>Login</b>
+                    Or switch to <b onClick={this.handleSwitchType} style={{color: '#000AB2'}}>Login</b>
                   </div>
 
             </span>
@@ -397,13 +397,13 @@ export default  class SignupModal extends React.Component {
                     <RaisedButton fullWidth={true}
                       backgroundColor={this.state.email && this.state.password  ?  '#000AB2' : '#C5C8C7'}
                       buttonStyle={{borderRadius: '6px'}}
-                      onTouchTap={this.handleLogin}
+                      onClick={this.handleLogin}
                       labelStyle={{textTransform: 'none',display: 'inline-flex', alignItems: 'center', height: '100%'}}
                       labelColor='white' label='Go' style={{height: '50px'}}
                       />
                   </div>
                   <div>
-                    Or switch to <b onTouchTap={this.handleSwitchType} style={{cursor: 'pointer',color: '#000AB2'}}>
+                    Or switch to <b onClick={this.handleSwitchType} style={{cursor: 'pointer',color: '#000AB2'}}>
                     {this.state.type === 'login' ? 'Sign up' : 'Login'}</b>
                   </div>
             </span>
@@ -544,7 +544,7 @@ export default  class SignupModal extends React.Component {
                     />
                 </div>
                 <div>
-                  Or switch to <b onTouchTap={this.handleSwitchType} style={{color: '#000AB2'}}>Login</b>
+                  Or switch to <b onClick={this.handleSwitchType} style={{color: '#000AB2'}}>Login</b>
                 </div>
 
           </span>
@@ -607,13 +607,13 @@ export default  class SignupModal extends React.Component {
                   <RaisedButton fullWidth={true}
                     backgroundColor={this.state.email && this.state.password  ?  '#000AB2' : '#C5C8C7'}
                     buttonStyle={{borderRadius: '6px'}}
-                    onTouchTap={this.handleLogin}
+                    onClick={this.handleLogin}
                     labelStyle={{textTransform: 'none',display: 'inline-flex', alignItems: 'center', height: '100%'}}
                     labelColor='white' label='Log in' style={{height: '50px'}}
                     />
                 </div>
                 <div>
-                  Or switch to <b onTouchTap={this.handleSwitchType} style={{cursor: 'pointer',color: '#000AB2'}}>
+                  Or switch to <b onClick={this.handleSwitchType} style={{cursor: 'pointer',color: '#000AB2'}}>
                   {this.state.type === 'login' ? 'Sign up' : 'Login'}</b>
 
                 </div>

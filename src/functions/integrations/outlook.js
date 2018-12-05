@@ -207,7 +207,7 @@ const attachDataToEvent = (calendarEvent, people) => {
 
 const getRelationships =  (memberData) => {
   return db.collection("Relationships")
-  .where("Members", "array-contains", memberData._id).get()
+  .where("Member", "==", memberData._id).get()
   .then((relSnapshot) => {
     var data = []
     relSnapshot.forEach((doc) => {

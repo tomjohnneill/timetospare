@@ -190,11 +190,13 @@ export class Member extends React.Component {
       MemberName: {
         [Router.query.member] : this.state.member['Full Name']
       },
-      Members: [Router.query.member],
+      Member: Router.query.member,
       OrgNames: {
         [data._id] : data.name
       },
-      Organisations: [data._id]
+      Organisations: {
+        [data._id] : true
+      }
     }
 
     db.collection("Relationships").add(body)
@@ -252,7 +254,10 @@ export class Member extends React.Component {
   }
 
   componentWillUnmount(props) {
-    this.unsubscribe()
+    if (this.unsubscribe) {
+      this.unsubscribe()
+    }
+
   }
 
   getMemberData = () => {
@@ -311,7 +316,7 @@ export class Member extends React.Component {
 
       this.getMemberData()
       .then((person) => db.collection("Relationships")
-          .where('Members', "array-contains", person._id).get())
+          .where('Member', "==", person._id).get())
       .then((querySnapshot) => {
         var relArray = []
         querySnapshot.forEach((relDoc) => {
@@ -854,26 +859,17 @@ export class Member extends React.Component {
                 style={{display: 'flex', height: 80, alignItems: 'center'}}
                 primaryText="Add a note"
                 onClick={()=> this.setState({new: false, takeNote: true})}
-                leftAvatar={<Avatar backgroundColor={'#000AB2'} icon={<NoteIcon/>}></Avatar>}
+                leftAvatar={<Avatar backgroundColor={'#FFCB00'} icon={<NoteIcon/>}></Avatar>}
 
               />
+
               <Divider/>
               <ListItem
                 style={{display: 'flex', height: 80, alignItems: 'center'}}
-                primaryText="Leave project feedback"
-                onClick={() => Router.push(`/csv-upload?organisation=${this.state.organisation}`,
-                      `/csv-upload/${this.state.organisation}`)}
-                leftAvatar={<Avatar  icon={<ReviewIcon/>}></Avatar>}
-
-
-              />
-              <Divider/>
-              <ListItem
-                style={{display: 'flex', height: 80, alignItems: 'center'}}
-                primaryText={<span>Contact {this.state.member['Full Name'] ? this.state.member['Full Name'] : decodeURIComponent(this.props.url.query.name)}</span>}
+                primaryText={<span style={{textTransform: 'capitalize'}}>Contact {this.state.member['Full Name'] ? this.state.member['Full Name'] : decodeURIComponent(this.props.url.query.name)}</span>}
                 onClick={() => Router.push(`/csv-upload?organisation=${this.state.organisation}`,
                       `/messaging/${this.state.organisation}`)}
-                leftAvatar={<Avatar backgroundColor={'#FFCB00'} icon={<Email/>}></Avatar>}
+                leftAvatar={<Avatar backgroundColor={'#000AB2'} icon={<Email/>}></Avatar>}
 
               />
 

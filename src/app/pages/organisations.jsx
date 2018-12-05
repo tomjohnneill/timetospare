@@ -186,6 +186,11 @@ class Cards extends Component {
   };
 
 
+  handleOrgPick = (org) => {
+    console.log(org)
+    Router.push(`/organisation?targetorganisation=${org._id}&view=${Router.query.view}`)
+  }
+
 
   render() {
 
@@ -293,6 +298,7 @@ class Cards extends Component {
           </div>
           <div style ={{width: 100, height: 4, backgroundColor: '#000AB2', marginBottom: 30}}/>
             <OrganisationAutocomplete
+              handleNewRequest={this.handleOrgPick}
               hintText='Search all organisations'
               org={this.props.url.query.view}/>
 

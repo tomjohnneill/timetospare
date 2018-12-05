@@ -300,7 +300,9 @@ export class Organisation extends React.Component {
                       int.Members && this.state.membersLoaded
                        ? int.Members.map((user) => (
                          <Link  prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
-                           <div style={{margin: 4, textTransform: 'capitalize'}}>
+                           <div
+                             key={user._id}
+                             style={{margin: 4, textTransform: 'capitalize'}}>
                               <Chip
                                 style={chipStyles.chip}
                                 labelStyle={chipStyles.chipLabel}
@@ -521,7 +523,7 @@ export class Organisation extends React.Component {
         })
 
         db.collection("Relationships")
-        .where("Organisations", "array-contains", Router.query.targetorganisation)
+        .where("Organisations." + Router.query.targetorganisation, "==", true)
         .get()
         .then((querySnapshot) => {
             var data = []
@@ -529,12 +531,12 @@ export class Organisation extends React.Component {
             querySnapshot.forEach((doc) => {
               var elem = doc.data()
 
-              if (elem.MemberNames) {
-                Object.keys(elem.MemberNames).forEach((key) => {
+              if (elem.MemberName) {
+                Object.keys(elem.MemberName).forEach((key) => {
 
                   var user = {}
                   user._id = key
-                  user['Full Name'] = elem.MemberNames[key]
+                  user['Full Name'] = elem.MemberName[key]
                   data.push(user)
                 })
               }
@@ -719,6 +721,7 @@ export class Organisation extends React.Component {
                         :
                         `/member?view=${Router.query.view}&member=${member._id}`}>
                         <Chip
+                          key={member._id}
                           style={chipStyles.chip}
                           labelStyle={chipStyles.chipLabel}
                           backgroundColor={randomColor({luminosity: 'light'})}>
@@ -743,7 +746,9 @@ export class Organisation extends React.Component {
                              this.state.members.map((member) => (
                                member[this.props.url.query.targetorganisation] ?
                                member[this.props.url.query.targetorganisation].map((role) => (
-                                 <div style={{display: 'flex', overflowX: 'hidden', alignItems: 'center',
+                                 <div
+                                   key={member._id}
+                                   style={{display: 'flex', overflowX: 'hidden', alignItems: 'center',
                                     borderBottom: '1px solid #DBDBDB'}}>
                                    <div style={{flex: 3, padding: '5px 5px 5px 15px', alignItems: 'center'}}>
                                      <b>{member['Full Name']}</b>

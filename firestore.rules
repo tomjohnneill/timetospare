@@ -1,7 +1,41 @@
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write;
-    }
+
+  	match /User/{userId} {
+      allow read: if request.auth.uid == userId;
+      allow write: if request.auth.uid == userId;
+  	}
+
+    match /Organisations/{orgId} {
+      allow read: if true;
+      allow update: if resource.data.Admin && resource.data.Admin[request.auth.uid];
+      allow delete: if resource.data.Admin && resource.data.Admin[request.auth.uid];
+      allow create: if request.resource.data.Admin && request.resource.data.Admin[request.auth.uid] == request.auth.uid;
+  	}
+
+    match /OrgData/{orgId} {
+      allow read: if get(/databases/$(database)/documents/Organisations/$(resource.data.managedBy)).data.Admin[request.auth.uid] == true;
+      allow write: if get(/databases/$(database)/documents/Organisations/$(resource.data.managedBy)).data.Admin[request.auth.uid] == true;
+  	}
+
+    match /PersonalData/{memberId} {
+      allow read: if get(/databases/$(database)/documents/Organisations/$(resource.data.managedBy)).data.Admin[request.auth.uid] == true;
+      allow write: if get(/databases/$(database)/documents/Organisations/$(resource.data.managedBy)).data.Admin[request.auth.uid] == true;
+  	}
+
+    match /Relationships/{relId} {
+      allow read: if get(/databases/$(database)/documents/Organisations/$(resource.data.managedBy)).data.Admin[request.auth.uid] == true;
+      allow write: if get(/databases/$(database)/documents/Organisations/$(resource.data.managedBy)).data.Admin[request.auth.uid] == true;
+  	}
+
+    match /Interactions/{intId} {
+      allow read: if get(/databases/$(database)/documents/Organisations/$(resource.data.managedBy)).data.Admin[request.auth.uid] == true;
+      allow write: if get(/databases/$(database)/documents/Organisations/$(resource.data.managedBy)).data.Admin[request.auth.uid] == true;
+  	}
+
+    match /Events/{intId} {
+      allow read: if get(/databases/$(database)/documents/Organisations/$(resource.data.managedBy)).data.Admin[request.auth.uid] == true;
+      allow write: if get(/databases/$(database)/documents/Organisations/$(resource.data.managedBy)).data.Admin[request.auth.uid] == true;
+  	}
   }
 }

@@ -479,10 +479,13 @@ export default class Deduplication extends React.Component {
         let record = records[elem.index]
         elem.ref.set(record, {merge: true})
         if (record.organisations) {
-          var orgNames = {}, orgIds = []
+          var orgNames = {}, orgIds = {}
+          console.log(record.organisations)
+          console.log(orgUpdateObjects)
           record.organisations.forEach((org) => {
-            orgNames[orgUpdateObjects[org].ref.id] = org
-            orgIds[orgUpdateObjects[org].ref.id] = true
+            let cleanOrg = org.trim().toLowerCase().replace(/(\r\n|\n|\r)/gm, '')
+            orgNames[orgUpdateObjects[cleanOrg].ref.id] = org
+            orgIds[orgUpdateObjects[cleanOrg].ref.id] = true
           })
           var roleOrgMap = {}
           if (record.roleOrgMap) {
@@ -499,7 +502,8 @@ export default class Deduplication extends React.Component {
               MemberName: record['Full Name'],
               OrgNames: orgNames,
               Organisations: orgIds,
-              RoleMap: roleOrgMap
+              RoleMap: roleOrgMap,
+              managedBy: Router.query.view
             })
         }
       })

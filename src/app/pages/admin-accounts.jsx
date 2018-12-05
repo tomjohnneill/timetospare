@@ -92,7 +92,7 @@ export class AdminAccounts extends React.Component {
 
     Promise.all(promises)
     .then(() => {
-      var pending = this.state.pending
+      var pending = this.state.pending ? this.state.pending : []
       pending.unshift(email)
       this.setState({pending: pending, email: ''})
     })
@@ -116,7 +116,7 @@ export class AdminAccounts extends React.Component {
     return (
       <App>
         <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-          <div style={{paddingTop: 20, maxWidth: 800, width: '100%', textAlign: 'left'}}>
+          <div style={{paddingTop: 20, maxWidth: 800, width: '100%', textAlign: 'left', minHeight: '100vh'}}>
               <h2 style={{fontWeight: 200, fontSize: '30px', marginBottom: '15px'}}>
                 <b>Admins</b> for this organisation
               </h2>

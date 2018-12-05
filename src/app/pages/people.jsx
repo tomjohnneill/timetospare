@@ -310,6 +310,7 @@ export class People extends React.Component {
             elem._id = member.id
             delete elem.managedBy
             delete elem.User
+            delete elem.roleOrgMap
             if (elem.lastContacted) {
               elem['Last Contacted'] = elem.lastContacted.toLocaleString('en-gb',
                 {weekday: 'long', month: 'long', day: 'numeric'})
