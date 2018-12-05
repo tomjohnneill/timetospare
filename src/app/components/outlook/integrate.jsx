@@ -44,6 +44,7 @@ export default class OutlookIntegrate extends React.Component {
       this.setState({organisation: data, orgId: orgId})
       if (this.state.orgId) {
         return db.collection("PersonalData").where("organisation", "==",this.state.orgId)
+        .where("managedBy", "==", this.state.orgId)
           .where("Email", "==", this.state.user.Email)
           .get()
           .then((personalDataSnapshot) => {

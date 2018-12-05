@@ -196,7 +196,8 @@ export class Member extends React.Component {
       },
       Organisations: {
         [data._id] : true
-      }
+      },
+      managedBy: Router.query.view
     }
 
     db.collection("Relationships").add(body)
@@ -265,6 +266,7 @@ export class Member extends React.Component {
     .then((doc) => {
       var elem = doc.data()
       elem._id = doc.id
+      console.log(elem)
       const rawData = Object.create(elem)
 
       delete rawData.managedBy
@@ -316,14 +318,18 @@ export class Member extends React.Component {
 
       this.getMemberData()
       .then((person) => db.collection("Relationships")
-          .where('Member', "==", person._id).get())
+      .where("managedBy", "==", Router.query.view)
+      .where('Member', "==", person._id).get())
       .then((querySnapshot) => {
         var relArray = []
+        console.log(querySnapshot)
         querySnapshot.forEach((relDoc) => {
           var item = relDoc.data()
+          console.log(item)
           item._id = relDoc.id
           relArray.push(item)
         })
+        console.log(relArray)
         this.setState({relationships: relArray})
       })
 

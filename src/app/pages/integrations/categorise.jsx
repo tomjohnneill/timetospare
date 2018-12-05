@@ -77,6 +77,10 @@ class ClassifiedInteraction extends React.Component {
     );
   }
 
+  handleDelete = () => {
+    this.props.handleDelete(this.props.data)
+  }
+
   render() {
     return (
       <Card
@@ -193,12 +197,9 @@ class ClassifiedInteraction extends React.Component {
           <FlatButton
             labelStyle={buttonStyles.smallLabel}
             style={buttonStyles.smallSize}
+            onClick={this.handleDelete}
              label="Delete" />
-          <RaisedButton
-            style={buttonStyles.smallSize}
-            labelStyle={buttonStyles.smallLabel}
-            primary={true}
-            label="Confirm" />
+
 
         </CardActions>
       </Card>
@@ -231,8 +232,12 @@ class InteractionCard extends React.Component {
   handleDeleteOrg = (user, org) => {
     var userArray = this.props.data.details
     var userPosition = userArray.indexOf(user)
-    var orgPosition = userArray[userPosition].Organisations.indexOf(org)
-    userArray[userPosition].Organisations.splice(orgPosition, 1)
+    console.log(userArray[userPosition])
+    var relationshipArray = userArray[userPosition].RELATIONSHIPS
+    console.log(relationshipArray)
+    relationshipArray.forEach((rel) => {
+        delete rel.OrgNames[org]
+    })
     this.props.editDetails(userArray, this.props.index)
   }
 
@@ -242,6 +247,14 @@ class InteractionCard extends React.Component {
     var tagPosition = userArray[userPosition].tags.indexOf(tag)
     userArray[userPosition].tags.splice(tagPosition, 1)
     this.props.editDetails(userArray, this.props.index)
+  }
+
+  handleDelete = () => {
+    this.props.handleDelete(this.props.data)
+  }
+
+  handleConfirm = () => {
+    this.props.classify(this.props.index)
   }
 
   render() {
@@ -310,12 +323,12 @@ class InteractionCard extends React.Component {
                       this.props.data && this.props.data.details.map((user) => (
 
                             user && user.RELATIONSHIPS && user.RELATIONSHIPS.map((rel) => (
-                              rel.OrgNames && Object.values(rel.OrgNames).map((org) => (
+                              rel.OrgNames && Object.keys(rel.OrgNames).map((orgId) => (
                                 <Chip style={chipStyles.chip}
                                   deleteIconStyle={chipStyles.deleteStyle}
-                                  onRequestDelete={() => this.handleDeleteOrg(user, org)}
+                                  onRequestDelete={() => this.handleDeleteOrg(user, orgId)}
                                   labelStyle={chipStyles.chipLabel}>
-                                  {org}
+                                  {rel.OrgNames[orgId]}
                                 </Chip>
                               ))
 
@@ -354,6 +367,7 @@ class InteractionCard extends React.Component {
         </CardText>
         <CardActions style={{textAlign: 'right'}}>
           <FlatButton
+            onClick={this.handleDelete}
             labelStyle={buttonStyles.smallLabel}
             style={buttonStyles.smallSize}
              label="Delete" />
@@ -361,6 +375,7 @@ class InteractionCard extends React.Component {
             style={buttonStyles.smallSize}
             labelStyle={buttonStyles.smallLabel}
             primary={true}
+            onClick={this.handleConfirm}
             label="Confirm" />
 
         </CardActions>
@@ -570,6 +585,21 @@ export class Categorise extends React.Component {
 
   }
 
+  deleteEmail = (email) => {
+    var index = this.state.emails.indexOf(email)
+    var emails = this.state.emails
+    emails.splice(index, 1)
+    this.setState({emails: emails})
+  }
+
+  handleClassify = (index) => {
+    var emails = this.state.emails
+    emails[index].classified = true
+    console.log(emails)
+    this.setState({emails: emails})
+  }
+
+
   editEmailDetailsFromChild = (detail, index) => {
     var emails = this.state.emails
     emails[index].details = detail
@@ -626,6 +656,8 @@ export class Categorise extends React.Component {
                 inputRequired.map((email) => (
                   email ?
                   <InteractionCard
+                    classify={this.handleClassify}
+                    handleDelete={this.deleteEmail}
                     editDetails={this.editEmailDetailsFromChild}
                     index={this.state.emails.indexOf(email)}
                     type={email.email ? 'Email' : 'Event'} data={email}/>
@@ -634,9 +666,18 @@ export class Categorise extends React.Component {
                 ))
               }
               {
+                inputRequired.length === 0 && this.state.outlookFinished ?
+                <div style={{display: 'flex', padding: 50, alignItems: 'center', justifyContent: 'center'
+                , backgroundColor: '#F5F5F5'}}>
+                  All interactions have been classified, click save to continue
+                </div>
+                :
+                null
+              }
+              {
                 classified.length > 0 ?
                 <h2 style={headerStyles.desktop}>
-                  Automatically classified
+                  Classified interactions
                 </h2>
                 :
                 null
@@ -646,6 +687,7 @@ export class Categorise extends React.Component {
                   classified.map((email) => (
                     email ?
                     <ClassifiedInteraction
+                      handleDelete={this.deleteEmail}
                       editDetails={this.editEmailDetailsFromChild}
                       index={this.state.emails.indexOf(email)}
                       type={email.email ? 'Email' : 'Event'} data={email}/>

@@ -148,6 +148,7 @@ export class Organisation extends React.Component {
 
       this.unsubscribe = db.collection("Interactions")
       .where("Organisations", "array-contains", Router.query.targetorganisation)
+      .where("managedBy", "==", Router.query.view)
       .orderBy("Date", 'desc').onSnapshot(
         (intSnapshot) => {
         var data = []
@@ -523,6 +524,7 @@ export class Organisation extends React.Component {
         })
 
         db.collection("Relationships")
+        .where("managedBy" , "==", Router.query.view)
         .where("Organisations." + Router.query.targetorganisation, "==", true)
         .get()
         .then((querySnapshot) => {
