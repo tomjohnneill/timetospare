@@ -74,6 +74,7 @@ export class SignupModal extends React.Component {
               .then(data =>
                 {
                   if (Router.query.organisation && Router.query.orgId) {
+                    localStorage.setItem('ttsOrg', Router.query.orgId)
                     window.location.href = 'https://timetospare.com/dashboard'
                   } else {
                     localStorage.setItem('sample', true)

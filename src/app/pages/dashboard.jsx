@@ -111,12 +111,14 @@ export class Organisation extends React.Component {
 
 
       this.setState({users: userArray})
+      this.updateLastLoggedIn(uid)
     })
 
   }
 
   updateLastLoggedIn = (uid) => {
     if (this.state.orgId) {
+      localStorage.setItem('ttsOrg', this.state.orgId)
       db.collection("PersonalData").where("User", "==", uid)
       .where("managedBy", "==", this.state.orgId).get()
       .then((querySnapshot) => {
@@ -140,15 +142,11 @@ export class Organisation extends React.Component {
       else {
         this.getData(user.uid)
         mixpanel.identify(user.uid)
-        this.updateLastLoggedIn(user.uid)
-
       }
     })
     if (fire.auth().currentUser) {
       this.getData(fire.auth().currentUser.uid)
       mixpanel.identify(fire.auth().currentUser.uid)
-      this.updateLastLoggedIn(fire.auth().currentUser.uid)
-
     }
   }
 
