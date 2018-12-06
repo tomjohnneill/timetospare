@@ -70,14 +70,7 @@ export class SignupModal extends React.Component {
                   Name: this.state.name
                 }
               )
-              .then(docRef =>
-                {
-                return db.collection("User").doc(user.uid).collection("public").
-                doc(user.uid).set({
-                  Name: this.state.name
-                })
-              }
-            )
+
               .then(data =>
                 {
                   if (Router.query.organisation && Router.query.orgId) {

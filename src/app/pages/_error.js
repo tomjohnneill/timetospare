@@ -3,9 +3,19 @@ import React from 'react';
 import App from '../components/App.js';
 import withMui from '../components/hocs/withMui.js';
 import {headerStyles} from '../components/styles.jsx';
+import {BUILD_LEVEL} from '../fire';
 
-Sentry.init({ dsn: "https://fb230d215bd745d6a8152f6145c8a409@sentry.io/1324566"});
+Sentry.init({ environment: BUILD_LEVEL,
+  beforeSend(event) {
+      // Check if it is an exception, if so, show the report dialog
+      if (event.exception) {
+        Sentry.showReportDialog();
+      }
+      return event;
+    },
+    dsn: "https://fb230d215bd745d6a8152f6145c8a409@sentry.io/1324566"});
 
+console.log(Sentry)
 /**
  * Send an error event to Sentry.
  *
@@ -50,8 +60,10 @@ export  class Error extends React.Component {
     } else {
       statusCode = null;
     }
+    if (BUILD_LEVEL != 'dev') {
+      notifySentry(err, req, statusCode);
+    }
 
-    notifySentry(err, req, statusCode);
 
     return { statusCode };
   }

@@ -399,7 +399,7 @@ export class Categorise extends React.Component {
         var attachedOrgs = []
 
         email.details.forEach((person) => {
-          if (person.RELATIONSHIPS) {
+          if (person && person.RELATIONSHIPS) {
             person.RELATIONSHIPS.forEach((rel) => {
               Object.keys(rel.OrgNames).forEach((orgId) => {
                 if (!attachedOrgs.includes({_id: orgId, name: rel.OrgNames[orgId]})) {

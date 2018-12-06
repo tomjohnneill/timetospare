@@ -53,6 +53,8 @@ export default class OrganisationUpload extends React.Component {
   }
 
   lookUpOrgs = () => {
+    // match organistions where organisations are not in separate columns
+
     console.log(this.props.columns)
     var orgIndices = []
     for (var i = 0; i < this.props.columns.length; i ++) {

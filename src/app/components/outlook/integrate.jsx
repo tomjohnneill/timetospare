@@ -120,7 +120,8 @@ export default class OutlookIntegrate extends React.Component {
           scrapeCalendarEvents({refresh_token: this.state.user.outlook_refresh_token,
               access_token: this.state.user.outlook_access_token,
               organisation: this.state.orgId,
-              personalDataId: this.state.personalDataId
+              personalDataId: this.state.personalDataId,
+              link: definedLink
             }).then((result) => {
               console.log(result)
               this.props.handleResult(result)

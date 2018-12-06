@@ -40,6 +40,7 @@ export class AdminAccounts extends React.Component {
           var promiseArray = []
           if (data && data.Admin) {
             Object.keys(data.Admin).forEach((admin) => {
+              console.log(admin)
               promiseArray.push(
                 db.collection("PersonalData")
                 .where("User", "==", admin)
@@ -202,13 +203,13 @@ export class AdminAccounts extends React.Component {
 
 
                           <div style={{textAlign: 'left', textDecoration: 'underline', fontWeight: 700}}>
-                            {user['Name']}
+                            {user && user['Name']}
                           </div>
 
 
 
                         <div style={{flex: 1}}>
-                          {user.Email}
+                          {user && user.Email}
                         </div>
 
                       </div>

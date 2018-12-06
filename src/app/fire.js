@@ -5,6 +5,10 @@ import 'firebase/auth';
 import "firebase/firestore";
 import "firebase/functions"
 
+// export const BUILD_LEVEL = "dev"
+// export const BUILD_LEVEL = "staging"
+export const BUILD_LEVEL = "production"
+
 var productionConfig = {
   apiKey: "AIzaSyA8FFWoOifdusbuoYB2ksneSlPl-GwoLJo",
   authDomain: "timetospare-123.firebaseapp.com",
@@ -17,4 +21,13 @@ var stagingConfig = {
   authDomain: "timetospare-staging.firebaseapp.com"
 }
 
-export default !firebase.apps.length ? firebase.initializeApp(stagingConfig) : firebase.app();
+var config
+if (BUILD_LEVEL == 'staging') {
+  config = stagingConfig
+} else if (BUILD_LEVEL == 'dev') {
+  config = stagingConfig
+} else if (BUILD_LEVEL == 'production') {
+  config = productionConfig
+}
+
+export default !firebase.apps.length ? firebase.initializeApp(config) : firebase.app();

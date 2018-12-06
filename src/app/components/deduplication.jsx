@@ -491,13 +491,12 @@ export default class Deduplication extends React.Component {
           if (record.roleOrgMap) {
             roleOrgMap = record.roleOrgMap
           } else if (record.Roles && record.organisations) {
-            roleOrgMap[role] = record.organisations
+            record.Roles.map((role) => {
+              roleOrgMap[role] = record.organisations
+            })
           }
 
           db.collection("Relationships").doc().set({
-              MemberNames: {
-                [elem.ref.id] : record['Full Name']
-              },
               Member: elem.ref.id,
               MemberName: record['Full Name'],
               OrgNames: orgNames,
@@ -534,6 +533,7 @@ export default class Deduplication extends React.Component {
     this.state.mergedRows.map((row) => {
       this.addToUploadList(row, toBeUploaded)
     })
+
     this.testUpload(toBeUploaded)
 
   }

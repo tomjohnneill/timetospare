@@ -122,7 +122,8 @@ const uniqObjs = (array, field) => {
 const keepEmail = (email, people, type) => {
   if (type === 'received') {
 
-    if (people[email.Sender.EmailAddress.Address].exists && !people[email.Sender.EmailAddress.Address].admin) {
+    if (email.Sender && people[email.Sender.EmailAddress.Address].exists &&
+       !people[email.Sender.EmailAddress.Address].admin) {
       return true
     } else {
       return false
@@ -130,13 +131,13 @@ const keepEmail = (email, people, type) => {
   } else if (type === 'sent') {
     var include = false
     email.ToRecipients.forEach((person) => {
-      if (people[person.EmailAddress.Address].exists && !people[person.EmailAddress.Address].admin) {
+      if (person && person.EmailAddress && people[person.EmailAddress.Address].exists && !people[person.EmailAddress.Address].admin) {
         include = true
       }
     })
     email.CcRecipients.forEach((person) => {
       console.log(person.EmailAddress)
-      if (people[person.EmailAddress.Address].exists && !people[person.EmailAddress.Address].admin) {
+      if (person && person.EmailAddress && people[person.EmailAddress.Address].exists && !people[person.EmailAddress.Address].admin) {
         include = true
       }
     })
@@ -166,12 +167,18 @@ const attachDataToEmail = (email, people, type) => {
   if (type === 'received') {
     var details = []
     email.ToRecipients.forEach((person) => {
-      details.push(people[person.EmailAddress.Address].details)
+      if (person && person.EmailAddress) {
+        details.push(people[person.EmailAddress.Address].details)
+      }
     })
     email.CcRecipients.forEach((person) => {
-      details.push(people[person.EmailAddress.Address].details)
+      if (person && person.EmailAddress) {
+        details.push(people[person.EmailAddress.Address].details)
+      }
     })
-    details.push(people[email.Sender.EmailAddress.Address].details)
+    if (email && email.Sender && email.Sender.EmailAddress) {
+      details.push(people[email.Sender.EmailAddress.Address].details)
+    }
     var uniqDetails
     if (details.length > 0) {
       uniqDetails =  uniqObjs(details, '_id')
@@ -182,10 +189,14 @@ const attachDataToEmail = (email, people, type) => {
   } else if (type === 'sent') {
     var details = []
     email.ToRecipients.forEach((person) => {
-      details.push(people[person.EmailAddress.Address].details)
+      if (person && person.EmailAddress) {
+        details.push(people[person.EmailAddress.Address].details)
+      }
     })
     email.CcRecipients.forEach((person) => {
-      details.push(people[person.EmailAddress.Address].details)
+      if (person && person.EmailAddress) {
+        details.push(people[person.EmailAddress.Address].details)
+      }
     })
     var uniqDetails
     if (details.length > 0) {
@@ -273,13 +284,21 @@ const checkIfExists = (person, organisation, adminList) => {
 const emailPeople = (emails) => {
   var people = {}
   emails.forEach((email) => {
-    let from = email.Sender.EmailAddress.Address
-    people[from] = {exists: false}
+    console.log(email.Sender)
+    let from
+    if (email.Sender && email.Sender.EmailAddress) {
+      from = email.Sender.EmailAddress.Address
+      people[from] = {exists: false}
+    }
     email.ToRecipients.forEach((person) => {
-      people[person.EmailAddress.Address] = {exists: false}
+      if (person && person.EmailAddress) {
+        people[person.EmailAddress.Address] = {exists: false}
+      }
     })
     email.CcRecipients.forEach((person) => {
-      people[person.EmailAddress.Address] = {exists: false}
+      if (person && person.EmailAddress) {
+        people[person.EmailAddress.Address] = {exists: false}
+      }
     })
   })
 

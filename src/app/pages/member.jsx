@@ -605,6 +605,15 @@ export class Member extends React.Component {
     })
   }
 
+  handleDeleteOrg = (key, relId, orgNames) => {
+    delete orgNames[key]
+    db.collection("Relationships").doc(relId).update({OrgNames : orgNames})
+    .then(() => {
+      this.updateData()
+    })
+    db.collection("PersonalData").doc(Router.query.member).update("organisations", firebase.firestore.FieldValue.arrayRemove(key))
+  }
+
   handleDeleteInteraction = (int) => {
     if (localStorage.getItem('sample') == "true") {
       if (this.state.interactions.includes(int)) {
@@ -960,6 +969,31 @@ export class Member extends React.Component {
                                   />
 
                               )
+                            } else if (key !== '_id' && key !== 'tags' && typeof this.state.member[key] == 'object') {
+                              return (
+                                <ListItem
+                                  onClick={(e) => this.handleClickExistingField(e,key)}
+                                  innerDivStyle={{marginLeft: 0, padding: 0}}
+                                  children={
+                                    <div style={{display: 'flex', overflowX: 'hidden', alignItems: 'center',
+                                       borderBottom: '1px solid #DBDBDB'}}>
+                                      <div style={{flex: 3, padding: '5px 5px 5px 15px', alignItems: 'center'}}>
+                                        <b>{key}</b>
+                                      </div>
+                                      <div style={{flex: 7, padding: 5, textTransform: 'capitalize'}}>
+                                        <Chip
+
+                                          style={chipStyles.chip}
+                                          labelStyle={chipStyles.chipLabel}
+                                          >
+                                          {this.state.member[key].toString()}
+                                        </Chip>
+
+                                      </div>
+                                    </div>
+                                  }
+                                  />
+                              )
                             }
                           })
                         }
@@ -988,7 +1022,7 @@ export class Member extends React.Component {
                                    style={chipStyles.chip}
                                    labelStyle={chipStyles.chipLabel}
                                    deleteIconStyle={chipStyles.deleteStyle}
-                                   onRequestDelete={() => this.handleDeleteTag(tag)}
+                                   onRequestDelete={() => this.handleDeleteOrg(key, rel._id, rel.OrgNames)}
                                    >{rel.OrgNames[key].toString()}
                                  </Chip>
                                </Link>

@@ -28,7 +28,8 @@ const makeNewUserAdmin = functions.firestore
                 User: context.params.userId,
                 Name: newValue.Name,
                 Email: newValue.Email,
-                Organisation: orgDoc.id
+                Admin: true,
+                managedBy: orgDoc.id
               }).then(() =>
                 db.collection("Organisations").doc(orgDoc.id).update({
                   "PendingAdmins": FieldValue.arrayRemove(newValue.Email),

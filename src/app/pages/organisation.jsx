@@ -534,10 +534,11 @@ export class Organisation extends React.Component {
               var elem = doc.data()
 
               if (elem.MemberName) {
+                console.log(elem.MemberName)
                 Object.keys(elem.MemberName).forEach((key) => {
-
+                  console.log(key)
                   var user = {}
-                  user._id = key
+                  user._id = elem.Member
                   user['Full Name'] = elem.MemberName[key]
                   data.push(user)
                 })
@@ -623,7 +624,7 @@ export class Organisation extends React.Component {
                 primaryText="Completely delete" leftIcon={<Delete/>} />
               <MenuItem
                 onClick={() => this.setState({deleteOpen: true, optionsOpen: false})}
-                primaryText="Remove from this tag" leftIcon={<Close/>} />
+                primaryText="Remove from this organisation" leftIcon={<Close/>} />
               <MenuItem
                 onClick={this.handlePin}
                 primaryText={`${this.state.targetedInt && this.state.targetedInt.Pinned ? 'Unpin' : 'Pin'} this`} leftIcon={<Pin/>} />
@@ -685,6 +686,7 @@ export class Organisation extends React.Component {
                 <div style={{textAlign: 'left'}}>
 
               <div style={{fontWeight: 200, fontSize: '40px', paddingBottom: 10,
+                textTransform: 'capitalize',
                 borderBottom: '4px solid #000AB2', display: 'flex', alignItems: 'center'
               }}>
                 <OrganisationsIcon style={{height: 30, paddingRight: 15}} color='#484848'/>
