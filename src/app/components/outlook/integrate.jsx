@@ -100,21 +100,28 @@ export default class OutlookIntegrate extends React.Component {
       } else {
         definedLink = null
       }
+      var scrapeCalendarEvents = functions.httpsCallable('integrations-scrapeOutlookEmails')
       if (Router.query.access_token ) {
-        var inviteEmail = functions.httpsCallable('integrations-scrapeOutlookEmails')
+
         if (this.state.orgId) {
           scrapeCalendarEvents({refresh_token: this.state.user.outlook_refresh_token,
-              access_token: this.state.user.outlook_access_token,
+              access_token: Router.query.access_token,
               organisation: this.state.orgId,
-              personalDataId: this.state.personalDataId
+              personalDataId: this.state.personalDataId,
+              link: definedLink
             }).then((result) => {
               console.log(result)
+              this.props.handleResult(result)
+              if (result.data && result.data.nextLink) {
+                this.handleScrapeEvents(result.data.nextLink)
+              } else if (!result.data.nextLink) {
+                this.props.onFinish('calendarFinished')
+              }
             })
         } else {
           alert("You don't belong to an organisation")
         }
       } else {
-        var scrapeCalendarEvents = functions.httpsCallable('integrations-scrapeCalendarEvents')
         if (this.state.orgId && this.state.user.outlook_refresh_token) {
 
           scrapeCalendarEvents({refresh_token: this.state.user.outlook_refresh_token,
@@ -128,7 +135,7 @@ export default class OutlookIntegrate extends React.Component {
               if (result.data && result.data.nextLink) {
                 this.handleScrapeEvents(result.data.nextLink)
               } else if (!result.data.nextLink) {
-                this.props.onFinish()
+                this.props.onFinish('calendarFinished')
               }
             })
 
@@ -152,9 +159,16 @@ export default class OutlookIntegrate extends React.Component {
         var inviteEmail = functions.httpsCallable('integrations-scrapeOutlookEmails')
         if (this.state.orgId) {
           inviteEmail({refresh_token: this.state.user.outlook_refresh_token,
-            access_token: this.state.user.outlook_access_token, organisation: this.state.orgId,
+            link: definedLink,
+            access_token: Router.query.access_token, organisation: this.state.orgId,
             personalDataId: this.state.personalDataId}).then((result) => {
               console.log(result)
+              this.props.handleResult(result)
+              if (result.data && result.data.nextLink) {
+                this.handleScrapeEmails(result.data.nextLink)
+              } else if (!result.data.nextLink) {
+                this.props.onFinish('emailFinished')
+              }
             })
         } else {
           alert("You don't belong to an organisation")
@@ -174,7 +188,7 @@ export default class OutlookIntegrate extends React.Component {
               if (result.data && result.data.nextLink) {
                 this.handleScrapeEmails(result.data.nextLink)
               } else if (!result.data.nextLink) {
-                this.props.onFinish()
+                this.props.onFinish('emailFinished')
               }
             })
           } else {

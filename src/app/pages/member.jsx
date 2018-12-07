@@ -37,6 +37,8 @@ import Close from 'material-ui/svg-icons/navigation/close'
 import ShortText from 'material-ui/svg-icons/editor/short-text';
 import OrganisationAutocomplete from '../components/organisation-autocomplete.jsx';
 import lunr from 'lunr'
+import Lock from 'material-ui/svg-icons/action/lock';
+import LockOpen from 'material-ui/svg-icons/action/lock-open';
 
 let db = fire.firestore()
 var randomColor = require('randomcolor')
@@ -178,7 +180,7 @@ function insertNum(str) {
 export class Member extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {member: {}, interactions: [], note: '', memberData: {}}
+    this.state = {member: {}, interactions: [], note: '', memberData: {}, adminMap: {}, privateDocs : {}}
     if (typeof window !== 'undefined') {
       this.ReactQuill = require('react-quill')
     }
@@ -309,7 +311,27 @@ export class Member extends React.Component {
         intSnapshot.forEach((intDoc) => {
           var elem = intDoc.data()
           elem._id = intDoc.id
+          if (elem.Private) {
+            db.collection("Private").doc(elem._id).get().then((privateDoc) => {
+              var privateDocs = this.state.privateDocs ? this.state.privateDocs : {}
+              privateDocs[elem._id] = privateDoc.data()
+            })
+            if (this.state.adminMap && !this.state.adminMap[elem.Creator]) {
+              db.collection("PersonalData").where("managedBy", "==", Router.query.view)
+              .where("User", "==", elem.Creator).get().then((userSnapshot) => {
+                userSnapshot.forEach((doc) => {
+                  console.log(doc.data())
+                  var adminMap = this.state.adminMap ? this.state.adminMap : {}
+                  adminMap[elem.Creator] = doc.data().Name
+                  console.log(adminMap)
+                  this.setState({adminMap: adminMap})
+                })
+              })
+            }
+          }
           data.push(elem)
+
+
         })
         this.setState({interactions: data})
         this.addInteractionsToIndex()
@@ -395,7 +417,7 @@ export class Member extends React.Component {
         return (
 
             <div
-              style={{ borderBottom : '1px solid #DBDBDB'}}
+              style={{  borderBottom : '1px solid #DBDBDB', backgroundColor: int.Private ? '#f5f5f5' : null}}
               >
 
               <ListItem
@@ -433,7 +455,7 @@ export class Member extends React.Component {
           return (
 
               <div
-                style={{ borderBottom : '1px solid #DBDBDB'}}
+                style={{  borderBottom : '1px solid #DBDBDB', backgroundColor: int.Private ? '#f5f5f5' : null}}
                 >
 
                 <ListItem
@@ -486,8 +508,18 @@ export class Member extends React.Component {
             <ListItem
               id={int._id}
               className='email-interaction'
-              style={{ borderBottom : '1px solid #DBDBDB'}}
-              primaryText={<span>Received your email: <b>{int.Details ? int.Details.Subject : ""}</b></span>}
+              style={{  borderBottom : '1px solid #DBDBDB', backgroundColor: int.Private ? '#f5f5f5' : null}}
+              primaryText={int.Private && int.Creator === fire.auth().currentUser.uid ?
+              <div>
+                {this.state.privateDocs[int._id].details.Subject}
+              </div>
+              :
+              int.Private ?
+              <div>
+                Details are hidden, talk to {this.state.adminMap[int.Creator]}
+              </div>
+              :
+              <span>Received your email: <b>{int.Details ? int.Details.Subject : ""}</b></span>}
               rightIcon={<IconButton
                 tooltip='Options'
                 onClick={(e) => this.handleOptionsClick(e, int)}
@@ -511,7 +543,7 @@ export class Member extends React.Component {
                 onClick={(e) => this.handleOptionsClick(e, int)}
                 style={iconButtonStyles.button}><MoreVert /></IconButton>}
               className='email-interaction'
-                style={{ borderBottom : '1px solid #DBDBDB'}}
+                style={{  borderBottom : '1px solid #DBDBDB', backgroundColor: int.Private ? '#f5f5f5' : null}}
               primaryText={<span>Replied to your email: <b>{int.Details ? int.Details.Subject : ""}</b>
             <div className='story-text' dangerouslySetInnerHTML={this.noteMarkup(int.Details ? int.Details.Message : null)}/>
         </span>}
@@ -532,8 +564,20 @@ export class Member extends React.Component {
             <ListItem
               id={int._id}
               className='email-interaction'
-              style={{  borderBottom : '1px solid #DBDBDB'}}
-              primaryText={<div>
+              style={{  borderBottom : '1px solid #DBDBDB', backgroundColor: int.Private ? '#f5f5f5' : null}}
+              primaryText={
+                int.Private && int.Creator === fire.auth().currentUser.uid ?
+                <div
+                  className='story-text'
+                  dangerouslySetInnerHTML={this.noteMarkup(this.state.privateDocs[int._id] ? this.state.privateDocs[int._id].details.Note : null)}
+                />
+                :
+                int.Private ?
+                <div>
+                  Details are hidden, talk to {this.state.adminMap[int.Creator]}
+                </div>
+                :
+                <div>
                 <div className='story-text' dangerouslySetInnerHTML={this.noteMarkup(int.Details ? int.Details.Note : null)}/>
               </div>}
               rightIcon={<IconButton
@@ -689,6 +733,33 @@ export class Member extends React.Component {
     })
   }
 
+  handleMakePrivate = () => {
+    if (!this.state.targetedInt.Private && fire.auth().currentUser) {
+      db.collection("Private").doc(this.state.targetedInt._id).set({
+        details: this.state.targetedInt.Details,
+        creator: fire.auth().currentUser.uid
+      }).then(() => {
+        return db.collection("Interactions").doc(this.state.targetedInt._id)
+        .update({Private: true, Details: {}})
+      }).then(() => {
+        this.setState({optionsOpen: false})
+      })
+    } else if (this.state.targetedInt.Private && fire.auth().currentUser) {
+      db.collection("Private").doc(this.state.targetedInt._id).get()
+      .then((doc) => {
+        return doc.data().details
+      })
+      .then((details) => {
+        db.collection("Interactions").doc(this.state.targetedInt._id).update({
+          Details: details,
+          Private: false
+        })
+      }).then(() => {
+        this.setState({optionsOpen: false})
+      })
+    }
+  }
+
   render() {
     var pinned = []
     if (this.state.interactions) {
@@ -827,6 +898,16 @@ export class Member extends React.Component {
               <MenuItem
                 onClick={() => this.setState({deleteOpen: true, optionsOpen: false})}
                 primaryText="Remove from this member" leftIcon={<Close/>} />
+              {
+                this.state.targetedInt && this.state.targetedInt.Creator === fire.auth().currentUser.uid ?
+                <MenuItem
+                  onClick={this.handleMakePrivate}
+                  primaryText={`Make ${this.state.targetedInt && this.state.targetedInt.Private ? 'Public' : 'Private'}`}
+                  leftIcon={this.state.targetedInt && this.state.targetedInt.Private ? <LockOpen/> : <Lock/>} />
+                :
+                null
+              }
+
               <MenuItem
                 onClick={() => this.handlePin(this.state.targetedInt)}
                 primaryText={`${this.state.targetedInt && this.state.targetedInt.Pinned

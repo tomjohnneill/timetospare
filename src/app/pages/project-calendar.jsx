@@ -14,7 +14,7 @@ import Menu from 'material-ui/Menu';
 import RaisedButton from 'material-ui/RaisedButton';
 import MenuItem from 'material-ui/MenuItem';
 import "react-big-calendar/lib/css/react-big-calendar.css"
-import {Clock, Place} from '../components/icons.jsx';
+import {Clock, Place, Tag} from '../components/icons.jsx';
 import AutoComplete from 'material-ui/AutoComplete';
 import withMui from '../components/hocs/withMui';
 import TextField from 'material-ui/TextField';
@@ -23,13 +23,17 @@ import DatePicker from 'material-ui/DatePicker';
 import Breadcrumbs from '../components/onboarding/breadcrumbs.jsx';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import 'react-day-picker/lib/style.css';
-import {buttonStyles} from '../components/styles.jsx';
+import AddTag from '../components/addTag.jsx';
+import {buttonStyles, chipStyles} from '../components/styles.jsx';
 import Link from 'next/link';
 import LinesEllipsis from 'react-lines-ellipsis';
 import ShortText from 'material-ui/svg-icons/editor/short-text';
 import {formatDateHHcolonMM} from '../components/timepicker.jsx';
 import Delete from 'material-ui/svg-icons/action/delete'
 import Close from 'material-ui/svg-icons/navigation/close'
+import {CirclePicker} from 'react-color';
+import Chip from 'material-ui/Chip';
+import ColorLens from 'material-ui/svg-icons/image/color-lens'
 
 var tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
@@ -147,15 +151,15 @@ class YourCalendar extends React.Component {
 
   eventStyleGetter = (event, start, end, isSelected) => {
     var publicStyle = {
-        backgroundColor: '#FFCB00',
+        backgroundColor: event.color ? event.color : '#FFCB00',
         borderRadius: 2,
         margin: 2,
-        color: 'black',
+        color:  'black',
         border: '0px',
         display: 'block'
     }
     var calendarStyle = {
-        backgroundColor: '#000AB2',
+        backgroundColor: event.color ? event.color : '#000AB2',
         borderRadius: 2,
         margin: 2,
         color: 'white',
@@ -191,11 +195,34 @@ class YourCalendar extends React.Component {
   });
 };
 
+  handleOptions = (e) => {
+    this.setState({optionsOpen: true, optionsAnchorEl: e.currentTarget})
+  }
+
+  handleOptionsRequestClose = () => {
+    this.setState({optionsOpen: false})
+  }
+
+  handleChangeColor  = (color) => {
+    console.log(color)
+    var event = this.state.targetedEvent
+    event.color = color.hex
+    var indexPosition = this.state.events.indexOf(this.state.targetedEvent)
+    var events = this.state.events
+    events[indexPosition] = event
+    this.setState({events: events, optionsOpen: false})
+    db.collection("Events").doc(this.state.targetedEvent._id).update({color: color.hex})
+  }
+
   handleDeleteEvent = () => {
     db.collection("Events").doc(this.state.targetedEvent._id).delete()
     .then(() => {
       this.setState({viewOpen: false})
     })
+  }
+
+  handleTagAdded = (tag) => {
+    console.log(tag)
   }
 
   render() {
@@ -207,6 +234,21 @@ class YourCalendar extends React.Component {
     return (
       <div>
         <App>
+          {
+            this.state.targetedEvent ?
+            <AddTag
+              selection={[this.state.memberData]}
+              text={`Tag "${this.state.targetedEvent.name.text}"`}
+              organisation={this.props.url.query.view}
+              open={this.state.tagOpen}
+              type='event'
+              event={this.state.targetedEvent._id}
+              onTagAdded={this.handleTagAdded}
+              onRequestClose={() => this.setState({tagOpen:false})}/>
+            :
+            null
+          }
+
           <Popover
             style={{marginLeft: 20, width: 450}}
           open={this.state.viewOpen}
@@ -226,14 +268,28 @@ class YourCalendar extends React.Component {
                 <Delete/>
               </IconButton>
               <IconButton
+                tooltip='Change Tags'
+                onClick={() => this.setState({tagOpen: true, viewOpen: false})}
+                 iconStyle={{color: 'white'}}>
+                <Tag color='white'/>
+              </IconButton>
+              <IconButton
+                tooltip='Change Colour'
+                onClick={this.handleOptions}
+                 iconStyle={{color: 'white'}}>
+                <ColorLens/>
+              </IconButton>
+              <IconButton
                 tooltip='Close'
                 onClick={this.handleRequestClose}
                  iconStyle={{color: 'white'}}>
                 <Close/>
               </IconButton>
+
             </div>
             <Link href={`/project-admin?project=${this.state.targetedEvent._id}&view=${Router.query.view}`}>
-              <div style={{backgroundColor: '#000AB2', color: 'white',
+              <div style={{backgroundColor: this.state.targetedEvent && this.state.targetedEvent.color ? this.state.targetedEvent.color : '#000AB2'
+                , color: 'white',
                 minHeight: '50px', cursor: 'pointer',
                 fontSize: '20px', padding: '80px 32px 0 64px'}}>
                 {this.state.targetedEvent.Name}
@@ -278,6 +334,23 @@ class YourCalendar extends React.Component {
                   </div>
                 </div>
 
+                {this.state.targetedEvent.tags ?
+                <div style={editStyles.container}>
+                  <Tag style={editStyles.icon} fill={'#484848'}/>
+                  <div style={{flex: 1, flexWrap: 'wrap'}}>
+                    {
+                      this.state.targetedEvent.tags.map((tag) => (
+                        <Chip style={chipStyles.chip}
+                          labelStyle={chipStyles.chipLabel}>
+                          {tag}
+                        </Chip>
+                      ))
+                    }
+                  </div>
+                </div>
+                :
+                null}
+
 
               </div>
 
@@ -286,6 +359,20 @@ class YourCalendar extends React.Component {
           null
         }
 
+        </Popover>
+        <Popover
+          style={{overflow: 'hidden'}}
+        open={this.state.optionsOpen}
+        anchorEl={this.state.optionsAnchorEl}
+        anchorOrigin={{horizontal: 'right', vertical: 'center'}}
+        targetOrigin={{horizontal: 'left', vertical: 'center'}}
+        onRequestClose={this.handleOptionsRequestClose}>
+          <div style={{padding: 10, overflow: 'hidden'}}>
+              <CirclePicker
+              color={ this.state.targetedEvent && this.state.targetedEvent.color }
+              onChangeComplete={ this.handleChangeColor }
+            />
+          </div>
         </Popover>
           <Dialog
             modal={false}

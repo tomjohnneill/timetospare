@@ -606,8 +606,8 @@ export class Categorise extends React.Component {
     this.setState({emails: emails})
   }
 
-  handleFinish = () => {
-    this.setState({outlookFinished: true})
+  handleFinish = (type) => {
+    this.setState({[type]: true})
   }
 
   render() {
@@ -639,7 +639,7 @@ export class Categorise extends React.Component {
               </div>
               <div style={{height: 4, width: 100, backgroundColor: '#000AB2', marginBottom: 20}}/>
               {
-                !this.state.outlookFinished ?
+                !this.state.calendarFinished || !this.state.emailFinished ?
                 <div style={{width: '100%', display:'flex', alignItems: 'center', flexDirection: 'column'}}>
                   <CircularProgress size={50} thickness={4} />
                   <div style={{paddingTop: 10}}>
@@ -709,7 +709,7 @@ export class Categorise extends React.Component {
               <div style={{width: 10}}/>
             <RaisedButton label='Save All'
               primary={true}
-              disabled={!this.state.outlookFinished}
+              disabled={!this.state.emailFinished || !this.state.calendarFinished}
               style={buttonStyles.smallSize}
               labelStyle={buttonStyles.smallLabel}
               onClick={() => {

@@ -95,7 +95,7 @@ var randomColor = require('randomcolor')
 export class Organisation extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {tagOpen: false, interactionUsers: {}}
+    this.state = {tagOpen: false, interactionUsers: {}, adminMap: {}}
   }
 
   componentWillUnmount(props) {
@@ -157,6 +157,18 @@ export class Organisation extends React.Component {
           var elem = intDoc.data()
           elem._id = intDoc.id
           data.push(elem)
+          if (elem.Creator && !this.state.adminMap[elem.Creator]) {
+            db.collection("PersonalData").where("managedBy", "==", Router.query.view)
+            .where("User", "==", elem.Creator).get()
+            .then((adminSnapshot) => {
+              adminSnapshot.forEach((adminDoc) => {
+                var adminData = adminDoc.data()
+                var adminMap = this.state.adminMap
+                adminMap[elem.Creator] = adminData['Full Name'] ? adminData['Full Name'] : adminData['Name']
+                this.setState({adminMap: adminMap})
+              })
+            })
+          }
           if (elem.Members) {
             elem.Members.forEach((member) => {
               promises.push(db.collection("PersonalData").doc(member)
@@ -248,24 +260,48 @@ export class Organisation extends React.Component {
 
                 primaryText={int.Details ? int.Details.name : null}
                 primaryTogglesNestedList={true}
-                nestedItems={[<div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
-                  {
-                    int.Members && this.state.membersLoaded
-                     ? int.Members.map((user) => (
-                       <Link
-                         key={user._id}
-                          prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
-                          <Chip
-                            style={chipStyles.chip}
-                            labelStyle={chipStyles.chipLabel}
-                            backgroundColor={this.state.interactionUsers[user] ? this.state.interactionUsers[user].color : null}>
-                             {this.state.interactionUsers[user] ? this.state.interactionUsers['Full Name'] : null}
-                          </Chip>
-                       </Link>
-                    ))
-                    :
-                    null
-                  }
+                nestedItems={[
+                  <div>
+                    <p>Involving:</p>
+                    <div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
+                    {
+                      int.Members && this.state.membersLoaded
+                       ? int.Members.map((user) => (
+                         <Link
+                           key={user._id}
+                            prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
+                            <div style={{margin: 4, textTransform: 'capitalize'}}>
+                              <Chip
+                                style={chipStyles.chip}
+                                labelStyle={chipStyles.chipLabel}
+                                backgroundColor={this.state.interactionUsers[user] ? this.state.interactionUsers[user].color : null}>
+                                {this.state.interactionUsers[user] && this.state.interactionUsers[user]['Full Name']
+                                   ? this.state.interactionUsers[user]['Full Name'][0] : null}
+                              </Chip>
+                          </div>
+                         </Link>
+                      ))
+                      :
+                      null
+                    }
+                  </div>
+                  <p>Within your organisation:</p>
+                    <div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
+                    {
+                      int.Creator && this.state.adminMap && this.state.adminMap[int.Creator]
+                       ?
+
+                        <Chip
+                          style={chipStyles.chip}
+                          labelStyle={chipStyles.chipLabel}
+                          >
+                           {this.state.adminMap[int.Creator]}
+                        </Chip>
+
+                      :
+                      null
+                    }
+                  </div>
                 </div>]}
                 secondaryText={int.Date.toLocaleString('en-gb',
                   {weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'})}
@@ -358,25 +394,57 @@ export class Organisation extends React.Component {
             <ListItem
               className='email-interaction'
               style={{marginBottom: 5 }}
-              nestedItems={[<div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
-                {
-                  int.Members && this.state.membersLoaded
-                   ? int.Members.map((user) => (
-                     <Link  prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
-                       <div style={{margin: 4, textTransform: 'capitalize'}}>
-                          <Chip
-                            style={chipStyles.chip}
-                            labelStyle={chipStyles.chipLabel}
-                            backgroundColor={this.state.interactionUsers[user].color}>
-                            {this.state.interactionUsers[user] && this.state.interactionUsers[user]['Full Name']
-                               ? this.state.interactionUsers[user]['Full Name'][0] : null}
-                          </Chip>
+              nestedItems={[
+                <div style={{paddingLeft: 72}}>
+
+                  <span>Involving:</span>
+                  <div style={{paddingLeft: 10, display: 'inline-flex', flexWrap: 'wrap'}}>
+                  {
+                    int.Members && this.state.membersLoaded
+                     ? int.Members.map((user) => (
+                       <Link
+                         key={user._id}
+                          prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
+                          <div style={{ textTransform: 'capitalize'}}>
+                            <Chip
+                              style={chipStyles.chip}
+                              labelStyle={chipStyles.chipLabel}
+                              backgroundColor={this.state.interactionUsers[user] ? this.state.interactionUsers[user].color : null}>
+                              {this.state.interactionUsers[user] && this.state.interactionUsers[user]['Full Name']
+                                 ? this.state.interactionUsers[user]['Full Name'][0] : null}
+                            </Chip>
                         </div>
-                     </Link>
-                  ))
-                  :
-                  null
-                }
+                       </Link>
+                    ))
+                    :
+                    null
+                  }
+                </div>
+                <div style={{height: 10}}/>
+                <span>Within your organisation:</span>
+
+
+                <div style={{paddingLeft: 10, display: 'inline-flex', flexWrap: 'wrap'}}>
+                  {
+                    int.Creator && this.state.adminMap && this.state.adminMap[int.Creator]
+                     ?
+
+                      <Chip
+                        style={chipStyles.chip}
+                        labelStyle={chipStyles.chipLabel}
+                        >
+                         {this.state.adminMap[int.Creator]}
+                      </Chip>
+
+                    :
+                    null
+                  }
+                </div>
+                <div style={{height: 10}}/>
+                <div style={{borderBottom: '1px solid #DBDBDB', marginBottom: 10}}/>
+                <div>
+                  {int.Details.BodyText.split('----Original message----')[0].split('From:')[0].split('From :')[0].split('www.localtrust.org.uk<http://www.localtrust.org.uk/>Twitter<https://twitter.com/LocalTrust>')[0]}
+                </div>
               </div>]}
               primaryTogglesNestedList={true}
               rightIcon={

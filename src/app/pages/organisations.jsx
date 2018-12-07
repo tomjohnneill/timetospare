@@ -238,7 +238,7 @@ class Cards extends Component {
           </div>
         </Dialog>
         <div style={{display: 'flex', justifyContent: 'center', minHeight: '100vh'}}>
-          <div style={{maxWidth: 1200}}>
+          <div style={{maxWidth: 1200, width: '100%'}}>
             <div style={headerStyles.desktop}>
               Key organisations
             </div>
@@ -246,6 +246,7 @@ class Cards extends Component {
             <div className="card-scene" style={{display: 'flex', textAlign: 'left'}}>
 
               <Container
+                style={{overflowX: 'auto'}}
                 orientation="horizontal"
                 onDrop={this.onColumnDrop}
                 dragHandleSelector=".column-drag-handle"

@@ -34,7 +34,19 @@ export default class AddTag extends React.Component {
     if (this.props.type && this.props.type === 'interaction') {
       db.collection("Interactions").doc(this.props.interaction).
       update("tags", firebase.firestore.FieldValue.arrayUnion(this.state.tag))
-    } else {
+    }
+    else if (this.props.type && this.props.type === 'event') {
+      db.collection("Events").doc(this.props.event).update(
+        "tags", firebase.firestore.FieldValue.arrayUnion(this.state.tag)
+      ).then(() => {
+        this.props.onRequestClose()
+        if (this.props.onTagAdded) {
+           this.props.onTagAdded(this.state.tag)
+        }
+      })
+
+    }
+    else {
       var sfDocRef = db.collection("Organisations").doc(this.props.organisation)
       db.runTransaction((transaction) =>
         transaction.get(sfDocRef)
@@ -83,7 +95,7 @@ export default class AddTag extends React.Component {
   }
 
   render() {
-    
+
     return (
       <div>
         <Dialog
