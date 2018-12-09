@@ -6,7 +6,7 @@
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
     "@babel/runtime": "^7.1.2",
-    "@handsontable/react": "^1.1.0",
+    "@handsontable/react": "^2.1.0",
     "@sentry/browser": "^4.3.0",
     "@zeit/next-css": "^1.0.1",
     "algoliasearch": "^3.27.1",

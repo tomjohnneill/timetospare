@@ -364,19 +364,23 @@ export default class DataValidation extends React.Component {
         td.style.backgroundColor = '#ffefb1';
       }
     }
-
       this.Handsontable.renderers.TextRenderer.apply(this, arguments);
     }
 
   handleRowDelete = (index, amount, physicalRows) => {
-
     var removals = this.state.removals ? this.state.removals : []
     for (let i = 0 ; i < amount ; i ++ ) {
       let gridIndex = Object.keys(this.state.checks[index + i])[0]
       removals.push(gridIndex)
     }
     this.state.checks.splice(index, amount)
-    this.setState({removals: removals})
+    setTimeout(
+        () => {
+            this.setState({removals: removals})
+        },
+        100
+    );
+
   }
 
   handleEdit = (changes) => {
@@ -439,12 +443,17 @@ export default class DataValidation extends React.Component {
     switch(this.state.stage) {
       case 'validation': {
         return (
-          <div >
-            <div style={headerStyles.desktop}>
-              Some of your data looks a bit unusual. You can change it here if you need to.
+          <div style={{paddingLeft: 5, paddingRight: 5, boxSizing: 'border-box', width: '100%', height: '100%'}}>
+            <div style={{paddingLeft: 30}}>
+              <div style={headerStyles.desktop}>
+                Some of your data looks a bit unusual. You can change it here if you need to.
+              </div>
             </div>
+
             {typeof window !== 'undefined' && HotTable ?
-              <div id="hot-app" style={{zIndex: 8, width: '90vw', boxSizing: 'border-box'}}>
+              <div id="hot-app" style={{zIndex: 8, width: '100%',
+                marginBottom: 150,
+                height: '100%', boxSizing: 'border-box'}}>
                 <HotTable
                   renderer={this.groupingRenderer.bind(this)}
                   data={tableRows} colHeaders={true}
@@ -454,10 +463,23 @@ export default class DataValidation extends React.Component {
                   afterChange={this.handleEdit}
                   colHeaders={this.state.colHeaders}
                   afterRemoveRow={this.handleRowDelete}
-                  rowHeaders={true} width="100%" height="600" stretchH="all" />
+                  rowHeaders={true} width="100%" stretchV="all" stretchH="all" />
               </div>
               : null}
-              <div style={styles.nextContainer}>
+              <div style={{
+                  position: 'fixed',
+                  bottom: 0,
+                  height: 80,
+                  zIndex: 5,
+                  display: 'flex',
+                  backgroundColor: 'rgba(255,255,255,0.9)',
+                  alignItems: 'center',
+                  justifyContent: 'flex-end',
+                  paddingRight: 100,
+                  paddingLeft: 20,
+                  boxSizing: 'border-box',
+                  right: 0
+                }}>
                 <FlatButton label='Back'
                   style={buttonStyles.smallSize}
                   labelStyle={buttonStyles.smallLabel}
@@ -490,12 +512,16 @@ export default class DataValidation extends React.Component {
         break;
       }
       case 'org-upload': {
-        return  <OrganisationUpload
-            columns={this.state.columns}
-            data={this.state.grid}
-            goBack={() => this.setState({stage: 'highlight-columns'})}
-            updateDataAndColumns={this.updateFromChild}
-          />
+        return (
+          <div style={{maxWidth: '60%'}}>
+            <OrganisationUpload
+                columns={this.state.columns}
+                data={this.state.grid}
+                goBack={() => this.setState({stage: 'highlight-columns'})}
+                updateDataAndColumns={this.updateFromChild}
+              />
+          </div>
+        )
         break;
       }
       case 'deduplication': {
@@ -732,23 +758,19 @@ export default class DataValidation extends React.Component {
     window.scrollTo(0, 0)
   }
 
+  componentDidCatch(error, info) {
+    // You can also log the error to an error reporting service
+    console.log('hello')
+  }
+
   render() {
 
     return (
-      <div>
-        <div>
+      <div style={{width: '100%', display: 'flex', justifyContent: 'center'}}>
           {
             this.renderCorrectStage()
           }
 
-
-
-
-
-
-
-
-        </div>
       </div>
     )
   }

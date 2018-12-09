@@ -57,15 +57,20 @@ export default class OrganisationUpload extends React.Component {
 
     console.log(this.props.columns)
     var orgIndices = []
+    var notSelectedCounter = 0
     for (var i = 0; i < this.props.columns.length; i ++) {
+      if (this.props.columns[i].selected === false) {
+        notSelectedCounter += 1
+      }
       if (this.props.columns[i].category === 'Organisations') {
-        orgIndices.push(i)
+        orgIndices.push(i - notSelectedCounter)
       }
     }
     console.log(orgIndices)
     var newGrid = this.props.data
     var data = []
     newGrid.forEach((row) => {
+      console.log(row)
       var organisations = []
       var dataRow = {}
       for (let j = 0; j < row.length; j++) {
@@ -143,7 +148,6 @@ export default class OrganisationUpload extends React.Component {
             <HotTable
               data={this.state.organisations}
               contextMenu={true}
-
               afterChange={this.handleEdit}
               colHeaders={['Organisations']}
               rowHeaders={true} width="100%" height="400" stretchH="all" />

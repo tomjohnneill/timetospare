@@ -11,6 +11,7 @@ import fire from '../fire';
 import {buttonStyles} from './styles.jsx';
 import * as math from 'mathjs'
 import * as firebase from 'firebase';
+import {CSVLink} from 'react-csv';
 import 'handsontable/dist/handsontable.full.css';
 import {styles} from './data-validation'
 
@@ -36,6 +37,8 @@ export default class Deduplication extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      toBeDeleted: [],
+      mergedRows: [],
       organisations: [['Example organisation'],
         [''],
         [''],
@@ -365,7 +368,7 @@ export default class Deduplication extends React.Component {
     var orgs
     var valid = false
     Object.keys(row).forEach((key) => {
-      if (row[key].length > 0) {
+      if (row[key] && row[key].length > 0) {
         if (typeof row[key] === 'object') {
           row[key].forEach((option) => {
             if (option.length > 0) {
@@ -518,8 +521,48 @@ export default class Deduplication extends React.Component {
 
 
 
+    addToDownloadList = (row, uploadList) => {
+      var body = {}
+      var orgs
+      var valid = false
+      Object.keys(row).forEach((key) => {
+        if (row[key] && row[key].length > 0) {
+          if (typeof row[key] === 'object') {
+            row[key].forEach((option) => {
+              if (option.length > 0) {
+                valid = true
+              }
+            })
+          } else {
+            valid = true
+          }
+        }
+      })
+
+      if (valid) {
+        Object.keys(row).forEach((key) => {
+          body[key] = row[key]
+        })
+        uploadList.push(body)
+      }
+      return uploadList
+    }
 
 
+
+  prepareDownload = () => {
+    var data = this.props.data
+    var toBeUploaded = []
+    data.forEach((row) => {
+      if (!this.state.toBeDeleted.includes(data.indexOf(row))) {
+        this.addToDownloadList(row, toBeUploaded)
+      }
+    })
+    this.state.mergedRows.map((row) => {
+      this.addToDownloadList(row, toBeUploaded)
+    })
+    return toBeUploaded
+  }
 
 
   handleUpload = () => {
@@ -539,6 +582,7 @@ export default class Deduplication extends React.Component {
   }
 
   render() {
+    var downloadData = this.prepareDownload()
     return (
       <div style={{display: 'flex'}}>
 
@@ -578,6 +622,19 @@ export default class Deduplication extends React.Component {
           : null}
 
           <div style={styles.nextContainer}>
+            <CSVLink
+              filename={`${new Date().toJSON().slice(0,10)} Contacts.csv`}
+              target=""
+              rel='noopener'
+              data={downloadData}>
+              <RaisedButton
+                style={buttonStyles.smallSize}
+                labelStyle={buttonStyles.smallLabel}
+                secondary={true}
+                onClick={this.prepareDownload}
+                label='Download CSV'/>
+            </CSVLink>
+
             <FlatButton label='Back'
               style={buttonStyles.smallSize}
               labelStyle={buttonStyles.smallLabel}
@@ -591,7 +648,7 @@ export default class Deduplication extends React.Component {
             labelStyle={buttonStyles.smallLabel}
             primary={true}
             onClick={this.handleUpload}
-            label='Next'/>
+            label='Upload to Time to Spare'/>
         </div>
       </div>
     )

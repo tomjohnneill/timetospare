@@ -938,9 +938,9 @@
     lodash "^4.17.5"
     protobufjs "^6.8.6"
 
-"@handsontable/react@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@handsontable/react/-/react-1.1.0.tgz#7f7cc822bc4cfab26f843792982ef81838e82d07"
+"@handsontable/react@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@handsontable/react/-/react-2.1.0.tgz#3b87ebfc0d5d47e1b0d07856bd473017a0a7179f"
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
