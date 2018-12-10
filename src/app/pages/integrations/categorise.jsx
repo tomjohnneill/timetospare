@@ -118,6 +118,26 @@ class ClassifiedInteraction extends React.Component {
           showExpandableButton={true}
           subtitle={this.props.type}
           avatar={<Avatar>H</Avatar>}
+          children={<div style={{display: 'inline-flex', flexWrap: 'wrap'}}>
+            {
+              this.props.data && this.props.data.details.map((user) => (
+
+                    user && user.RELATIONSHIPS && user.RELATIONSHIPS.map((rel) => (
+                      rel.OrgNames && Object.keys(rel.OrgNames).map((orgId) => (
+                        <Chip style={chipStyles.chip}
+                          deleteIconStyle={chipStyles.deleteStyle}
+                          onRequestDelete={() => this.handleDeleteOrg(user, orgId)}
+                          labelStyle={chipStyles.chipLabel}>
+                          {rel.OrgNames[orgId]}
+                        </Chip>
+                      ))
+
+
+                    ))
+
+              ))
+            }
+          </div>}
         />
 
       <CardText expandable={true}>

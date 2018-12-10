@@ -537,6 +537,7 @@ class YourCalendar extends React.Component {
                 </h2>
                 <BigCalendar
                     popup
+                    length={90}
                     selectable
                     defaultDate={new Date()}
                     style={{backgroundColor: 'white'}}

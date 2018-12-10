@@ -428,9 +428,7 @@ export default class Header extends React.Component {
                                   <Link  prefetch href='/your-calendar'>
                                     <MenuItem primaryText="Calendar"/>
                                   </Link>
-                                  <Link prefetch href='/groups'>
-                                    <MenuItem primaryText="Groups" />
-                                  </Link>
+
 
                                     <MenuItem onClick={this.handleSignOut}
                                       primaryText="Sign out" />
