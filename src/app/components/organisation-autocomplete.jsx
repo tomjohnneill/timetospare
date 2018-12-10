@@ -81,7 +81,7 @@ export default class OrganisationAutocomplete extends React.Component {
     }
     else {
       return (
-        <div>
+
           <AutoComplete
             fullWidth={true}
             inputStyle={styles.inputStyle}
@@ -100,7 +100,7 @@ export default class OrganisationAutocomplete extends React.Component {
             style={styles.textfield}
 
           />
-        </div>
+
       )
     }
 

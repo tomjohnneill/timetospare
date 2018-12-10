@@ -34,6 +34,7 @@ import Close from 'material-ui/svg-icons/navigation/close'
 import {CirclePicker} from 'react-color';
 import Chip from 'material-ui/Chip';
 import ColorLens from 'material-ui/svg-icons/image/color-lens'
+import OrganisationAutocomplete from '../components/organisation-autocomplete.jsx';
 
 var tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
@@ -230,11 +231,27 @@ class YourCalendar extends React.Component {
     console.log(tag)
   }
 
+  filterByOrg = (org) => {
+    console.log(org)
+    this.setState({filterOrg: org._id})
+  }
+
   render() {
     if (this.state.targetedEvent) {
       var start = new Date(this.state.targetedEvent.start)
       var end = new Date(this.state.targetedEvent.end)
     }
+
+    var filteredEvents = []
+    this.state.events && this.state.events.forEach((event) => {
+      if (this.state.filterOrg) {
+        if (event.Organisations.includes(this.state.filterOrg)) {
+          filteredEvents.push(event)
+        }
+      } else {
+        filteredEvents.push(event)
+      }
+    })
 
     return (
       <div>
@@ -482,9 +499,32 @@ class YourCalendar extends React.Component {
               !this.state.loading ?
               <div style={{height: '80vh', width: '100%', boxSizing: 'border-box', padding: '0px 15px'}}>
                 <h2 style={{textAlign: 'left', width: '100%', display: 'flex', justifyContent: 'space-between'}}>
-                  <div style={{width: '80%', fontSize: '30px', fontWeight: 200}}>
+                  <div style={{flex: 5, fontSize: '30px', fontWeight: 200}}>
                     {this.state.onboarding ? 'Pick a date, and add a project' : 'Your project calendar'}
                   </div>
+                  {
+                    this.state.filterOrg ?
+                    <div style={{display: 'flex', height: '56px', width: '56px', alignItems: 'center',
+                    justifyContent: 'center'}}>
+                      <IconButton
+                        tooltip='Clear Filter'
+                        iconStyle={{zIndex: 4, height: 24, padding: 0, width: 24}}
+                        onClick={() => this.setState({filterOrg: null})}
+                        style={{display: 'flex', alignItems: 'center', padding: 0, width: 24, height: 24}}>
+                        <Close/>
+                      </IconButton>
+                    </div>
+
+                    :
+                    null
+                  }
+                  <div style={{flex: 3, display: 'flex', alignItems: 'center', marginRight: 20}}>
+                    <OrganisationAutocomplete
+                      handleNewRequest={this.filterByOrg}
+                      hintText='Filter by organisation'
+                      org={this.props.url.query.view}/>
+                  </div>
+
                   <IconButton style={{display: 'flex', alignItems: 'center', justifyContent: 'center',
                     boxShadow: '0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2)',
                     padding: 0, height: 56, backgroundColor: '#000AB2',
@@ -500,7 +540,7 @@ class YourCalendar extends React.Component {
                     selectable
                     defaultDate={new Date()}
                     style={{backgroundColor: 'white'}}
-                    events={this.state.events}
+                    events={filteredEvents}
                     startAccessor='start'
                     endAccessor='end'
                     eventPropGetter={this.eventStyleGetter}

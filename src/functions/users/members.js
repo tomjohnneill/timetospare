@@ -26,7 +26,7 @@ const makeNewUserAdmin = functions.firestore
 
               db.collection("PersonalData").add({
                 User: context.params.userId,
-                Name: newValue.Name,
+                'Full Name': newValue.Name,
                 Email: newValue.Email,
                 Admin: true,
                 managedBy: orgDoc.id

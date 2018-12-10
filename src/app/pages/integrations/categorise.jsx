@@ -77,6 +77,28 @@ class ClassifiedInteraction extends React.Component {
     );
   }
 
+  handleDeleteOrg = (user, org) => {
+    console.log(org)
+    var userArray = this.props.data.details
+    var userPosition = userArray.indexOf(user)
+    console.log(userArray[userPosition])
+    userArray[userPosition] && userArray[userPosition].RELATIONSHIPS.forEach((rel) => {
+      console.log(rel.OrgNames[org])
+        delete rel.OrgNames[org]
+        console.log(rel)
+    })
+    console.log(userArray)
+    this.props.editDetails(userArray, this.props.index)
+  }
+
+  handleDeleteUser = (user) => {
+    var userArray = this.props.data.details
+    var userPosition = userArray.indexOf(user)
+    userArray.splice(userPosition, 1)
+    this.props.editDetails(userArray, this.props.index)
+  }
+
+
   handleDelete = () => {
     this.props.handleDelete(this.props.data)
   }
@@ -149,12 +171,12 @@ class ClassifiedInteraction extends React.Component {
                       this.props.data && this.props.data.details.map((user) => (
 
                             user && user.RELATIONSHIPS && user.RELATIONSHIPS.map((rel) => (
-                              rel.OrgNames && Object.values(rel.OrgNames).map((org) => (
+                              rel.OrgNames && Object.keys(rel.OrgNames).map((orgId) => (
                                 <Chip style={chipStyles.chip}
                                   deleteIconStyle={chipStyles.deleteStyle}
-                                  onRequestDelete={() => this.handleDeleteOrg(user, org)}
+                                  onRequestDelete={() => this.handleDeleteOrg(user, orgId)}
                                   labelStyle={chipStyles.chipLabel}>
-                                  {org}
+                                  {rel.OrgNames[orgId]}
                                 </Chip>
                               ))
 
@@ -235,7 +257,7 @@ class InteractionCard extends React.Component {
     console.log(userArray[userPosition])
     var relationshipArray = userArray[userPosition].RELATIONSHIPS
     console.log(relationshipArray)
-    relationshipArray.forEach((rel) => {
+    relationshipArray && relationshipArray.forEach((rel) => {
         delete rel.OrgNames[org]
     })
     this.props.editDetails(userArray, this.props.index)
@@ -398,10 +420,10 @@ export class Categorise extends React.Component {
 
         var attachedOrgs = []
 
-        email.details.forEach((person) => {
+        email.details && email.details.forEach((person) => {
           if (person && person.RELATIONSHIPS) {
-            person.RELATIONSHIPS.forEach((rel) => {
-              Object.keys(rel.OrgNames).forEach((orgId) => {
+            person.RELATIONSHIPS && person.RELATIONSHIPS.forEach((rel) => {
+              Object.keys(rel.OrgNames) && Object.keys(rel.OrgNames).forEach((orgId) => {
                 if (!attachedOrgs.includes({_id: orgId, name: rel.OrgNames[orgId]})) {
                   attachedOrgs.push({_id: orgId, name: rel.OrgNames[orgId]})
                 }
@@ -490,14 +512,14 @@ export class Categorise extends React.Component {
     mixpanel.track('Scraped emails')
     var batch = db.batch()
     var updatesToBatch = []
-    this.state.emails.forEach((email) => {
+    this.state.emails && this.state.emails.forEach((email) => {
       var details = email.details
       var members = [], orgs = []
       var orgNameObj = {}
-      details.forEach((person) => {
+      details && details.forEach((person) => {
         members.push(person._id)
-        person.RELATIONSHIPS.forEach((rel) => {
-          Object.keys(rel.OrgNames).forEach((key) => {
+        person.RELATIONSHIPS && person.RELATIONSHIPS.forEach((rel) => {
+          Object.keys(rel.OrgNames) && Object.keys(rel.OrgNames).forEach((key) => {
             orgs.push(key)
             orgNameObj[key] = rel.OrgNames[key]
           })

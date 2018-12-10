@@ -311,6 +311,8 @@ export class People extends React.Component {
             delete elem.managedBy
             delete elem.User
             delete elem.roleOrgMap
+            delete elem.Admin
+            delete elem.lastLoggedIn
             if (elem.lastContacted) {
               elem['Last Contacted'] = elem.lastContacted.toLocaleString('en-gb',
                 {weekday: 'long', month: 'long', day: 'numeric'})
