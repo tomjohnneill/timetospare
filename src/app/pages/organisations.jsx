@@ -276,6 +276,7 @@ class Cards extends Component {
                               <Draggable style={{display: 'block'}} key={card.id}
                                 id={card.id}>
                                 <ListItem
+                                  onClick={() => Router.push(`/organisation?view=${Router.query.view}&targetorganisation=${card.id}`)}
                                   rightIcon={<IconButton
                                     tooltip='Options'
                                     onClick={(e) => this.handleOptionsClick(e, card)}

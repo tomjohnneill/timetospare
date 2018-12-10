@@ -20,6 +20,7 @@
     "firebase": "^5.0.2",
     "firebase-admin": "^6.0.0",
     "firebase-functions": "^2.0.5",
+    "fuzzysort": "^1.1.4",
     "handsontable": "^6.0.0",
     "is-mobile": "^1.0.0",
     "lunr": "^2.3.5",

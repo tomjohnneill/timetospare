@@ -60,7 +60,7 @@ export const App = ({ children, router, href }) => (
         </ErrorBoundary>
         {
           typeof window !== 'undefined' && localStorage.getItem('sample') == 'true'
-          && router.route !== '/' && router.route !== '/upload-data'
+          && router.route !== '/' && router.route !== '/upload-data' && router.route !== '/onboarding'
           ?
           <div style={{overflowX: 'hidden',position: 'fixed',
             borderTop: '1px solid #DBDBDB', color: 'white',
@@ -72,6 +72,11 @@ export const App = ({ children, router, href }) => (
            </div>
               <RaisedButton label='Use Real Data'
                 style={buttonStyles.bigSize}
+                onClick={() => {
+                  localStorage.setItem('sample', 'false')
+                  Router.push('/onboarding')
+
+                }}
                 labelStyle={buttonStyles.bigLabel}
                 />
 

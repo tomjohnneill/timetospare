@@ -65,7 +65,7 @@ const styles = {
 class YourCalendar extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {}
+    this.state = {loading: true}
   }
 
   getEventInteractions = () => {
@@ -83,6 +83,7 @@ class YourCalendar extends React.Component {
         data.push(elem)
       })
       this.setState({events: data})
+      this.setState({loading: false})
     })
   }
 
@@ -203,6 +204,10 @@ class YourCalendar extends React.Component {
     this.setState({optionsOpen: false})
   }
 
+  addMarkup(note) {
+    return {__html: note}
+  }
+
   handleChangeColor  = (color) => {
     console.log(color)
     var event = this.state.targetedEvent
@@ -287,7 +292,7 @@ class YourCalendar extends React.Component {
               </IconButton>
 
             </div>
-            <Link href={`/project-admin?project=${this.state.targetedEvent._id}&view=${Router.query.view}`}>
+            <Link href={`/projectedit?event=${this.state.targetedEvent._id}&view=${Router.query.view}`}>
               <div style={{backgroundColor: this.state.targetedEvent && this.state.targetedEvent.color ? this.state.targetedEvent.color : '#000AB2'
                 , color: 'white',
                 minHeight: '50px', cursor: 'pointer',
@@ -322,15 +327,28 @@ class YourCalendar extends React.Component {
                   null
                 }
 
+                {
+                  this.state.targetedEvent.summary ?
+                  <div style={editStyles.container}>
+                    <ShortText style={editStyles.icon} fill={'#484848'}/>
+                    <div style={{flex: 1}}>
+                      <div>
+                        {this.state.targetedEvent.summary}
+                      </div>
+                    </div>
+                  </div>
+                  :
+                  null
+                }
+
+
                 <div style={editStyles.container}>
                   <ShortText style={editStyles.icon} fill={'#484848'}/>
                   <div style={{flex: 1}}>
-                    <LinesEllipsis
-                      text={this.state.targetedEvent.description.text}
-                      maxLine='3'
-                      ellipsis='...'
-                      trimRight
-                      basedOn='words'/>
+                    <div
+                      className='story-text'
+                       dangerouslySetInnerHTML={this.addMarkup(this.state.targetedEvent.description.text)}/>
+
                   </div>
                 </div>
 
@@ -461,7 +479,7 @@ class YourCalendar extends React.Component {
 
 
             {
-              this.state.events ?
+              !this.state.loading ?
               <div style={{height: '80vh', width: '100%', boxSizing: 'border-box', padding: '0px 15px'}}>
                 <h2 style={{textAlign: 'left', width: '100%', display: 'flex', justifyContent: 'space-between'}}>
                   <div style={{width: '80%', fontSize: '30px', fontWeight: 200}}>

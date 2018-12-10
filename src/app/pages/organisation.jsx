@@ -28,6 +28,7 @@ import Warning from 'material-ui/svg-icons/alert/warning';
 import MenuItem from 'material-ui/MenuItem';
 import MoreVert from 'material-ui/svg-icons/navigation/more-vert'
 import Delete from 'material-ui/svg-icons/action/delete'
+import * as firebase from 'firebase';
 import Close from 'material-ui/svg-icons/navigation/close'
 import IconButton from 'material-ui/IconButton';
 import {classifyIntsByDate, runThroughInts} from './member.jsx'
@@ -368,6 +369,58 @@ export class Organisation extends React.Component {
             </Link>
           )
 
+          case "PlaceholderEvent":
+            return (
+
+                <div
+                  style={{ borderBottom : '1px solid #DBDBDB'}}
+                  >
+                  <ListItem
+                    id={int._id}
+                    rightIcon={<IconButton
+                      tooltip='Options'
+                      onClick={(e) => this.handleOptionsClick(e, int)}
+                      style={iconButtonStyles.button}><MoreVert /></IconButton>
+                    }
+                    className='email-interaction'
+                    primaryText={int.Details ? int.Details.Subject : null}
+                    primaryTogglesNestedList={true}
+                    nestedItems={[<div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
+                      {
+                        int.Members && this.state.membersLoaded
+                         ? int.Members.map((user) => (
+                           <Link  prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
+                             <div
+                               key={user._id}
+                               style={{margin: 4, textTransform: 'capitalize'}}>
+                                <Chip
+                                  style={chipStyles.chip}
+                                  labelStyle={chipStyles.chipLabel}
+                                  backgroundColor={this.state.interactionUsers[user].color}>
+                                  {this.state.interactionUsers[user] && this.state.interactionUsers[user]['Full Name']
+                                     ? this.state.interactionUsers[user]['Full Name'][0] : null}
+                                </Chip>
+                              </div>
+                           </Link>
+                        ))
+                        :
+                        null
+                      }
+                    </div>]}
+                    secondaryText={int.Date.toLocaleString('en-gb',
+                      {weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'})}
+                      leftAvatar={<Avatar
+                      backgroundColor={'#039BE5'}
+                      icon={
+                        <Link prefetch href={`/project-admin?project=${int._id}&view=${Router.query.view}`}>
+                        <EventIcon color='white'/>
+                      </Link> } />
+                      } />
+
+                </div>
+
+            )
+
       case "Invited":
 
         return (
@@ -607,9 +660,23 @@ export class Organisation extends React.Component {
                   console.log(key)
                   var user = {}
                   user._id = elem.Member
+                  user.relId = doc.id
+                  user.orgNames = elem.OrgNames
                   user['Full Name'] = elem.MemberName[key]
                   data.push(user)
                 })
+              }
+
+              if (elem.RoleMap && elem.OrgNames) {
+                var orgRoleMap = this.state.orgRoleMap ? this.state.orgRoleMap : {}
+                Object.keys(elem.RoleMap).forEach((roleName) => {
+                  if (elem.RoleMap[roleName] == elem.OrgNames[Router.query.targetorganisation]) {
+                    var usersInRole = orgRoleMap[roleName] ? orgRoleMap[roleName] : []
+                    usersInRole.push({_id: elem.Member, name: elem.MemberName})
+                    orgRoleMap[roleName] = usersInRole
+                  }
+                })
+                this.setState({orgRoleMap : orgRoleMap})
               }
             })
 
@@ -633,6 +700,15 @@ export class Organisation extends React.Component {
 
   }
 
+  handleDeleteOrg = (memberId, relId, orgNames) => {
+    delete orgNames[this.state.organisation.details.name]
+    db.collection("Relationships").doc(relId).update({OrgNames : orgNames, ['Organisations.' + Router.query.targetorganisation] : false})
+    .then(() => {
+      this.updateData()
+    })
+    db.collection("PersonalData").doc(memberId).update("organisations", firebase.firestore.FieldValue.arrayRemove(this.state.organisation.details.name))
+  }
+
   render() {
     var pinned = []
     if (this.state.interactions) {
@@ -642,6 +718,8 @@ export class Organisation extends React.Component {
         }
       })
     }
+
+    console.log(this.state)
     return (
       <div>
         <App>
@@ -795,6 +873,8 @@ export class Organisation extends React.Component {
                         <Chip
                           key={member._id}
                           style={chipStyles.chip}
+                          deleteIconStyle={chipStyles.deleteStyle}
+                          onRequestDelete={() => this.handleDeleteOrg(member._id, member.relId, member.orgNames)}
                           labelStyle={chipStyles.chipLabel}
                           backgroundColor={randomColor({luminosity: 'light'})}>
                           {member['Full Name']}
@@ -814,31 +894,31 @@ export class Organisation extends React.Component {
                      nestedItems = {
                        [<div>
                            {
-                             this.state.members ?
-                             this.state.members.map((member) => (
-                               member[this.props.url.query.targetorganisation] ?
-                               member[this.props.url.query.targetorganisation].map((role) => (
-                                 <div
-                                   key={member._id}
-                                   style={{display: 'flex', overflowX: 'hidden', alignItems: 'center',
-                                    borderBottom: '1px solid #DBDBDB'}}>
-                                   <div style={{flex: 3, padding: '5px 5px 5px 15px', alignItems: 'center'}}>
-                                     <b>{member['Full Name']}</b>
-                                   </div>
-                                   <div style={{flex: 7, padding: 5}}>
-                                     <Chip
-                                       backgroundColor={randomColor({luminosity: 'light'})}
-                                       style={chipStyles.chip}
-                                       labelStyle={chipStyles.chipLabel}
-                                       >
-                                       {role}
-                                     </Chip>
-
-                                   </div>
+                             this.state.orgRoleMap ?
+                             Object.keys(this.state.orgRoleMap).map((roleName) => (
+                               <div style={{display: 'flex', overflowX: 'hidden', alignItems: 'center',
+                                  borderBottom: '1px solid #DBDBDB'}}>
+                                 <div style={{flex: 3, padding: '5px 5px 5px 15px', alignItems: 'center'}}>
+                                   <b>{roleName}</b>
                                  </div>
-                               ))
-                               :
-                               null
+
+                                 <div style={{flex: 7, padding: 5, flexWrap: 'wrap'}}>
+                                   {
+                                     this.state.orgRoleMap[roleName].map((member) => (
+                                       <Link href={`/member?view=${Router.query.view}&member=${member._id}`}>
+                                         <Chip
+                                           style={chipStyles.chip}
+                                           labelStyle={chipStyles.chipLabel}
+                                           >
+                                           {member.name}
+                                         </Chip>
+                                       </Link>
+                                     ))
+                                   }
+
+
+                                 </div>
+                               </div>
                              ))
                               : null
                            }

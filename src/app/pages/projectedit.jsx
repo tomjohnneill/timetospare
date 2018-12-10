@@ -136,6 +136,38 @@ class ProjectEdit extends React.Component {
   }
 
   componentDidMount(props) {
+    if (Router.query.event) {
+      db.collection("Events").doc(Router.query.event).get().then((eventDoc) => {
+        var event = eventDoc.data()
+
+        this.setState({
+          startDate: new Date(event.start),
+          endDate: new Date(event.end),
+          title: event.name.text,
+          story: event.description.text,
+          tagline: event.summary,
+          address: event.Location,
+          geopoint: event.Geopoint,
+        })
+        if (event.Organisations) {
+          var orgArray = []
+          var orgLookups = []
+          event.Organisations.forEach((org) => {
+            orgLookups.push(db.collection("OrgData").doc(org).get().then((orgDoc) => {
+              var orgData = orgDoc.data()
+              orgArray.push({name: orgData.details.name, _id: org})
+            }))
+          })
+          console.log(orgArray)
+          Promise.all(orgLookups).then(() => {
+            this.setState({selectedOrgs: orgArray})
+          })
+
+        }
+
+      })
+    }
+
     this.setState({client: true})
     if (Router.query.organisation) {
       fire.auth().onAuthStateChanged((user) => {
@@ -285,10 +317,18 @@ class ProjectEdit extends React.Component {
     console.log('Saving project')
     var batch = db.batch();
 
+    var orgs = []
+    if (this.state.selectedOrgs) {
+      this.state.selectedOrgs.forEach((org) => {
+        orgs.push(org._id)
+      })
+    }
+
 
     var body = {
       'start' : this.state.startDate,
       'end' : this.state.endDate,
+      "Organisations": orgs,
       name:  {
         html: this.state.title ? this.state.title : null,
         text: this.state.title ? this.state.title : null,
@@ -315,7 +355,8 @@ class ProjectEdit extends React.Component {
             EventId: docRef.id
           },
           managedBy: Router.query.view,
-          Type: 'PlaceholderEvent'
+          Type: 'PlaceholderEvent',
+          Organisations: orgs
         })
       })
       Router.back()
@@ -364,6 +405,14 @@ class ProjectEdit extends React.Component {
     this.setState({users: users})
   }
 
+  removeOrg = (orgId, orgName) => {
+    var orgs = this.state.selectedOrgs
+    var index = orgs.indexOf({_id: orgId, name: orgName})
+    orgs.splice(index, 1)
+    this.setState({selectedOrgs: orgs})
+  }
+
+
   handleStoryChange = (value) => {
     this.setState({story: value})
   }
@@ -386,14 +435,12 @@ class ProjectEdit extends React.Component {
       people.forEach((person) => {
         if (person['Full Name'].substring(0, length).toLowerCase() === this.state.searchText.toLowerCase()) {
           filteredPeople.push(person)
-          console.log(person)
         }
       })
-      console.log(filteredPeople)
     }
 
     const ReactQuill = this.ReactQuill
-    console.log(styles)
+
     console.log(this.state)
     return (
       <div>
@@ -637,7 +684,7 @@ class ProjectEdit extends React.Component {
                             <Chip style={chipStyles.chip}
                               labelStyle={chipStyles.chipLabel}
                               deleteIconStyle={chipStyles.deleteStyle}
-                              onRequestDelete={() => this.removePerson(org._id, org.name)}
+                              onRequestDelete={() => this.removeOrg(org._id, org.name)}
                               >
                               {org.name}
                             </Chip>

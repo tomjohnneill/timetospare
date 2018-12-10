@@ -651,7 +651,7 @@ export class Member extends React.Component {
 
   handleDeleteOrg = (key, relId, orgNames) => {
     delete orgNames[key]
-    db.collection("Relationships").doc(relId).update({OrgNames : orgNames})
+    db.collection("Relationships").doc(relId).update({OrgNames : orgNames, ['Organisations.' + key] : false})
     .then(() => {
       this.updateData()
     })

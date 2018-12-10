@@ -15,8 +15,9 @@ export class Onboarding extends React.Component {
   }
 
   handleSaveOrg = (details) => {
-    var docRef = db.collection("Organisations").doc()
-    docRef.set(details).then(() => {
+    console.log(details)
+    db.collection("Organisations").add(details)
+    .then((docRef) => {
       db.collection("User").doc(fire.auth().currentUser.uid).get().then((userDoc) => {
         var userData = userDoc.data()
         db.collection("PersonalData").add({

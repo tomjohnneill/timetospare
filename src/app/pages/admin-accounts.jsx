@@ -203,7 +203,7 @@ export class AdminAccounts extends React.Component {
 
 
                           <div style={{textAlign: 'left', textDecoration: 'underline', fontWeight: 700}}>
-                            {user && user['Name']}
+                            {user && user['Full Name']}
                           </div>
 
 

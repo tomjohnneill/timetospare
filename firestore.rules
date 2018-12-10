@@ -6,6 +6,11 @@ service cloud.firestore {
       allow write: if request.auth.uid == userId;
   	}
 
+    match /Private/{intId} {
+      allow read: if request.auth.uid == resource.data.creator;
+      allow write: if request.auth.uid == resource.data.creator || request.auth.uid == request.resource.data.creator;
+  	}
+
     match /Organisations/{orgId} {
       allow read: if true;
       allow update: if get(/databases/$(database)/documents/Organisations/$(orgId)).data.Admin[request.auth.uid] == true;

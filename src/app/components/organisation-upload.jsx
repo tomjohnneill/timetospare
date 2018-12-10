@@ -13,6 +13,8 @@ import * as math from 'mathjs'
 import * as firebase from 'firebase';
 import 'handsontable/dist/handsontable.full.css';
 import {styles} from './data-validation';
+import fuzzysort from 'fuzzysort';
+
 
 function uniq(a) {
     var seen = {};
@@ -55,7 +57,7 @@ export default class OrganisationUpload extends React.Component {
   lookUpOrgs = () => {
     // match organistions where organisations are not in separate columns
 
-    console.log(this.props.columns)
+
     var orgIndices = []
     var notSelectedCounter = 0
     for (var i = 0; i < this.props.columns.length; i ++) {
@@ -66,34 +68,44 @@ export default class OrganisationUpload extends React.Component {
         orgIndices.push(i - notSelectedCounter)
       }
     }
-    console.log(orgIndices)
+
     var newGrid = this.props.data
     var data = []
+
+
     newGrid.forEach((row) => {
-      console.log(row)
+
       var organisations = []
       var dataRow = {}
       for (let j = 0; j < row.length; j++) {
         if (this.props.columns[j].category) {
           if (dataRow[this.props.columns[j].category]) {
-            var elem = row[j].toLowerCase().trim().replace(/(\r\n|\n|\r)/gm, '')
+            var elem = row[j].trim().toLowerCase().replace(/(\r\n|\n|\r)/gm, '').trim()
             dataRow[this.props.columns[j].category].push(elem)
           } else {
-            var elem = row[j].toLowerCase().trim().replace(/(\r\n|\n|\r)/gm, '')
+            var elem = row[j].trim().replace(/(\r\n|\n|\r)/gm, '').trim()
             dataRow[this.props.columns[j].category] = [elem]
           }
         } else {
           dataRow[this.props.columns[j].name] = row[j]
         }
         if (orgIndices.includes(j)) {
+
           this.state.uniqueOrgs.forEach((org) => {
-            if (row[j].trim().toLowerCase().replace(/(\r\n|\n|\r)/gm, '').includes(org[0].trim().toLowerCase().replace(/(\r\n|\n|\r)/gm, ''))) {
+            /*
+            if (fuzzysort.go(org[0], [row[j]])[0] && fuzzysort.go(org[0], [row[j]])[0].score <= 0) {
+              organisations.push(org[0].trim().replace(/(\r\n|\n|\r)/gm, '').replace('  ', ''))
+            }
+            */
+
+            if (row[j].trim().replace(/(\r\n|\n|\r)/gm, '').trim().includes(org[0].trim().replace(/(\r\n|\n|\r)/gm, '').replace('  ', ' ').trim())) {
               organisations.push(org[0])
             }
+
           })
         }
       }
-      console.log(organisations)
+
       dataRow.organisations = organisations
       data.push(dataRow)
     })
@@ -103,7 +115,7 @@ export default class OrganisationUpload extends React.Component {
 
     var cleanOrgs = []
     this.state.uniqueOrgs.forEach((orgArray) => {
-      cleanOrgs.push(orgArray[0].toLowerCase().replace(/(\r\n|\n|\r)/gm, ''))
+      cleanOrgs.push(orgArray[0].replace(/(\r\n|\n|\r)/gm, '').replace('  ', ' ').trim())
     })
     console.log(cleanOrgs)
     console.log(data)

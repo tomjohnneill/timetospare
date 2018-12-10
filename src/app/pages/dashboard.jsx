@@ -312,7 +312,7 @@ export class Organisation extends React.Component {
                             style={{width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center'}}>
                             <div style={{flex: 1}}>
                               <div style={styles.tableRow}>
-                                {user && user.Name}
+                                {user && user['Full Name']}
                               </div>
                             </div>
 

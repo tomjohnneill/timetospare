@@ -89,8 +89,12 @@ export default class Deduplication extends React.Component {
     var data = []
     grid.forEach((row) => {
       var dataRow = {}
+      var notSelectedCounter = 0
       for (var i = 0; i < row.length; i ++ ) {
-        dataRow[this.props.columns[i].name] = row[i]
+        if (this.props.columns[i].selected === false) {
+          notSelectedCounter += 1
+        }
+        dataRow[this.props.columns[i - notSelectedCounter].name] = row[i]
       }
       data.push(dataRow)
     })
@@ -99,9 +103,13 @@ export default class Deduplication extends React.Component {
   convertRowToKeys = (row) => {
     console.log('columns', this.props.columns)
     var keyedData = {}
-
+    var notSelectedCounter = 0
     for (var i = 0; i < this.props.columns.length; i ++) {
-      var column = this.props.columns[i]
+      if (this.props.columns[i].selected === false) {
+        notSelectedCounter += 1
+      }
+      var column = this.props.columns[i - notSelectedCounter]
+      console.log(column)
       if (column.category) {
         keyedData[column.category] = row[i]
       } else {
@@ -486,7 +494,7 @@ export default class Deduplication extends React.Component {
           console.log(record.organisations)
           console.log(orgUpdateObjects)
           record.organisations.forEach((org) => {
-            let cleanOrg = org.trim().toLowerCase().replace(/(\r\n|\n|\r)/gm, '')
+            let cleanOrg = org.trim().replace(/(\r\n|\n|\r)/gm, '').replace('  ', ' ').trim()
             orgNames[orgUpdateObjects[cleanOrg].ref.id] = org
             orgIds[orgUpdateObjects[cleanOrg].ref.id] = true
           })
@@ -509,7 +517,7 @@ export default class Deduplication extends React.Component {
             })
         }
       })
-
+      
       Object.values(orgUpdateObjects).forEach((orgObj) => {
         console.log(orgObj)
         db.collection("OrgData").doc(orgObj.ref.id).set(orgObj.data, {merge: true})
@@ -583,6 +591,7 @@ export default class Deduplication extends React.Component {
 
   render() {
     var downloadData = this.prepareDownload()
+    console.log(this.props)
     return (
       <div style={{display: 'flex'}}>
 
