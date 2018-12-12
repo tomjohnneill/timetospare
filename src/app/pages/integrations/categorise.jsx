@@ -8,6 +8,8 @@ import FlatButton from 'material-ui/FlatButton';
 import RaisedButton from 'material-ui/RaisedButton';
 import Avatar from 'material-ui/Avatar';
 import ShortText from 'material-ui/svg-icons/editor/short-text';
+import {List, ListItem} from 'material-ui/List';
+import Email from 'material-ui/svg-icons/communication/email';
 import Chip from 'material-ui/Chip';
 import OutlookIntegrate from '../../components/outlook/integrate.jsx';
 import CircularProgress from 'material-ui/CircularProgress';
@@ -100,7 +102,7 @@ class ClassifiedInteraction extends React.Component {
 
 
   handleDelete = () => {
-    this.props.handleDelete(this.props.data)
+    this.props.handleDelete(this.props.conversationId)
   }
 
   render() {
@@ -252,6 +254,10 @@ class ClassifiedInteraction extends React.Component {
 class InteractionCard extends React.Component {
   constructor(props) {
     super(props)
+
+
+
+
     this.state = {visible: false}
   }
 
@@ -265,22 +271,23 @@ class InteractionCard extends React.Component {
   }
 
   handleDeleteUser = (user) => {
-    var userArray = this.props.data.details
+    var userArray = this.props.users
     var userPosition = userArray.indexOf(user)
     userArray.splice(userPosition, 1)
-    this.props.editDetails(userArray, this.props.index)
+    console.log(userArray)
+    this.props.editUsers(userArray, this.props.conversationId)
   }
 
-  handleDeleteOrg = (user, org) => {
-    var userArray = this.props.data.details
-    var userPosition = userArray.indexOf(user)
-    console.log(userArray[userPosition])
-    var relationshipArray = userArray[userPosition].RELATIONSHIPS
-    console.log(relationshipArray)
-    relationshipArray && relationshipArray.forEach((rel) => {
-        delete rel.OrgNames[org]
-    })
-    this.props.editDetails(userArray, this.props.index)
+  handleDeleteOrg = (relationships, org) => {
+    var rels = this.props.relationships
+    var position = this.props.relationships.indexOf(relationships)
+    console.log(rels)
+    console.log(rels[position])
+    delete rels[position].OrgNames[org]
+
+    console.log(rels)
+    this.props.editOrgs(rels, this.props.conversationId)
+
   }
 
   handleDeleteTag = (user, tag) => {
@@ -292,36 +299,38 @@ class InteractionCard extends React.Component {
   }
 
   handleDelete = () => {
-    this.props.handleDelete(this.props.data)
+    this.props.handleDelete(this.props.conversationId)
   }
 
   handleConfirm = () => {
-    this.props.classify(this.props.index)
+    this.props.classify(this.props.conversationId)
   }
 
   render() {
     return (
       <Card
-        key={this.props.data.details.Subject}
+        key={this.props.conversationId}
         style={{textAlign: 'left', marginBottom: 20, boxShadow: 'none',
         opacity: this.state.visible ? 100 : 0,
         transition: 'opacity 0.5s',
-        backgroundColor: this.props.data.classified ? 'teal' : null,
         borderBottom: '1px solid #DBDBDB'}}>
         <CardHeader
-          title={this.props.data.email ? this.props.data.email.Subject : this.props.data.event.Subject}
+          actAsExpander={true}
+          title={this.props.Subject}
           subtitle={this.props.type}
-          avatar={<Avatar>H</Avatar>}
+          avatar={<Avatar icon={<Email /> }/>}
         />
 
-        <CardText>
+        <CardText
+          actAsExpander={true}
+          >
           <div style={{display: 'flex'}}>
             <div style={{flex: 1, paddingRight: 20}}>
               <div style={{display: 'flex'}}>
                 <ShortText style={editStyles.icon} color={'#484848'}/>
                 <div style={{display: 'flex', flexWrap: 'wrap', textTransform: 'capitalize'}}>
                   {
-                    this.props.data && this.props.data.details.map((user) => (
+                    this.props.users.map((user) => (
                       user ?
                       <Chip style={chipStyles.chip}
                         deleteIconStyle={chipStyles.deleteStyle}
@@ -336,23 +345,6 @@ class InteractionCard extends React.Component {
                 </div>
               </div>
 
-              <div style={{display: 'flex', paddingTop: 16}}>
-                <div style={{width: 54}}>
-                  <ShortText style={editStyles.icon} color={'#484848'}/>
-                </div>
-                <div style={{flex: 1}}>
-
-                  <LinesEllipsis
-                    text={this.props.data.email ? this.props.data.email.Body.Content :
-                            this.props.data.event.Body.Content}
-                    maxLine='3'
-                    ellipsis='...'
-                    trimRight
-                    basedOn='words'/>
-
-                </div>
-
-              </div>
             </div>
             <div style={{flex: 1}}>
               <div style={{display: 'flex'}}>
@@ -362,13 +354,11 @@ class InteractionCard extends React.Component {
                 <div style={{flex: 1}}>
                   <div style={{display: 'flex', flexWrap: 'wrap'}}>
                     {
-                      this.props.data && this.props.data.details.map((user) => (
-
-                            user && user.RELATIONSHIPS && user.RELATIONSHIPS.map((rel) => (
+                      this.props.relationships && this.props.relationships.map((rel) => (
                               rel.OrgNames && Object.keys(rel.OrgNames).map((orgId) => (
                                 <Chip style={chipStyles.chip}
                                   deleteIconStyle={chipStyles.deleteStyle}
-                                  onRequestDelete={() => this.handleDeleteOrg(user, orgId)}
+                                  onRequestDelete={() => this.handleDeleteOrg(rel, orgId)}
                                   labelStyle={chipStyles.chipLabel}>
                                   {rel.OrgNames[orgId]}
                                 </Chip>
@@ -377,36 +367,39 @@ class InteractionCard extends React.Component {
 
                             ))
 
-                      ))
-                    }
-                  </div>
-                </div>
-              </div>
-              <div style={{display: 'flex', paddingTop: 16}}>
-                <div style={{width: 54}}>
-                  <ShortText style={editStyles.icon} color={'#484848'}/>
-                </div>
-                <div style={{flex: 1}}>
-                  <div style={{display: 'flex', flexWrap: 'wrap'}}>
-                    {
-                      this.props.data && this.props.data.details.map((user) => (
-                            user && user.tags && user.tags.map((tag) => (
-                              <Chip style={chipStyles.chip}
-                                deleteIconStyle={chipStyles.deleteStyle}
-                                onRequestDelete={() => this.handleDeleteTag(user, tag)}
-                                labelStyle={chipStyles.chipLabel}>
-                                {tag}
-                              </Chip>
-                            ))
-                      ))
                     }
                   </div>
                 </div>
               </div>
 
+
             </div>
           </div>
         </CardText>
+        <CardText expandable={true}>
+          <List>
+            {
+              Object.values(this.props.conversation).map((email) => (
+                email && email.email ?
+                <ListItem
+                  leftAvatar={<Avatar
+                    backgroundColor={'#DBDBDB'}
+                    icon={<Email /> } />}
+                  children={<LinesEllipsis
+                    text={email.email.Body.Content}
+                    maxLine='3'
+                    ellipsis='...'
+                    trimRight
+                    basedOn='words'/>}
+                  />
+                :
+                null
+              ))
+            }
+
+          </List>
+        </CardText>
+
         <CardActions style={{textAlign: 'right'}}>
           <FlatButton
             onClick={this.handleDelete}
@@ -429,9 +422,22 @@ class InteractionCard extends React.Component {
 export class Categorise extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {outlookFinished: false}
+    this.state = {outlookFinished: false, conversations: {}}
   }
 
+  handleEditUsers = (users, conversation)  => {
+    console.log(users)
+    console.log(conversation)
+    var conversations = this.state.conversations
+    conversations[conversation].users = users
+    this.setState({conversations: conversations})
+  }
+
+  handleEditOrgs = (orgs, conversation)  => {
+    var conversations = this.state.conversations
+    conversations[conversation].relationships = orgs
+    this.setState({conversations: conversations})
+  }
 
   smartCategorise = (email, type) => {
 
@@ -528,6 +534,78 @@ export class Categorise extends React.Component {
     return email
   }
 
+  smartClassConversation = (conversation) => {
+    console.log(conversation)
+    if (conversation.relationships && conversation.relationships.length < 2) {
+      var editedConvo = conversation
+      editedConvo.classified = true
+      return editedConvo
+    } else {
+      var editedConvo = conversation
+      editedConvo.classified = false
+      return editedConvo
+    }
+  }
+
+  handleSaveConversations = () => {
+    mixpanel.track('Scraped emails')
+    var batch = db.batch()
+    var updatesToBatch = []
+    this.state.conversations && Object.values(this.state.conversations).forEach((convData) => {
+      console.log('data',convData)
+      console.log('data.emails',convData.emails)
+
+      convData.emails && Object.values(convData.emails).forEach((email) => {
+        var details = email.details
+        var members = [], orgs = []
+        var orgNameObj = {}
+
+        convData.users && convData.users.forEach((person) => {
+          members.push(person._id)
+        })
+
+        convData.relationships && convData.relationships.forEach((rel) => {
+          Object.keys(rel.OrgNames) && Object.keys(rel.OrgNames).forEach((key) => {
+            orgs.push(key)
+            orgNameObj[key] = rel.OrgNames[key]
+          })
+        })
+
+        let body = {
+          Creator : fire.auth().currentUser.uid,
+          Members: members,
+          Organisations: orgs,
+          OrgNames: orgNameObj,
+          managedBy: localStorage.getItem('ttsOrg')
+        }
+
+        if (email.email) {
+          var data = email.email
+          body.Details = data
+          body.Type = 'Email'
+          body.Date = new Date(data.SentDateTime)
+          console.log(body)
+
+          updatesToBatch.push({docRef: db.collection("Interactions").doc(data.Id), data: body})
+
+        }
+      })
+    })
+
+    const batches = chunk(updatesToBatch, 450).map(postSnapshots => {
+                const writeBatch = db.batch();
+
+                postSnapshots.forEach(post => {
+                  writeBatch.set(post.docRef, post.data, {merge: true});
+                });
+
+                return writeBatch.commit();
+            });
+    return  Promise.all(batches).then(() => {
+      Router.push('/dashboard')
+    });
+  }
+
   handleSaveAll = () => {
     mixpanel.track('Scraped emails')
     var batch = db.batch()
@@ -610,10 +688,59 @@ export class Categorise extends React.Component {
   }
 
   addEmails = (result) => {
+    var conversations = this.state.conversations
+
+
     var newEmails = result.data && result.data.data
     var currentEmails = this.state.emails ? this.state.emails : []
     newEmails.forEach((email) => {
       if (email.email) {
+        if (email.email.ConversationId) {
+          var thisConversation = conversations[email.email.ConversationId]
+          if (thisConversation && thisConversation.emails) {
+            thisConversation.emails[email.email.Id] = this.smartCategorise(email, 'email')
+          } else {
+            thisConversation = {emails: {[email.email.Id] : this.smartCategorise(email, 'email')}}
+          }
+          var conversationRelationships = thisConversation.relationships ? thisConversation.relationships : []
+          var conversationUsers = thisConversation.users ? thisConversation.users : []
+          thisConversation.Subject = email.email.Subject
+          Object.values(thisConversation.emails).forEach((data) => {
+            var details = data.details
+            details && details.forEach((person) => {
+              person.RELATIONSHIPS && person.RELATIONSHIPS.forEach((rel) => {
+
+
+                var alreadyExists = false
+                for (var i = 0; i < conversationRelationships.length; i++) {
+                  var relOrgNames = conversationRelationships[i].OrgNames
+                  Object.keys(rel.OrgNames).forEach((orgId) => {
+                    if (relOrgNames[orgId]) {
+                      alreadyExists = true
+                    }
+                  })
+                }
+                if (!alreadyExists) {
+                  conversationRelationships.push(rel)
+                }
+
+              })
+              const result = conversationUsers.filter(word => word._id === person._id)
+              if (result.length === 0) {
+                conversationUsers.push(person)
+              }
+
+            })
+          })
+          thisConversation.relationships = conversationRelationships
+          thisConversation.users = conversationUsers
+
+          conversations[email.email.ConversationId] = thisConversation
+
+
+          this.setState({conversations: conversations})
+        }
+
         var editedEmail = this.smartCategorise(email, 'email')
         currentEmails.unshift(editedEmail)
         this.setState({emails: currentEmails})
@@ -627,18 +754,17 @@ export class Categorise extends React.Component {
 
   }
 
-  deleteEmail = (email) => {
-    var index = this.state.emails.indexOf(email)
-    var emails = this.state.emails
-    emails.splice(index, 1)
-    this.setState({emails: emails})
+  deleteEmail = (convId) => {
+    var conversations = this.state.conversations
+    delete conversations[convId]
+    this.setState({conversations: conversations})
   }
 
-  handleClassify = (index) => {
-    var emails = this.state.emails
-    emails[index].classified = true
-    console.log(emails)
-    this.setState({emails: emails})
+  handleClassify = (convId) => {
+    var conversations = this.state.conversations
+    console.log(conversations)
+    conversations[convId].classified = true
+    this.setState({conversations: conversations})
   }
 
 
@@ -663,7 +789,21 @@ export class Categorise extends React.Component {
         }
       })
     }
-    console.log(this.state)
+
+    var emailConversations = [], classifiedConversations = []
+    if (this.state.conversations) {
+
+      Object.keys(this.state.conversations).forEach((conv) => {
+        console.log(this.smartClassConversation(this.state.conversations[conv]))
+        if (this.smartClassConversation(this.state.conversations[conv]).classified) {
+          classifiedConversations.push({_id: conv, data: this.state.conversations[conv]})
+        } else {
+          emailConversations.push({_id: conv, data: this.state.conversations[conv]})
+        }
+
+      })
+    }
+
     return (
       <div>
         <App>
@@ -694,6 +834,47 @@ export class Categorise extends React.Component {
                 :
                 null
               }
+              {
+                emailConversations.map((conversation) => (
+                    <InteractionCard
+                      classify={this.handleClassify}
+                      handleDelete={this.deleteEmail}
+                      editDetails={this.editEmailDetailsFromChild}
+                      editUsers={this.handleEditUsers}
+                      editOrgs={this.handleEditOrgs}
+                      conversationId={conversation._id}
+                      relationships={conversation.data.relationships}
+                      users={conversation.data.users}
+                      Subject={conversation.data.Subject}
+                      type={'Email'} conversation={conversation.data.emails}/>
+                ))
+              }
+              {
+                classifiedConversations.length > 0 ?
+                <h2 style={headerStyles.desktop}>
+                  Classified interactions
+                </h2>
+                :
+                null
+              }
+              {
+                classifiedConversations.map((conversation) => (
+                  <InteractionCard
+                    classify={this.handleClassify}
+                    handleDelete={this.deleteEmail}
+                    editDetails={this.editEmailDetailsFromChild}
+                    editUsers={this.handleEditUsers}
+                    editOrgs={this.handleEditOrgs}
+                    conversationId={conversation._id}
+                    relationships={conversation.data.relationships}
+                    users={conversation.data.users}
+                    Subject={conversation.data.Subject}
+                    type={'Email'} conversation={conversation.data.emails}/>
+                ))
+              }
+
+              {/*
+
               {
                 inputRequired.map((email) => (
                   email ?
@@ -737,6 +918,7 @@ export class Categorise extends React.Component {
                     null
                   ))
                 }
+                */}
             </div>
           </div>
           <div style={editStyles.nextContainer}>
@@ -744,8 +926,7 @@ export class Categorise extends React.Component {
               style={buttonStyles.smallSize}
               labelStyle={buttonStyles.smallLabel}
               onClick={() => {
-                this.setState({stage: null})
-                window.scrollTo(0, 0)
+                Router.back()
               }}
               />
               <div style={{width: 10}}/>
@@ -755,7 +936,7 @@ export class Categorise extends React.Component {
               style={buttonStyles.smallSize}
               labelStyle={buttonStyles.smallLabel}
               onClick={() => {
-                this.handleSaveAll()
+                this.handleSaveConversations()
               }}
               />
           </div>

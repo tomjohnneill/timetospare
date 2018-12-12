@@ -344,7 +344,13 @@ class ProjectEdit extends React.Component {
       created: new Date(),
     }
     console.log(body)
-    db.collection("Events").add(body).then((docRef) => {
+    var eventRef
+    if (Router.query.event) {
+      eventRef = db.collection("Events").doc(Router.query.event)
+    } else {
+      eventRef = db.collection("Events").doc()
+    }
+    eventRef.set(body ,{merge: true}).then(() => {
       this.state.selectedOrgs.forEach((org) => {
         db.collection("Interactions").add({
           Creator : fire.auth().currentUser.uid,
@@ -352,7 +358,7 @@ class ProjectEdit extends React.Component {
           Details: {
             Subject: body.name.text,
             BodyText: body.description.text,
-            EventId: docRef.id
+            EventId: eventRef.id
           },
           managedBy: Router.query.view,
           Type: 'PlaceholderEvent',

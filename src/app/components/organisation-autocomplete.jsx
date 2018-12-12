@@ -93,6 +93,7 @@ export default class OrganisationAutocomplete extends React.Component {
             onNewRequest={this.handleNewRequest}
             style={styles.inputStyle}
             dataSource={this.state.orgs}
+            filter={AutoComplete.fuzzyFilter}
             openOnFocus={true}
             menuStyle={{textAlign: 'left'}}
             dataSourceConfig={{text: 'name', value: '_id'}}

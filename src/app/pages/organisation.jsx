@@ -225,6 +225,7 @@ export class Organisation extends React.Component {
     this.setState({takeNote: false})
     let data = {
       managedBy: Router.query.view,
+      Creator: fire.auth().currentUser.uid,
       Date: new Date(),
       Type: 'Note',
       Organisations: [Router.query.targetorganisation],
@@ -285,9 +286,6 @@ export class Organisation extends React.Component {
                       :
                       null
                     }
-                  </div>
-                  <p>Within your organisation:</p>
-                    <div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
                     {
                       int.Creator && this.state.adminMap && this.state.adminMap[int.Creator]
                        ?
@@ -472,12 +470,6 @@ export class Organisation extends React.Component {
                     :
                     null
                   }
-                </div>
-                <div style={{height: 10}}/>
-                <span>Within your organisation:</span>
-
-
-                <div style={{paddingLeft: 10, display: 'inline-flex', flexWrap: 'wrap'}}>
                   {
                     int.Creator && this.state.adminMap && this.state.adminMap[int.Creator]
                      ?
@@ -493,10 +485,11 @@ export class Organisation extends React.Component {
                     null
                   }
                 </div>
+
                 <div style={{height: 10}}/>
                 <div style={{borderBottom: '1px solid #DBDBDB', marginBottom: 10}}/>
                 <div>
-                  {int.Details.BodyText.split('----Original message----')[0].split('From:')[0].split('From :')[0].split('www.localtrust.org.uk<http://www.localtrust.org.uk/>Twitter<https://twitter.com/LocalTrust>')[0]}
+                  {int.Details.BodyText && int.Details.BodyText.split('----Original message----')[0].split('From:')[0].split('From :')[0].split('www.localtrust.org.uk<http://www.localtrust.org.uk/>Twitter<https://twitter.com/LocalTrust>')[0]}
                 </div>
               </div>]}
               primaryTogglesNestedList={true}
@@ -507,7 +500,17 @@ export class Organisation extends React.Component {
                   style={iconButtonStyles.button}><MoreVert />
                 </IconButton>
             }
-              primaryText={<span>Received your email: <b>{int.Details ? int.Details.Subject : ""}</b></span>}
+              primaryText={int.Private && int.Creator === fire.auth().currentUser.uid ?
+              <div>
+                {this.state.privateDocs[int._id].details.Subject}
+              </div>
+              :
+              int.Private ?
+              <div>
+                Details are hidden, talk to {this.state.adminMap[int.Creator]}
+              </div>
+              :
+              <span>Received your email: <b>{int.Details ? int.Details.Subject : ""}</b></span>}
               secondaryText={int.Date.toLocaleString('en-gb',
                 {weekday: 'long', month: 'long', day: 'numeric'})}
                 leftAvatar={<Avatar
@@ -798,15 +801,7 @@ export class Organisation extends React.Component {
 
 
               />
-              <Divider/>
-              <ListItem
-                style={{display: 'flex', height: 80, alignItems: 'center'}}
-                primaryText={<span>Contact everyone in this organisation</span>}
-                onClick={() => Router.push(`/csv-upload?organisation=${this.state.organisation}`,
-                      `/csv-upload/${this.state.organisation}`)}
-                leftAvatar={<Avatar backgroundColor={'#FFCB00'} icon={<Email/>}></Avatar>}
 
-              />
 
             </List>
           </Dialog>

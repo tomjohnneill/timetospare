@@ -90,28 +90,28 @@ export var classifyIntsByDate = (date, includedSeparators) => {
   var lastMonth = fifteen.setMonth(fifteen.getMonth() - 2)
 
     if (date > twoMonthsTime) {
-      if (includedSeparators.filter(e => e.text === 'Three Months Time').length === 0) {
-        includedSeparators.push({text: 'Three Months Time', Date: threeMonthsTime, Type : 'classifier'})
+      if (includedSeparators.filter(e => e.text === 'Three months time').length === 0) {
+        includedSeparators.push({text: 'Three months time', Date: threeMonthsTime, Type : 'classifier'})
       }
     } else if (date > laterThisMonth) {
-      if (includedSeparators.filter(e => e.text === 'Two Months Time').length === 0) {
-        includedSeparators.push({text: 'Two Months Time', Date: twoMonthsTime, Type : 'classifier'})
+      if (includedSeparators.filter(e => e.text === 'Two months time').length === 0) {
+        includedSeparators.push({text: 'Two months time', Date: twoMonthsTime, Type : 'classifier'})
       }
     } else if (date > twoWeeksTime) {
-      if (includedSeparators.filter(e => e.text === 'Later This Month').length === 0) {
-        includedSeparators.push({text: 'Later This Month', Date: laterThisMonth, Type : 'classifier'})
+      if (includedSeparators.filter(e => e.text === 'Later this month').length === 0) {
+        includedSeparators.push({text: 'Later this month', Date: laterThisMonth, Type : 'classifier'})
       }
     } else if (date > nextWeek) {
-      if (includedSeparators.filter(e => e.text === 'Two Weeks Time').length === 0) {
-        includedSeparators.push({text: 'Two Weeks Time', Date: twoWeeksTime, Type : 'classifier'})
+      if (includedSeparators.filter(e => e.text === 'Two weeks time').length === 0) {
+        includedSeparators.push({text: 'Two weeks time', Date: twoWeeksTime, Type : 'classifier'})
       }
     } else if (date > laterThisWeek) {
-      if (includedSeparators.filter(e => e.text === 'Next Week').length === 0) {
-        includedSeparators.push({text: 'Next Week', Date: nextWeek, Type : 'classifier'})
+      if (includedSeparators.filter(e => e.text === 'Next week').length === 0) {
+        includedSeparators.push({text: 'Next week', Date: nextWeek, Type : 'classifier'})
       }
     } else if (date > tomorrow) {
-      if (includedSeparators.filter(e => e.text === 'Later This Week').length === 0) {
-        includedSeparators.push({text: 'Later This Week', Date: laterThisWeek, Type : 'classifier'})
+      if (includedSeparators.filter(e => e.text === 'Later this week').length === 0) {
+        includedSeparators.push({text: 'Later this week', Date: laterThisWeek, Type : 'classifier'})
       }
     } else if (date > today) {
       if (includedSeparators.filter(e => e.text === 'Tomorrow').length === 0) {
@@ -126,24 +126,24 @@ export var classifyIntsByDate = (date, includedSeparators) => {
         includedSeparators.push({text: 'Yesterday', Date: yesterday, Type : 'classifier'})
       }
     } else if (date > thisWeek) {
-      if (includedSeparators.filter(e => e.text === 'Two Days Ago').length === 0) {
-        includedSeparators.push({text: 'Two Days Ago', Date: twoDaysAgo, Type : 'classifier'})
+      if (includedSeparators.filter(e => e.text === 'Two days ago').length === 0) {
+        includedSeparators.push({text: 'Two days ago', Date: twoDaysAgo, Type : 'classifier'})
       }
     } else if (date > lastWeek) {
-      if (includedSeparators.filter(e => e.text === 'Earlier This Week').length === 0) {
-        includedSeparators.push({text: 'Earlier This Week', Date: twoDaysAgo, Type : 'classifier'})
+      if (includedSeparators.filter(e => e.text === 'Earlier this week').length === 0) {
+        includedSeparators.push({text: 'Earlier this week', Date: twoDaysAgo, Type : 'classifier'})
       }
     } else if (date > twoWeeksAgo) {
-      if (includedSeparators.filter(e => e.text === 'Last Week').length === 0) {
-        includedSeparators.push({text: 'Last Week', Date: lastWeek, Type : 'classifier'})
+      if (includedSeparators.filter(e => e.text === 'Last week').length === 0) {
+        includedSeparators.push({text: 'Last week', Date: lastWeek, Type : 'classifier'})
       }
     } else if (date > thisMonth) {
-      if (includedSeparators.filter(e => e.text === 'Two Weeks Ago').length === 0) {
-        includedSeparators.push({text: 'Two Weeks Ago', Date: lastWeek, Type : 'classifier'})
+      if (includedSeparators.filter(e => e.text === 'Two weeks ago').length === 0) {
+        includedSeparators.push({text: 'Two weeks ago', Date: lastWeek, Type : 'classifier'})
       }
     } else if (date > lastMonth) {
-      if (includedSeparators.filter(e => e.text === 'Earlier This Month').length === 0) {
-        includedSeparators.push({text: 'Earlier This Month', Date: lastWeek, Type : 'classifier'})
+      if (includedSeparators.filter(e => e.text === 'Earlier this month').length === 0) {
+        includedSeparators.push({text: 'Earlier this month', Date: lastWeek, Type : 'classifier'})
       }
     }
 }
@@ -959,15 +959,6 @@ export class Member extends React.Component {
 
               />
 
-              <Divider/>
-              <ListItem
-                style={{display: 'flex', height: 80, alignItems: 'center'}}
-                primaryText={<span style={{textTransform: 'capitalize'}}>Contact {this.state.member['Full Name'] ? this.state.member['Full Name'] : decodeURIComponent(this.props.url.query.name)}</span>}
-                onClick={() => Router.push(`/csv-upload?organisation=${this.state.organisation}`,
-                      `/messaging/${this.state.organisation}`)}
-                leftAvatar={<Avatar backgroundColor={'#000AB2'} icon={<Email/>}></Avatar>}
-
-              />
 
             </List>
           </Dialog>

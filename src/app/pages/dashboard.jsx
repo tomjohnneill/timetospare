@@ -198,7 +198,7 @@ export class Organisation extends React.Component {
                               style={{height: 30, paddingRight: 20}}/>
                             <span style={{flex: 1}}>Get emails from outlook</span>
                             <RaisedButton
-                              label='Scrape Emails'
+                              label='Import Emails'
                               labelStyle={buttonStyles.smallLabel}
                               style={buttonStyles.smallSize}
                               primary={true}

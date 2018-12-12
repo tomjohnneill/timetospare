@@ -309,7 +309,9 @@ class YourCalendar extends React.Component {
               </IconButton>
 
             </div>
-            <Link href={`/projectedit?event=${this.state.targetedEvent._id}&view=${Router.query.view}`}>
+            <Link href={this.state.targetedEvent.source === 'Eventbrite' ?
+              `/project-admin?project=${this.state.targetedEvent._id}&view=${Router.query.view}`:
+              `/projectedit?event=${this.state.targetedEvent._id}&view=${Router.query.view}`}>
               <div style={{backgroundColor: this.state.targetedEvent && this.state.targetedEvent.color ? this.state.targetedEvent.color : '#000AB2'
                 , color: 'white',
                 minHeight: '50px', cursor: 'pointer',

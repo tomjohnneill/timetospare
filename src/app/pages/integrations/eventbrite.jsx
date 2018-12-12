@@ -50,7 +50,7 @@ class EventComponent extends React.Component {
           null
         }
 
-        <img src={this.props.data.logo.url} style={{width: '100%', height: 'auto'}}/>
+        <img src={this.props.data.logo && this.props.data.logo.url} style={{width: '100%', height: 'auto'}}/>
         <div style={{padding: 15}}>
           <div style={{fontWeight: 700, fontSize: '25px'}}>
               {this.props.data.name.text}
@@ -65,10 +65,10 @@ class EventComponent extends React.Component {
           </div>
           {
             this.props.data.venue ?
-            <div style={{display: 'flex'}}>
-              <Place style={{height: 24, paddingRight: 20}}/>
+            <div style={{display: 'flex', marginTop: 10}}>
+              <Place style={{height: 20, paddingRight: 20}}/>
               <div>
-
+                {this.props.data.venue.address && this.props.data.venue.address.localized_address_display}
               </div>
             </div>
             :
@@ -110,9 +110,10 @@ export class EventbriteSuccessPage extends React.Component {
       })
       .then((data) => {
         if (data.eventbriteOrgId) {
+          console.log(data.eventbriteOrgId)
           this.getEventbriteList(data.eventbriteOrgId)
         } else {
-          localStorage.setItem('ttsOrg', this.props.organisation)
+
 
           var client_id = 'CVMW6D7X3KP4GSF2JB'
 
@@ -135,8 +136,8 @@ export class EventbriteSuccessPage extends React.Component {
 
     console.log(org)
     var getEventList = functions.httpsCallable('integrations-getEventList')
-    console.log({organisation: localStorage.getItem('ttsOrg'), eventbriteOrgId: org.id})
-    getEventList({organisation: localStorage.getItem('ttsOrg'), eventbriteOrgId: org.id}).then((result) => {
+    console.log({organisation: localStorage.getItem('ttsOrg'), eventbriteOrgId: org})
+    getEventList({organisation: localStorage.getItem('ttsOrg'), eventbriteOrgId: parseInt(org)}).then((result) => {
       console.log(result)
       this.setState({events: result.data.events})
     })
@@ -160,17 +161,21 @@ export class EventbriteSuccessPage extends React.Component {
         capacity: event.capacity,
         description: event.description,
         end: event.end.utc,
-        picture: event.logo.url,
+        picture: event.logo ? event.logo.url : null,
         name: event.name,
         start: event.start.utc,
         url: event.url
       }
       batch.set(eventRef, body)
     })
-    batch.commit().then(() => {
+    batch.commit()
+    .then(() => {
       var getEventAttendees = functions.httpsCallable('integrations-getEventAttendees')
-      getEventAttendees({organisation: localStorage.getItem('ttsOrg')})
-      Router.push(`/project-calendar?view=${localStorage.getItem('ttsOrg')}`)
+      getEventAttendees({organisation: localStorage.getItem('ttsOrg')}).then((result) => {
+        console.log(result)
+        Router.push(`/project-calendar?view=${localStorage.getItem('ttsOrg')}`)
+      })
+
     })
   }
 

@@ -155,35 +155,62 @@ export class ProjectAdmin extends React.Component {
         console.log(elem)
       })
 
-      db.collection("Interactions").doc(Router.query.project)
-      .get().then((doc) => {
-        var data = []
-        var intData = doc.data()
-        this.setState({project: intData})
-        console.log(intData)
-        if (intData && intData.Members) {
-          intData.Members.forEach((member) => {
-            db.collection("PersonalData").doc(member).get().then((memberDoc) => {
-              var raw = memberDoc.data()
-              var elem = {}
-              var columns = ['Full Name', 'Email', 'Organisations', 'lastContacted']
-              columns.forEach((key) => {
-                if (raw[key]) {
-                  elem[key] = raw[key]
+      var getOneEventAttendees = functions.httpsCallable('integrations-getOneEventAttendees')
+      getOneEventAttendees({organisation: Router.query.view, eventId: Router.query.project}).then((result) => {
+        console.log(result)
+        var unmatched = []
+        result.data && result.data.attendees.forEach((attendee) => {
+          unmatched.push(attendee.profile)
+        })
+        this.setState({unmatchedAttendees: unmatched,
+            unmatchedColumns:
+            [
+              {id: 'name',
+                Header: 'name',
+                accessor: 'name'},
+                {
+                  id: 'email',
+                  Header: 'email',
+                  accessor: 'email'
                 }
-              })
-              if (elem.lastContacted) {
-                elem['Last Contacted'] = elem.lastContacted.toLocaleString('en-gb',
-                  {weekday: 'long', month: 'long', day: 'numeric'})
-                delete elem.lastContacted
-              }
-              elem._id = memberDoc.id
-              data.push(elem)
-              this.setState({data: data, columns: getColumnsFromMembers(data)})
-            })
+              ]
+        })
+      })
 
-          })
-        }
+      db.collection("Interactions").where("EventId", "==", Router.query.project)
+      .where("managedBy", "==", Router.query.view)
+      .get().then((querySnapshot) => {
+        var data = []
+        querySnapshot.forEach((doc) => {
+          var intData = doc.data()
+          this.setState({project: intData})
+          console.log(intData)
+          if (intData && intData.Members) {
+            intData.Members.forEach((member) => {
+              db.collection("PersonalData").doc(member).get().then((memberDoc) => {
+                let raw = memberDoc.data()
+                let elem = {}
+                let columns = ['Full Name', 'Email', 'Organisations', 'lastContacted']
+                columns.forEach((key) => {
+                  if (raw[key]) {
+                    elem[key] = raw[key]
+                  }
+                })
+                if (elem.lastContacted) {
+                  elem['Last Contacted'] = elem.lastContacted.toLocaleString('en-gb',
+                    {weekday: 'long', month: 'long', day: 'numeric'})
+                  delete elem.lastContacted
+                }
+                elem._id = memberDoc.id
+                data.push(elem)
+                this.setState({data: data, columns: getColumnsFromMembers(data)})
+              })
+
+            })
+          }
+        })
+
+
 
         console.log(data)
       })
@@ -279,6 +306,25 @@ export class ProjectAdmin extends React.Component {
               null
               }
 
+              <div style={{height: 100}}>
+                {
+                  this.state.unmatchedAttendees && this.state.unmatchedColumns ?
+                  <ReactTable
+
+                    defaultPageSize={10}
+                    onFilteredChange={(filtered) =>this.setState({filtered: filtered})}
+                    ref={(r) => {
+                      this.unmatchedTable = r;
+                    }}
+                    className='-highlight'
+                    data={this.state.unmatchedAttendees}
+                    columns={this.state.unmatchedColumns}
+                    filterable={true}
+                  />
+                :
+                null
+                }
+              </div>
 
             </div>
           </MediaQuery>

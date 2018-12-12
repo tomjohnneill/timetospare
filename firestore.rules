@@ -15,7 +15,7 @@ service cloud.firestore {
       allow read: if true;
       allow update: if get(/databases/$(database)/documents/Organisations/$(orgId)).data.Admin[request.auth.uid] == true;
       allow delete: if get(/databases/$(database)/documents/Organisations/$(orgId)).data.Admin[request.auth.uid] == true;
-      allow create: if request.resource.data.Admin && request.resource.data.Admin[request.auth.uid] == true;
+      allow create: if request.resource.data.Admin[request.auth.uid];
   	}
 
     match /OrgData/{orgId} {
@@ -44,7 +44,8 @@ service cloud.firestore {
 
     match /Events/{intId} {
       allow read: if get(/databases/$(database)/documents/Organisations/$(resource.data.managedBy)).data.Admin[request.auth.uid] == true;
-      allow write: if get(/databases/$(database)/documents/Organisations/$(resource.data.managedBy)).data.Admin[request.auth.uid] == true;
+      allow write: if get(/databases/$(database)/documents/Organisations/$(request.resource.data.managedBy)).data.Admin[request.auth.uid] == true ||
+      get(/databases/$(database)/documents/Organisations/$(resource.data.managedBy)).data.Admin[request.auth.uid] == true;
   	}
   }
 }
