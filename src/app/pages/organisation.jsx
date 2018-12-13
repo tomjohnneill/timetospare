@@ -30,8 +30,11 @@ import MoreVert from 'material-ui/svg-icons/navigation/more-vert'
 import Delete from 'material-ui/svg-icons/action/delete'
 import * as firebase from 'firebase';
 import Close from 'material-ui/svg-icons/navigation/close'
+import Interaction from '../components/interaction.jsx';
 import IconButton from 'material-ui/IconButton';
 import {classifyIntsByDate, runThroughInts} from './member.jsx'
+import Lock from 'material-ui/svg-icons/action/lock';
+import LockOpen from 'material-ui/svg-icons/action/lock-open';
 
 let db = fire.firestore()
 
@@ -96,7 +99,7 @@ var randomColor = require('randomcolor')
 export class Organisation extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {tagOpen: false, interactionUsers: {}, adminMap: {}}
+    this.state = {tagOpen: false, interactionUsers: {}, adminMap: {}, privateDocs : {}}
   }
 
   componentWillUnmount(props) {
@@ -158,13 +161,21 @@ export class Organisation extends React.Component {
           var elem = intDoc.data()
           elem._id = intDoc.id
           data.push(elem)
+          if (elem.Private && elem.Creator == fire.auth().currentUser.uid) {
+            db.collection("Private").doc(elem._id).get().then((privateDoc) => {
+              var privateDocs = this.state.privateDocs ? this.state.privateDocs : {}
+              privateDocs[elem._id] = privateDoc.data()
+              this.setState({privateDocs: privateDocs})
+            })
+          }
           if (elem.Creator && !this.state.adminMap[elem.Creator]) {
             db.collection("PersonalData").where("managedBy", "==", Router.query.view)
             .where("User", "==", elem.Creator).get()
             .then((adminSnapshot) => {
               adminSnapshot.forEach((adminDoc) => {
                 var adminData = adminDoc.data()
-                var adminMap = this.state.adminMap
+                console.log(adminData)
+                var adminMap = this.state.adminMap ? this.state.adminMap : {}
                 adminMap[elem.Creator] = adminData['Full Name'] ? adminData['Full Name'] : adminData['Name']
                 this.setState({adminMap: adminMap})
               })
@@ -194,7 +205,6 @@ export class Organisation extends React.Component {
   }
 
   handleOptionsClick = (event, int) => {
-
     this.setState({
       optionsOpen: true,
       targetedInt: int,
@@ -242,355 +252,6 @@ export class Organisation extends React.Component {
 
   }
 
-  renderInteraction = (int) => {
-
-    switch(int.Type) {
-      case "Event":
-        return (
-          <Link prefetch href={`/project-admin?project=${int._id}&view=${Router.query.view}`}>
-            <div
-              style={{ borderBottom : '1px solid #DBDBDB'}}
-              >
-              <ListItem
-                id={int._id}
-                rightIcon={<IconButton
-                  tooltip='Options'
-                  onClick={(e) => this.handleOptionsClick(e, int)}
-                  style={iconButtonStyles.button}><MoreVert /></IconButton>
-                }
-                className='email-interaction'
-
-                primaryText={int.Details ? int.Details.name : null}
-                primaryTogglesNestedList={true}
-                nestedItems={[
-                  <div>
-                    <p>Involving:</p>
-                    <div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
-                    {
-                      int.Members && this.state.membersLoaded
-                       ? int.Members.map((user) => (
-                         <Link
-                           key={user._id}
-                            prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
-                            <div style={{margin: 4, textTransform: 'capitalize'}}>
-                              <Chip
-                                style={chipStyles.chip}
-                                labelStyle={chipStyles.chipLabel}
-                                backgroundColor={this.state.interactionUsers[user] ? this.state.interactionUsers[user].color : null}>
-                                {this.state.interactionUsers[user] && this.state.interactionUsers[user]['Full Name']
-                                   ? this.state.interactionUsers[user]['Full Name'][0] : null}
-                              </Chip>
-                          </div>
-                         </Link>
-                      ))
-                      :
-                      null
-                    }
-                    {
-                      int.Creator && this.state.adminMap && this.state.adminMap[int.Creator]
-                       ?
-
-                        <Chip
-                          style={chipStyles.chip}
-                          labelStyle={chipStyles.chipLabel}
-                          >
-                           {this.state.adminMap[int.Creator]}
-                        </Chip>
-
-                      :
-                      null
-                    }
-                  </div>
-                </div>]}
-                secondaryText={int.Date.toLocaleString('en-gb',
-                  {weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'})}
-                  leftAvatar={<Avatar
-                  backgroundColor={'#e91e63'}
-                  icon={
-                    <Link prefetch href={`/project-admin?project=${int._id}&view=${Router.query.view}`}>
-                    <EventIcon color='white'/>
-                  </Link> } />
-                  } />
-
-            </div>
-          </Link>
-        )
-        case "CalendarEvent":
-          return (
-            <Link prefetch href={`/project-admin?project=${int._id}&view=${Router.query.view}`}>
-              <div
-                style={{ borderBottom : '1px solid #DBDBDB'}}
-                >
-                <ListItem
-                  id={int._id}
-                  rightIcon={<IconButton
-                    tooltip='Options'
-                    onClick={(e) => this.handleOptionsClick(e, int)}
-                    style={iconButtonStyles.button}><MoreVert /></IconButton>
-                  }
-                  className='email-interaction'
-                  primaryText={int.Details ? int.Details.Subject : null}
-                  primaryTogglesNestedList={true}
-                  nestedItems={[<div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
-                    {
-                      int.Members && this.state.membersLoaded
-                       ? int.Members.map((user) => (
-                         <Link  prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
-                           <div
-                             key={user._id}
-                             style={{margin: 4, textTransform: 'capitalize'}}>
-                              <Chip
-                                style={chipStyles.chip}
-                                labelStyle={chipStyles.chipLabel}
-                                backgroundColor={this.state.interactionUsers[user].color}>
-                                {this.state.interactionUsers[user] && this.state.interactionUsers[user]['Full Name']
-                                   ? this.state.interactionUsers[user]['Full Name'][0] : null}
-                              </Chip>
-                            </div>
-                         </Link>
-                      ))
-                      :
-                      null
-                    }
-                  </div>]}
-                  secondaryText={int.Date.toLocaleString('en-gb',
-                    {weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'})}
-                    leftAvatar={<Avatar
-                    backgroundColor={'#039BE5'}
-                    icon={
-                      <Link prefetch href={`/project-admin?project=${int._id}&view=${Router.query.view}`}>
-                      <EventIcon color='white'/>
-                    </Link> } />
-                    } />
-
-              </div>
-            </Link>
-          )
-
-          case "PlaceholderEvent":
-            return (
-
-                <div
-                  style={{ borderBottom : '1px solid #DBDBDB'}}
-                  >
-                  <ListItem
-                    id={int._id}
-                    rightIcon={<IconButton
-                      tooltip='Options'
-                      onClick={(e) => this.handleOptionsClick(e, int)}
-                      style={iconButtonStyles.button}><MoreVert /></IconButton>
-                    }
-                    className='email-interaction'
-                    primaryText={int.Details ? int.Details.Subject : null}
-                    primaryTogglesNestedList={true}
-                    nestedItems={[<div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
-                      {
-                        int.Members && this.state.membersLoaded
-                         ? int.Members.map((user) => (
-                           <Link  prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
-                             <div
-                               key={user._id}
-                               style={{margin: 4, textTransform: 'capitalize'}}>
-                                <Chip
-                                  style={chipStyles.chip}
-                                  labelStyle={chipStyles.chipLabel}
-                                  backgroundColor={this.state.interactionUsers[user].color}>
-                                  {this.state.interactionUsers[user] && this.state.interactionUsers[user]['Full Name']
-                                     ? this.state.interactionUsers[user]['Full Name'][0] : null}
-                                </Chip>
-                              </div>
-                           </Link>
-                        ))
-                        :
-                        null
-                      }
-                    </div>]}
-                    secondaryText={int.Date.toLocaleString('en-gb',
-                      {weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'})}
-                      leftAvatar={<Avatar
-                      backgroundColor={'#039BE5'}
-                      icon={
-                        <Link prefetch href={`/project-admin?project=${int._id}&view=${Router.query.view}`}>
-                        <EventIcon color='white'/>
-                      </Link> } />
-                      } />
-
-                </div>
-
-            )
-
-      case "Invited":
-
-        return (
-          <div>
-            <ListItem
-
-              primaryText={`Invited to ${int.Details ? int.Details.Name : ""}`}
-              secondaryText={int.Date.toLocaleString('en-gb',
-                {weekday: 'long', month: 'long', day: 'numeric'})}
-               leftIcon={<ContentInbox />} />
-          </div>
-        )
-        break;
-        case "classifier":
-          return (
-            <div style={{borderBottom: '1px solid black', fontWeight: 700 ,paddingBottom: 5, paddingTop:20}}>
-              {int.text}
-            </div>
-          )
-        break;
-      case "Email":
-        return (
-          <div style={{ borderBottom : '1px solid #DBDBDB'}}>
-            <ListItem
-              className='email-interaction'
-              style={{marginBottom: 5 }}
-              nestedItems={[
-                <div style={{paddingLeft: 72}}>
-
-                  <span>Involving:</span>
-                  <div style={{paddingLeft: 10, display: 'inline-flex', flexWrap: 'wrap'}}>
-                  {
-                    int.Members && this.state.membersLoaded
-                     ? int.Members.map((user) => (
-                       <Link
-                         key={user._id}
-                          prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
-                          <div style={{ textTransform: 'capitalize'}}>
-                            <Chip
-                              style={chipStyles.chip}
-                              labelStyle={chipStyles.chipLabel}
-                              backgroundColor={this.state.interactionUsers[user] ? this.state.interactionUsers[user].color : null}>
-                              {this.state.interactionUsers[user] && this.state.interactionUsers[user]['Full Name']
-                                 ? this.state.interactionUsers[user]['Full Name'][0] : null}
-                            </Chip>
-                        </div>
-                       </Link>
-                    ))
-                    :
-                    null
-                  }
-                  {
-                    int.Creator && this.state.adminMap && this.state.adminMap[int.Creator]
-                     ?
-
-                      <Chip
-                        style={chipStyles.chip}
-                        labelStyle={chipStyles.chipLabel}
-                        >
-                         {this.state.adminMap[int.Creator]}
-                      </Chip>
-
-                    :
-                    null
-                  }
-                </div>
-
-                <div style={{height: 10}}/>
-                <div style={{borderBottom: '1px solid #DBDBDB', marginBottom: 10}}/>
-                <div>
-                  {int.Details.BodyText && int.Details.BodyText.split('----Original message----')[0].split('From:')[0].split('From :')[0].split('www.localtrust.org.uk<http://www.localtrust.org.uk/>Twitter<https://twitter.com/LocalTrust>')[0]}
-                </div>
-              </div>]}
-              primaryTogglesNestedList={true}
-              rightIcon={
-                <IconButton
-                  tooltip='Options'
-                  onClick={(e) => this.handleOptionsClick(e, int)}
-                  style={iconButtonStyles.button}><MoreVert />
-                </IconButton>
-            }
-              primaryText={int.Private && int.Creator === fire.auth().currentUser.uid ?
-              <div>
-                {this.state.privateDocs[int._id].details.Subject}
-              </div>
-              :
-              int.Private ?
-              <div>
-                Details are hidden, talk to {this.state.adminMap[int.Creator]}
-              </div>
-              :
-              <span>Received your email: <b>{int.Details ? int.Details.Subject : ""}</b></span>}
-              secondaryText={int.Date.toLocaleString('en-gb',
-                {weekday: 'long', month: 'long', day: 'numeric'})}
-                leftAvatar={<Avatar
-                  backgroundColor={'#DBDBDB'}
-                  icon={<Email /> } />} />
-
-          </div>
-        )
-        break;
-      case "Reply":
-        return (
-          <div>
-            <ListItem
-              rightIcon={<IconButton
-                tooltip='Options'
-                onClick={(e) => this.handleOptionsClick(e, int)}
-                style={iconButtonStyles.button}><MoreVert /></IconButton>}
-              className='email-interaction'
-              style={{marginBottom: 10, borderLeft: '3px solid #DBDBDB', backgroundColor: 'rgb(249, 249, 249)'}}
-              primaryText={<span>Replied to your email: <b>{int.Details ? int.Details.Subject : ""}</b>
-            <div className='story-text' dangerouslySetInnerHTML={this.noteMarkup(int.Details ? int.Details.Message : null)}/>
-        </span>}
-              secondaryText={int.Date.toLocaleString('en-gb',
-                {weekday: 'long', month: 'long', day: 'numeric'})}
-               leftIcon={<Email />} />
-          </div>
-        )
-        break;
-      case "Note":
-        return (
-          <div
-            style={{  borderBottom : '1px solid #DBDBDB'}}
-            >
-            <ListItem
-              id={int._id}
-              rightIcon={<IconButton
-                tooltip='Options'
-                onClick={(e) => this.handleOptionsClick(e, int)}
-                style={iconButtonStyles.button}><MoreVert /></IconButton>}
-              className='email-interaction'
-              primaryText={<div>
-                <div className='story-text' dangerouslySetInnerHTML={this.noteMarkup(int.Details ? int.Details.Note : null)}/>
-              </div>}
-              primaryTogglesNestedList={true}
-              nestedItems={[<div style={{paddingLeft: 72, display: 'flex', flexWrap: 'wrap'}}>
-                {
-                  int.Members && this.state.membersLoaded
-                   ? int.Members.map((user) => (
-                     <Link  prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
-                        <Chip
-                          style={chipStyles.chip}
-                          labelStyle={chipStyles.chipLabel}
-                          backgroundColor={this.state.interactionUsers[user] ? this.state.interactionUsers[user].color : null}>
-                           {this.state.interactionUsers[user] ? this.state.interactionUsers['Full Name'] : null}
-                        </Chip>
-                     </Link>
-                  ))
-                  :
-                  null
-                }
-              </div>]}
-              secondaryText={int.Date.toLocaleString('en-gb',
-                {weekday: 'long', month: 'long', day: 'numeric'})}
-                leftAvatar={<Avatar
-                  backgroundColor={'rgb(253,216,53)'}
-                  icon={<NoteIcon  color={'black'}/> } />}
-               />
-
-          </div>
-        )
-        break;
-      default:
-        return (
-          <ListItem primaryText="Other"
-            secondaryText={int.Date.toLocaleString('en-gb',
-              {weekday: 'long', month: 'long', day: 'numeric'})}
-             leftIcon={<ContentInbox />} />
-        )
-    }
-  }
 
   componentDidMount(props) {
     fire.auth().onAuthStateChanged((user) => {
@@ -644,6 +305,7 @@ export class Organisation extends React.Component {
         db.collection("OrgData").doc(Router.query.targetorganisation).get()
         .then((doc) => {
           var data = doc.data()
+          data._id = doc.id
           this.setState({organisation: data})
         })
 
@@ -703,6 +365,33 @@ export class Organisation extends React.Component {
 
   }
 
+  handleMakePrivate = () => {
+    if (!this.state.targetedInt.Private && fire.auth().currentUser) {
+      db.collection("Private").doc(this.state.targetedInt._id).set({
+        details: this.state.targetedInt.Details,
+        creator: fire.auth().currentUser.uid
+      }).then(() => {
+        return db.collection("Interactions").doc(this.state.targetedInt._id)
+        .update({Private: true, Details: {}})
+      }).then(() => {
+        this.setState({optionsOpen: false})
+      })
+    } else if (this.state.targetedInt.Private && fire.auth().currentUser) {
+      db.collection("Private").doc(this.state.targetedInt._id).get()
+      .then((doc) => {
+        return doc.data().details
+      })
+      .then((details) => {
+        db.collection("Interactions").doc(this.state.targetedInt._id).update({
+          Details: details,
+          Private: false
+        })
+      }).then(() => {
+        this.setState({optionsOpen: false})
+      })
+    }
+  }
+
   handleDeleteOrg = (memberId, relId, orgNames) => {
     delete orgNames[this.state.organisation.details.name]
     db.collection("Relationships").doc(relId).update({OrgNames : orgNames, ['Organisations.' + Router.query.targetorganisation] : false})
@@ -710,6 +399,17 @@ export class Organisation extends React.Component {
       this.updateData()
     })
     db.collection("PersonalData").doc(memberId).update("organisations", firebase.firestore.FieldValue.arrayRemove(this.state.organisation.details.name))
+  }
+
+  handleTagAdded = (tag) => {
+    var tags = this.state.organisation.tags
+    var organisation = this.state.organisation
+    if (tags) {
+      tags.push(tag)
+    }
+    organisation.tags = tags
+    this.setState({organisation: organisation, tagOpen: false})
+    this.updateData()
   }
 
   render() {
@@ -753,7 +453,7 @@ export class Organisation extends React.Component {
             onRequestClose={() => this.setState({deleteOpen:false})}>
             <h2 style={{textAlign: 'left'}}>Are you sure you want to delete this?</h2>
             <div style={{textAlign: 'left'}}>
-              {this.state.targetedInt ? this.renderInteraction(this.state.targetedInt) : null}
+              {this.state.targetedInt ? <Interaction interaction={this.state.targetedInt}/> : null}
             </div>
           </Dialog>
           <Popover
@@ -765,7 +465,7 @@ export class Organisation extends React.Component {
           >
             <Menu style={{textAlign: 'left'}}>
               <MenuItem primaryText="Tags"
-                onClick={() => this.setState({tagOpen: true, optionsOpen: false,
+                onClick={() => this.setState({intTagOpen: true, optionsOpen: false,
                   tags: this.state.targetedInt.tags, int: this.state.targetedInt._id})}
                   leftIcon={<Tag style={{height: 25}}/>} />
               <MenuItem
@@ -774,6 +474,15 @@ export class Organisation extends React.Component {
               <MenuItem
                 onClick={() => this.setState({deleteOpen: true, optionsOpen: false})}
                 primaryText="Remove from this organisation" leftIcon={<Close/>} />
+                {
+                  this.state.targetedInt && this.state.targetedInt.Creator === fire.auth().currentUser.uid ?
+                  <MenuItem
+                    onClick={this.handleMakePrivate}
+                    primaryText={`Make ${this.state.targetedInt && this.state.targetedInt.Private ? 'Public' : 'Private'}`}
+                    leftIcon={this.state.targetedInt && this.state.targetedInt.Private ? <LockOpen/> : <Lock/>} />
+                  :
+                  null
+                }
               <MenuItem
                 onClick={this.handlePin}
                 primaryText={`${this.state.targetedInt && this.state.targetedInt.Pinned ? 'Unpin' : 'Pin'} this`} leftIcon={<Pin/>} />
@@ -794,12 +503,9 @@ export class Organisation extends React.Component {
               <Divider/>
               <ListItem
                 style={{display: 'flex', height: 80, alignItems: 'center'}}
-                primaryText="Leave project feedback"
-                onClick={() => Router.push(`/csv-upload?organisation=${this.state.organisation}`,
-                      `/csv-upload/${this.state.organisation}`)}
-                leftAvatar={<Avatar  icon={<ReviewIcon/>}></Avatar>}
-
-
+                primaryText="Add event"
+                onClick={() => Router.push(`/projectedit?view=${this.state.organisation._id}`)}
+                leftAvatar={<Avatar  icon={<EventIcon/>}></Avatar>}
               />
 
 
@@ -808,14 +514,25 @@ export class Organisation extends React.Component {
 
 
           <AddTag
-            selection={[this.state.memberData]}
+            selection={this.state.organisation}
+            text={`Add new tag`}
+            organisation={this.props.url.query.view}
+            open={this.state.intTagOpen}
+            edit
+            type='interaction'
+            interaction={this.state.int}
+            onTagAdded={this.handleTagAdded}
+            onRequestClose={() => this.setState({intTagOpen:false})}/>
+
+          <AddTag
+            selection={this.state.organisation}
             text={`Add new tag`}
             organisation={this.props.url.query.view}
             open={this.state.tagOpen}
             edit
-            type='interaction'
+            type='organisation'
             interaction={this.state.int}
-            tags={this.state.tags}
+            tags={this.state.organisation && this.state.organisation.tags}
             onTagAdded={this.handleTagAdded}
             onRequestClose={() => this.setState({tagOpen:false})}/>
           <div
@@ -921,6 +638,36 @@ export class Organisation extends React.Component {
                      }
                       style={{ borderBottom: '1px solid #DBDBDB'}}/>
 
+                      <ListItem
+                        primaryText='Tags'
+                        leftIcon={<Tag/>}
+                        primaryTogglesNestedList={true}
+                        nestedItems={
+                          [<div style={{display: 'flex', flexWrap: 'wrap', padding: 10}}>
+                            {this.state.organisation && this.state.organisation.tags ? this.state.organisation.tags.map((tag) => (
+                              <Link prefetch href={`/tag?tag=${tag}&view=${Router.query.view}`}>
+                            <Chip
+                              style={chipStyles.chip}
+                              labelStyle={chipStyles.chipLabel}
+                              deleteIconStyle={chipStyles.deleteStyle}
+                              onRequestDelete={() => this.handleDeleteTag(tag)}
+                              >{tag}
+                            </Chip>
+                            </Link>
+                          )) : null}
+                          </div>,
+                          <div style={{padding: 6}}>
+                            <RaisedButton label='Add new tag'
+                              secondary={true}
+                              icon={<Add/>}
+                              onClick={() => this.setState({tagOpen: true})}
+                              style={buttonStyles.smallStyle}
+                              labelStyle={buttonStyles.smallLabel}/>
+                          </div>]
+
+                        }
+                         style={{ borderBottom: '1px solid #DBDBDB'}}/>
+
 
 
               </div>
@@ -951,7 +698,10 @@ export class Organisation extends React.Component {
                           Important to be aware of
                         </div>
                       {pinned.map((int) => (
-                      this.renderInteraction(int)
+                        <Interaction
+                          interaction={int}
+                          handleOptionsClick={this.handleOptionsClick}/>
+
                     ))}
 
                     </div>
@@ -981,7 +731,10 @@ export class Organisation extends React.Component {
 
                     {this.state.interactions && this.state.interactions.length > 0 ?
                       runThroughInts(this.state.interactions).map((int) => (
-                      int.Pinned ? null : this.renderInteraction(int)
+                      int.Pinned ? null :
+                      <Interaction
+                        interaction={int}
+                        handleOptionsClick={this.handleOptionsClick}/>
                     ))
                       :
                       <div style={{display: 'flex', padding: 50, alignItems: 'center', justifyContent: 'center'
