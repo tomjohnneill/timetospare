@@ -15,10 +15,9 @@ import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
 import ArrowRight from 'material-ui/svg-icons/navigation/arrow-forward';
 import Divider from 'material-ui/Divider'
-import {buttonStyles, iconButtonStyles} from '../components/styles.jsx';
+import {buttonStyles, iconButtonStyles, chipStyles} from '../components/styles.jsx';
 import AddNote from '../components/addNote.jsx';
 import {ReviewIcon, NoteIcon, Tag} from '../components/icons.jsx';
-import AddTag from '../components/addTag.jsx';
 import Chip from 'material-ui/Chip';
 import Popover from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
@@ -59,17 +58,67 @@ export class UserTag extends React.Component {
   }
 
   updateData = () => {
+    db.collection("PersonalData")
+    .where("tags", "array-contains", Router.query.tag)
+    .where("managedBy", "==", Router.query.view)
+    .get()
+    .then((querySnapshot) => {
+        var data = []
+        var ids = []
+        querySnapshot.forEach((doc) => {
+          var elem = doc.data()
+          elem._id = doc.id
+          data.push(elem)
+          ids.push(elem._id)
+        })
+        console.log(data)
+        this.setState({members: data, memberIds: ids})
+    })
+
+    db.collection("OrgData")
+    .where("tags", "array-contains", Router.query.tag)
+    .where("managedBy", "==", Router.query.view)
+    .get()
+    .then((orgSnapshot) => {
+        var data = []
+        orgSnapshot.forEach((doc) => {
+          var elem = doc.data()
+          elem._id = doc.id
+          data.push(elem)
+        })
+        console.log(data)
+        this.setState({organisations: data})
+    })
+
+    db.collection("Events")
+    .where("tags", "array-contains", Router.query.tag)
+    .where("managedBy", "==", Router.query.view)
+    .get()
+    .then((eventSnapshot) => {
+        var data = []
+        eventSnapshot.forEach((doc) => {
+          var elem = doc.data()
+          elem._id = doc.id
+          data.push(elem)
+        })
+        console.log(data)
+        this.setState({events: data})
+    })
+
     db.collection("Interactions")
     .where("tags", "array-contains", Router.query.tag)
-    .where("Organisation", "==", Router.query.organisation)
+    .where("managedBy", "==", Router.query.view)
     .orderBy("Date", 'desc').get()
     .then((intSnapshot) => {
+      console.log(intSnapshot)
       var data = []
       var promises = []
       intSnapshot.forEach((intDoc) => {
         var elem = intDoc.data()
         elem._id = intDoc.id
+        console.log(elem)
         data.push(elem)
+        this.setState({interactions: data})
         if (elem.Members) {
           elem.Members.forEach((member) => {
             promises.push(db.collection("PersonalData").doc(member)
@@ -88,7 +137,7 @@ export class UserTag extends React.Component {
 
       })
       Promise.all(promises).then(() => this.setState({membersLoaded: true}))
-      this.setState({interactions: data})
+
     })
   }
 
@@ -176,9 +225,10 @@ export class UserTag extends React.Component {
                {
                  int.Members && this.state.membersLoaded
                   ? int.Members.map((user) => (
-                    <Link  prefetch href={`/member?organisation=${Router.query.organisation}&member=${user}`}>
+                    <Link  prefetch href={`/member?view=${Router.query.view}&member=${user}`}>
                        <Chip
-                         style={styles.chip}
+                         style={chipStyles.chip}
+                         labelStyle={chipStyles.chipLabel}
                          backgroundColor={this.state.interactionUsers[user].color}>
                          {this.state.interactionUsers[user]['Full Name']}
                        </Chip>
@@ -235,7 +285,8 @@ export class UserTag extends React.Component {
                     ? int.Members.map((user) => (
                       <Link  prefetch href={`/member?organisation=${Router.query.organisation}&member=${user}`}>
                          <Chip
-                           style={styles.chip}
+                           style={chipStyles.chip}
+                           labelStyle={chipStyles.chipLabel}
                            backgroundColor={this.state.interactionUsers[user].color}>
                            {this.state.interactionUsers[user]['Full Name']}
                          </Chip>
@@ -259,28 +310,7 @@ export class UserTag extends React.Component {
   }
 
   componentDidMount(props) {
-    fire.auth().onAuthStateChanged((user) => {
-      if (user === null) {
 
-      } else {
-        db.collection("PersonalData")
-        .where("tags", "array-contains", Router.query.tag)
-        .where("organisation", "==", Router.query.organisation)
-        .get()
-        .then((querySnapshot) => {
-            var data = []
-            var ids = []
-            querySnapshot.forEach((doc) => {
-              var elem = doc.data()
-              elem._id = doc.id
-              data.push(elem)
-              ids.push(elem._id)
-            })
-            console.log(data)
-            this.setState({members: data, memberIds: ids})
-        })
-      }
-    })
     console.log(Router.query)
     this.updateData()
   }
@@ -290,8 +320,15 @@ export class UserTag extends React.Component {
   }
 
   render() {
+    console.log(this.state)
     return (
       <div>
+        <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '30% 0 0 90%',
+          transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', right: -250,
+           width: '30vw', height: '100vw'}}/>
+         <div style={{position: 'fixed', zIndex: -1, top: 50, borderRadius: '0 30% 90% 0%',
+           transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', left: -250,
+            width: '20vw', height: '100vw'}}/>
         <App>
           <Dialog
             open={this.state.deleteOpen}
@@ -373,17 +410,7 @@ export class UserTag extends React.Component {
           </Dialog>
 
 
-          <AddTag
-            selection={[this.state.memberData]}
-            text={`Add new tag`}
-            organisation={this.props.url.query.organisation}
-            open={this.state.tagOpen}
-            edit
-            type='interaction'
-            interaction={this.state.int}
-            tags={this.state.tags}
-            onTagAdded={this.handleTagAdded}
-            onRequestClose={() => this.setState({tagOpen:false})}/>
+
           <div
             style={{ paddingTop: 20, paddingBottom: 20, justifyContent: 'center',
               fontWeight: 700,
@@ -392,7 +419,7 @@ export class UserTag extends React.Component {
                 justifyContent: 'space-between', alignItems: 'center'}}>
                 <div style={{textAlign: 'left'}}>
 
-              <div style={{fontWeight: 700, fontSize: '40px', paddingBottom: 10,
+              <div style={{fontWeight: 200, fontSize: '40px', paddingBottom: 10,
                 borderBottom: '4px solid #000AB2', display: 'flex', alignItems: 'center'
               }}>
                 <Tag style={{height: 30, paddingRight: 15}} color='#484848'/>
@@ -427,12 +454,41 @@ export class UserTag extends React.Component {
                   nestedItems = {
                     [<div style={{display: 'flex', flexWrap: 'wrap'}}>
                     {this.state.members ? this.state.members.map((member) => (
-                      <Link prefetch href={`/member?organisation=${Router.query.organisation}&member=${member._id}`}>
+                      <Link prefetch href={`/member?view=${Router.query.view}&member=${member._id}`}>
+                        <div style={{textTransform: 'capitalize'}}>
+                          <Chip
+                            style={chipStyles.chip}
+                            labelStyle={chipStyles.chipLabel}
+
+                            backgroundColor={randomColor({luminosity: 'light'})}>
+                            {member['Full Name']}
+                          </Chip>
+                        </div>
+                      </Link>
+                    )) :
+                  null}
+                    </div>
+                  ]
+                  }
+                   style={{ borderBottom: '1px solid #DBDBDB'}}/>
+              </div>
+              <div style={{boxSizing: 'border-box', marginTop: 10,
+                  border: '1px solid #DBDBDB', borderRadius: 2}}>
+                <ListItem
+                  primaryText='Organisations'
+
+                  initiallyOpen={true}
+                  primaryTogglesNestedList={true}
+                  nestedItems = {
+                    [<div style={{display: 'flex', flexWrap: 'wrap'}}>
+                    {this.state.organisations ? this.state.organisations.map((org) => (
+                      <Link prefetch href={`/organisation?targetorganisation=${org._id}&view=${Router.query.view}`}>
                         <Chip
-                          style={styles.chip}
+                          style={chipStyles.chip}
+                          labelStyle={chipStyles.chipLabel}
 
                           backgroundColor={randomColor({luminosity: 'light'})}>
-                          {member['Full Name']}
+                          {org.details.name}
                         </Chip>
                       </Link>
                     )) :
@@ -453,7 +509,7 @@ export class UserTag extends React.Component {
                 </div>
               <div style={{display: 'flex', padding: 40, backgroundColor: '#DBDBDB',
               marginBottom: 20}}>
-                This is going to be summary statistics
+                This is going to be summary statistics/events
               </div>
               <div style={{textAlign: 'left'}}>
 

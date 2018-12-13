@@ -152,7 +152,7 @@ class ProjectEdit extends React.Component {
         if (event.Organisations) {
           var orgArray = []
           var orgLookups = []
-          event.Organisations.forEach((org) => {
+          event.Organisations && event.Organisations.forEach((org) => {
             orgLookups.push(db.collection("OrgData").doc(org).get().then((orgDoc) => {
               var orgData = orgDoc.data()
               orgArray.push({name: orgData.details.name, _id: org})
@@ -319,7 +319,7 @@ class ProjectEdit extends React.Component {
 
     var orgs = []
     if (this.state.selectedOrgs) {
-      this.state.selectedOrgs.forEach((org) => {
+      this.state.selectedOrgs && this.state.selectedOrgs.forEach((org) => {
         orgs.push(org._id)
       })
     }
@@ -351,7 +351,7 @@ class ProjectEdit extends React.Component {
       eventRef = db.collection("Events").doc()
     }
     eventRef.set(body ,{merge: true}).then(() => {
-      this.state.selectedOrgs.forEach((org) => {
+      this.state.selectedOrgs && this.state.selectedOrgs.forEach((org) => {
         db.collection("Interactions").add({
           Creator : fire.auth().currentUser.uid,
           Date: new Date(body.start),
@@ -438,7 +438,7 @@ class ProjectEdit extends React.Component {
       var length = this.state.searchText.length
       var people = Object.values(this.state.members)
       var filteredPeople = []
-      people.forEach((person) => {
+      people && people.forEach((person) => {
         if (person['Full Name'].substring(0, length).toLowerCase() === this.state.searchText.toLowerCase()) {
           filteredPeople.push(person)
         }

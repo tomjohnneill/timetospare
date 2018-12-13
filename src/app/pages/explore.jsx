@@ -4,10 +4,12 @@ import OrganisationDetails from '../components/organisation-details.jsx';
 import withMui from '../components/hocs/withMui';
 import Router from 'next/router'
 import fire from '../fire';
+import {BUILD_LEVEL} from '../fire';
 import {textFieldStyles, chipStyles} from '../components/styles.jsx';
 import TextField from 'material-ui/TextField';
 import * as firebase from 'firebase';
 import Chip from 'material-ui/Chip'
+import Interaction from '../components/interaction.jsx';
 
 let db = fire.firestore()
 var functions = firebase.app().functions('europe-west1');
@@ -36,9 +38,32 @@ export class Explore extends React.Component {
     })
   }
 
+  runSearch = () => {
+    var basicSearch = functions.httpsCallable('elastic-basicSearch')
+    basicSearch({
+      index: BUILD_LEVEL === 'production' ? 'interactions' : 'staging-interactions',
+      query: { "multi_match" : {
+      "query" : this.state.search
+    } }
+    }).then((result) => {
+      console.log(result)
+      if (result.data && result.data.hits && result.data.hits.hits) {
+        var editedHits = []
+        result.data.hits.hits.forEach((hit) => {
+          var newHit = hit
+          newHit._source.Date = new Date(hit._source.Date._seconds)
+          editedHits.push(newHit)
+        })
+        this.setState({hits: editedHits})
+
+      }
+    })
+  }
+
   handleKeyPress = (e) => {
     if (e.key === 'Enter') {
-      this.getTopics()
+      //this.getTopics()
+      this.runSearch()
     }
   }
 
@@ -49,8 +74,8 @@ export class Explore extends React.Component {
           transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', left: -150,
            width: '30vw', height: '100vw'}}/>
          <div style={{display: 'flex', justifyContent: 'center', padding: 16, minHeight: '100vh'}}>
-          <div style={{width: '100%', maxWidth: 600}}>
-            <h2 style={{textAlign: 'left', fontSize: '60px', fontWeight: 200}}>
+          <div style={{width: '100%', maxWidth: 600, textAlign: 'left'}}>
+            <h2 style={{textAlign: 'left', fontSize: '60px', fontWeight: 200, marginTop: 20, marginBottom: 20}}>
               Explore...
             </h2>
             <TextField
@@ -64,6 +89,7 @@ export class Explore extends React.Component {
               inputStyle={textFieldStyles.input}
               hintStyle={textFieldStyles.hint}
               />
+            <div style={{height: 20}}/>
               {
                 this.state.local_search_query ?
                 <div>
@@ -90,6 +116,18 @@ export class Explore extends React.Component {
                     </div>
                   ))}
                 </div>
+                :
+                null
+              }
+              {
+                this.state.hits ?
+                this.state.hits.map((hit) => (
+                  <Interaction
+                    interactionUsers={this.state.interactionUsers}
+                    adminMap={this.state.adminMap}
+                    membersLoaded={this.state.membersLoaded}
+                    interaction={hit._source}/>
+                ))
                 :
                 null
               }

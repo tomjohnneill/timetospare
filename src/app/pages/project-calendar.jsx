@@ -69,12 +69,15 @@ class YourCalendar extends React.Component {
     this.state = {loading: true}
   }
 
+  componentWillUnmount(props) {
+    this.unsubscribe()
+  }
+
   getEventInteractions = () => {
 
 
-    db.collection("Events").where("managedBy", "==", Router.query.view)
-    .get()
-    .then((querySnapshot) => {
+    this.unsubscribe = db.collection("Events").where("managedBy", "==", Router.query.view)
+    .onSnapshot((querySnapshot) => {
       var data = []
       querySnapshot.forEach((doc) => {
         var elem = doc.data()
@@ -221,6 +224,7 @@ class YourCalendar extends React.Component {
   }
 
   handleDeleteEvent = () => {
+    this.setState({viewOpen: false})
     db.collection("Events").doc(this.state.targetedEvent._id).delete()
     .then(() => {
       this.setState({viewOpen: false})
