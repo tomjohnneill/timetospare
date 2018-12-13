@@ -334,6 +334,18 @@ export default class Header extends React.Component {
                                            <Home/>
                                          </div>
                                        </Link>
+                                       <Link prefetch href={`/explore`}>
+                                         <div
+                                           className='header-category'
+                                           style={
+                                             this.props.router.pathname.includes('explore') ?
+                                             style.selectedCategory :
+                                             style.category}
+
+                                           >
+                                           Explore
+                                         </div>
+                                       </Link>
                                        <Link prefetch href={`/project-calendar?view=${this.state.organisation}`}>
                                          <div
                                            className='header-category'

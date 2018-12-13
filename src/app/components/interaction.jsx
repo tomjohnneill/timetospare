@@ -73,7 +73,7 @@ export default class Interaction extends React.Component {
     switch(int.Type) {
       case "Event":
         return (
-          <Link prefetch href={`/project-admin?project=${int._id}&view=${localStorage.getItem('ttsOrg')}`}>
+          <Link prefetch href={`/project-admin?project=${int.EventId}&view=${localStorage.getItem('ttsOrg')}`}>
             <div
               style={{ borderBottom : '1px solid #DBDBDB'}}
               >
@@ -133,7 +133,7 @@ export default class Interaction extends React.Component {
                   leftAvatar={<Avatar
                   backgroundColor={'#e91e63'}
                   icon={
-                    <Link prefetch href={`/project-admin?project=${int._id}&view=${localStorage.getItem('ttsOrg')}`}>
+                    <Link prefetch href={`/project-admin?project=${int.EventId}&view=${localStorage.getItem('ttsOrg')}`}>
                     <EventIcon color='white'/>
                   </Link> } />
                   } />
@@ -143,7 +143,7 @@ export default class Interaction extends React.Component {
         )
         case "CalendarEvent":
           return (
-            <Link prefetch href={`/project-admin?project=${int._id}&view=${localStorage.getItem('ttsOrg')}`}>
+            <Link prefetch href={`/project-admin?project=${int.EventId}&view=${localStorage.getItem('ttsOrg')}`}>
               <div
                 style={{ borderBottom : '1px solid #DBDBDB'}}
                 >
@@ -236,7 +236,7 @@ export default class Interaction extends React.Component {
                       leftAvatar={<Avatar
                       backgroundColor={'#039BE5'}
                       icon={
-                        <Link prefetch href={`/project-admin?project=${int._id}&view=${localStorage.getItem('ttsOrg')}`}>
+                        <Link prefetch href={`/project-edit?event=${int.Details.EventId}&view=${localStorage.getItem('ttsOrg')}`}>
                         <EventIcon color='white'/>
                       </Link> } />
                       } />

@@ -46,6 +46,14 @@ export default class AddTag extends React.Component {
       })
 
     }
+    else if (this.props.type && this.props.type === 'organisation') {
+      db.collection("OrgData").doc(this.props.selection._id).update("tags", firebase.firestore.FieldValue.arrayUnion(this.state.tag)).then(() => {
+        this.props.onRequestClose()
+        if (this.props.onTagAdded) {
+           this.props.onTagAdded(this.state.tag)
+        }
+      })
+    }
     else {
       var sfDocRef = db.collection("Organisations").doc(this.props.organisation)
       db.runTransaction((transaction) =>

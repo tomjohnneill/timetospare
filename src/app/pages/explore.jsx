@@ -9,6 +9,7 @@ import {textFieldStyles, chipStyles} from '../components/styles.jsx';
 import TextField from 'material-ui/TextField';
 import * as firebase from 'firebase';
 import Chip from 'material-ui/Chip'
+import Link from 'next/link';
 import Interaction from '../components/interaction.jsx';
 
 let db = fire.firestore()
@@ -18,6 +19,15 @@ export class Explore extends React.Component {
   constructor(props) {
     super(props);
     this.state = {}
+  }
+
+  componentDidMount(props) {
+    if (Router.query.q) {
+        this.setState({search: Router.query.q})
+
+        this.runSearch()
+        this.runOrgSearch()
+    }
   }
 
   getTopics = () => {
@@ -39,11 +49,12 @@ export class Explore extends React.Component {
   }
 
   runSearch = () => {
+    var q = this.state.search ? this.state.search : decodeURIComponent(Router.query.q)
     var basicSearch = functions.httpsCallable('elastic-basicSearch')
     basicSearch({
       index: BUILD_LEVEL === 'production' ? 'interactions' : 'staging-interactions',
       query: { "multi_match" : {
-      "query" : this.state.search
+      "query" : q
     } }
     }).then((result) => {
       console.log(result)
@@ -51,11 +62,35 @@ export class Explore extends React.Component {
         var editedHits = []
         result.data.hits.hits.forEach((hit) => {
           var newHit = hit
-          newHit._source.Date = new Date(hit._source.Date._seconds)
+          newHit._source.Date = new Date(hit._source.Date)
           editedHits.push(newHit)
         })
         this.setState({hits: editedHits})
+        Router.push(`/explore?q=${q}`)
+      }
+    })
+  }
 
+  runOrgSearch = () => {
+    var q = this.state.search ? this.state.search : decodeURIComponent(Router.query.q)
+    var basicSearch = functions.httpsCallable('elastic-basicSearch')
+    basicSearch({
+      index: BUILD_LEVEL === 'production' ? 'orgs' : 'staging-orgs',
+      query: { "multi_match" : {
+      "query" : q
+    } }
+    }).then((result) => {
+      console.log(result)
+      if (result.data && result.data.hits && result.data.hits.hits) {
+        var editedHits = []
+        result.data.hits.hits.forEach((hit) => {
+          var newHit = hit
+          newHit._source.Date = new Date(hit._source.Date)
+          editedHits.push(newHit)
+        })
+        this.setState({orghits: editedHits})
+        console.log('orgs', editedHits)
+        Router.push(`/explore?q=${q}`)
       }
     })
   }
@@ -64,6 +99,7 @@ export class Explore extends React.Component {
     if (e.key === 'Enter') {
       //this.getTopics()
       this.runSearch()
+      this.runOrgSearch()
     }
   }
 
@@ -120,14 +156,44 @@ export class Explore extends React.Component {
                 null
               }
               {
-                this.state.hits ?
-                this.state.hits.map((hit) => (
-                  <Interaction
-                    interactionUsers={this.state.interactionUsers}
-                    adminMap={this.state.adminMap}
-                    membersLoaded={this.state.membersLoaded}
-                    interaction={hit._source}/>
-                ))
+                this.state.orghits && this.state.orghits.length > 0?
+                <div>
+                  <div style={{fontWeight: 200, fontSize: '20px', paddingBottom: 20}}>Organisations</div>
+                  <div style={{display: 'flex', flexWrap: 'wrap', marginBottom: 20}}>
+                  {
+                    this.state.orghits.map((hit) => (
+                      <Link href={`/organisation?view=${localStorage.getItem('ttsOrg')}&targetorganisation=${hit._id}`}>
+                        <div style={{cursor: 'pointer', margin: 2}}>
+                          <Chip
+                            style={chipStyles.chip}
+                            labelStyle={chipStyles.chipLabel}>
+                            {hit._source.details.name}
+                          </Chip>
+                        </div>
+                      </Link>
+                    ))
+                  }
+                  </div>
+                </div>
+
+                :
+                null
+              }
+              {
+                this.state.hits && this.state.hits.length > 0 ?
+                <div>
+                  <div style={{fontWeight: 200, fontSize: '20px', paddingBottom: 20}}>Interactions</div>
+                  {
+                  this.state.hits.map((hit) => (
+                    <Interaction
+                      interactionUsers={this.state.interactionUsers}
+                      adminMap={this.state.adminMap}
+                      membersLoaded={this.state.membersLoaded}
+                      interaction={hit._source}/>
+                  ))
+                  }
+                </div>
+
                 :
                 null
               }

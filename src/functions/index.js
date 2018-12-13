@@ -10,6 +10,7 @@ import {sendInviteEmail} from './transactional/signup.js';
 import {outlookAuth,scrapeOutlookEmails, scrapeCalendarEvents} from './integrations/outlook.js';
 import {getEventbriteOrganisations, getEventAttendees, getEventList, getOneEventAttendees} from './integrations/eventbrite.js';
 import {wrapCors} from './integrations/cors.js';
+import {basicSearch, addDocument, addMember, addOrg, indexAllInteractions, indexAllMembers, indexAllOrgs} from './elastic/search.js';
 
 /*
 Namespace application services with function groups.
@@ -63,4 +64,8 @@ const integrations = {
   wrapCors
 }
 
-export { app, greetings, mailchimp, users, messaging, transactional, integrations}
+const elastic = {
+  basicSearch, addDocument, addMember, addOrg, indexAllInteractions, indexAllMembers, indexAllOrgs
+}
+
+export { app, greetings, mailchimp, users, messaging, transactional, integrations, elastic}

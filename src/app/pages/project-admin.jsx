@@ -39,11 +39,9 @@ const ChipArray = (props) => (
                 </Chip>
               ))
               :
-              <Chip style={chipStyles.chip}
-                backgroundColor={props.color}
-                labelStyle={chipStyles.chipLabel}>
-                {props.data.value}
-              </Chip>
+
+                props.data.value
+
             }
           </div>
 )

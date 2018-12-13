@@ -319,7 +319,6 @@ export class Organisation extends React.Component {
                             <div style={{flex: 1}}>
                               <div style={styles.tableRow}>
                                 <Chip
-                                  backgroundColor={randomColor({luminosity: 'light'})}
                                   style={chipStyles.chip}
                                   labelStyle={chipStyles.chipLabel}
                                   >
@@ -333,7 +332,8 @@ export class Organisation extends React.Component {
 
                             <div style={{flex: 1}}>
                               <div style={styles.tableRow}>
-                                {user.lastLoggedIn ? user.lastLoggedIn.toString() : null}
+                                {user.lastLoggedIn ? user.lastLoggedIn.toLocaleString('en-gb',
+                                  {hour12: true, weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric'}) : null}
                               </div>
                             </div>
                           </div>
