@@ -110,6 +110,13 @@ class Cards extends Component {
         this.addToUnfavourites(orgDoc)
       })
     })
+
+    db.collection("OrgData").where("Pinned", "==", true).where("managedBy", "==", Router.query.view)
+    .get().then((querySnapshot) => {
+      querySnapshot.forEach((orgDoc) => {
+        this.addToIssues(orgDoc)
+      })
+    })
   }
 
   handleSaveNote = (note) => {
@@ -167,6 +174,26 @@ class Cards extends Component {
     currentOrgs.push(body)
     var scene = this.state.scene
     scene.children[1].children = currentOrgs
+    this.setState({scene: scene})
+  }
+
+  addToIssues = (orgDoc) => {
+    var data = orgDoc.data()
+    var body = {
+      type: "draggable",
+      id : orgDoc.id,
+      props: {
+        className: "card",
+        id: orgDoc.id
+      },
+      data: data.details.name,
+      date: data.lastInteraction
+    }
+
+    var currentOrgs = this.state.scene.children[2].children ? this.state.scene.children[2].children : []
+    currentOrgs.push(body)
+    var scene = this.state.scene
+    scene.children[2].children = currentOrgs
     this.setState({scene: scene})
   }
 

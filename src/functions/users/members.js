@@ -75,6 +75,18 @@ const updateContactRecord = functions.firestore
       }
       if (newValue && newValue.Organisations) {
         newValue.Organisations.forEach((org) => {
+
+          updates.push(db.collection("Interactions").where("Organisations", "array-contains", org)
+            .where("Pinned", "==", true).get().then((pinnedSnapshot) => {
+              if (pinnedSnapshot.size > 0) {
+                db.collection("OrgData").doc(org)
+                .update({Pinned: true})
+              } else {
+                db.collection("OrgData").doc(org)
+                .update({Pinned: false})
+              }
+            }))
+
           updates.push(db.collection("Interactions").where("Date", "<", new Date())
           .where("Organisations", "array-contains", org)
           .orderBy("Date", "desc").limit(1).get().then((querySnapshot) => {
