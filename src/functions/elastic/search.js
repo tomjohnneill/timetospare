@@ -85,6 +85,67 @@ const basicSearch = functions.region('europe-west1').https.onCall((data, context
     })
 })
 
+const basicOrganisationAggregation = functions.region('europe-west1').https.onCall((data, context) => {
+    return client.search({
+      index: data.index,
+      body: {
+        "size" : 0,
+            "query" : {
+                 "constant_score": {
+                     "filter": {
+                       "bool": {
+                         "must": [
+                           {"term": {
+                             "managedBy": data.view
+                            }},
+                            {"term": {
+                             "Organisations.raw": data.organisation
+                            }}
+                         ]
+                       }
+
+                     }
+                 }
+             },
+            "aggs": data.aggs
+          }
+    })
+})
+
+const summaryAggregation  = functions.region('europe-west1').https.onCall((data, context) => {
+    return client.search({
+      index: data.index,
+      body: {
+        "query" : {
+
+            "constant_score": {
+             "filter": {
+               "bool": {
+                 "must": [
+                   {"term": {
+                     "managedBy": data.view
+                    }},
+                    {"range" : {
+                        "Date" : {
+                            "gte": data.fromDate,
+                            "lte": data.toDate,
+                            "format": "dd/MM/yyyy"
+                        }
+                    }}
+                 ]
+               }
+
+             }
+           }
+        },
+        "size" : 0,
+        "aggs": data.aggs
+
+      }
+    }).then((result) => result)
+    .catch(err => err)
+})
+
 const indexAllInteractions = functions.region('europe-west1').https.onCall((data, context) => {
     return db.collection("Interactions").get().then((intSnapshot) => {
       var intIndexes = []
@@ -157,4 +218,4 @@ const indexAllOrgs = functions.region('europe-west1').https.onCall((data, contex
     }).then((intIndexes) => Promise.all(intIndexes))
 })
 
-export {basicSearch, addDocument, addMember, addOrg, indexAllInteractions, indexAllMembers, indexAllOrgs}
+export {summaryAggregation, basicSearch, basicOrganisationAggregation, addDocument, addMember, addOrg, indexAllInteractions, indexAllMembers, indexAllOrgs}

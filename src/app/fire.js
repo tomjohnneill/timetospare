@@ -1,7 +1,5 @@
 import firebase from "firebase/app";
 import 'firebase/auth';
-
-// Required for side-effects
 import "firebase/firestore";
 import "firebase/functions"
 

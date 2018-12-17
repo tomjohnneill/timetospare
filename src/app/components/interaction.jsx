@@ -26,7 +26,7 @@ export default class Interaction extends React.Component {
   constructor(props) {
     super(props)
     this.state = {adminMap: {}, interactionUsers: {}}
-    console.log(this.props)
+
   }
 
   componentDidMount(props) {
@@ -45,7 +45,7 @@ export default class Interaction extends React.Component {
       .then((adminSnapshot) => {
         adminSnapshot.forEach((adminDoc) => {
           var adminData = adminDoc.data()
-          console.log(adminData)
+          
           var adminMap = this.state.adminMap ? this.state.adminMap : {}
           adminMap[elem.Creator] = adminData['Full Name'] ? adminData['Full Name'] : adminData['Name']
           this.setState({adminMap: adminMap})
@@ -236,7 +236,7 @@ export default class Interaction extends React.Component {
                       leftAvatar={<Avatar
                       backgroundColor={'#039BE5'}
                       icon={
-                        <Link prefetch href={`/project-edit?event=${int.Details.EventId}&view=${localStorage.getItem('ttsOrg')}`}>
+                        <Link prefetch href={`/projectedit?event=${int.Details.EventId}&view=${localStorage.getItem('ttsOrg')}`}>
                         <EventIcon color='white'/>
                       </Link> } />
                       } />

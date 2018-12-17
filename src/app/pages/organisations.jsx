@@ -21,10 +21,11 @@ import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
 import OrganisationAutocomplete from '../components/organisation-autocomplete.jsx';
 import {ReviewIcon, NoteIcon, Tag, Pin} from '../components/icons.jsx';
+import moment from 'moment'
 
 let db = fire.firestore()
 
-
+let functions = fire.functions('europe-west1')
 
 export const applyDrag = (arr, dragResult) => {
   const { removedIndex, addedIndex, payload } = dragResult;
@@ -64,6 +65,7 @@ class Cards extends Component {
     this.onCardDrop = this.onCardDrop.bind(this);
     this.getCardPayload = this.getCardPayload.bind(this);
     this.state = {
+      orgMap: {},
       scene: {
         type: "container",
         props: {
@@ -100,54 +102,12 @@ class Cards extends Component {
   */
 
   componentDidMount(props) {
+    this.getSummaryAgg()
     db.collection("OrgData").where("managedBy", "==", Router.query.view)
-    .orderBy('lastInteraction', "desc")
-    .limit(10)
+    .orderBy("lastInteraction", "asc").limit(10)
     .get().then((querySnapshot) => {
       querySnapshot.forEach((orgDoc) => {
-        var data = orgDoc.data()
-
-        var body = {
-          type: "draggable",
-          id : orgDoc.id,
-          props: {
-            className: "card",
-            id: orgDoc.id
-          },
-          data: data.details.name,
-          date: data.lastInteraction
-        }
-
-        var currentOrgs = this.state.scene.children[0].children ? this.state.scene.children[0].children : []
-        currentOrgs.push(body)
-        var scene = this.state.scene
-        scene.children[0].children = currentOrgs
-        this.setState({scene: scene})
-      })
-    })
-
-    db.collection("OrgData").where("managedBy", "==", Router.query.view)
-    .orderBy('lastInteraction', "asc")
-    .limit(10)
-    .get().then((querySnapshot) => {
-      querySnapshot.forEach((orgDoc) => {
-        var data = orgDoc.data()
-        var body = {
-          type: "draggable",
-          id : orgDoc.id,
-          props: {
-            className: "card",
-            id: orgDoc.id
-          },
-          data: data.details.name,
-          date: data.lastInteraction
-        }
-
-        var currentOrgs = this.state.scene.children[1].children ? this.state.scene.children[1].children : []
-        currentOrgs.push(body)
-        var scene = this.state.scene
-        scene.children[1].children = currentOrgs
-        this.setState({scene: scene})
+        this.addToUnfavourites(orgDoc)
       })
     })
   }
@@ -167,6 +127,97 @@ class Cards extends Component {
     }
     db.collection("Interactions").add(data).then(() => {
       this.setState({dialogOpen: false, selectedDropped: null})
+    })
+  }
+
+  addToFavourites = (orgDoc) => {
+    var data = orgDoc.data()
+    var body = {
+      type: "draggable",
+      id : orgDoc.id,
+      props: {
+        className: "card",
+        id: orgDoc.id
+      },
+      data: data.details.name,
+      date: data.lastInteraction
+    }
+
+    var currentOrgs = this.state.scene.children[0].children ? this.state.scene.children[0].children : []
+    currentOrgs.push(body)
+    var scene = this.state.scene
+    scene.children[0].children = currentOrgs
+    this.setState({scene: scene})
+  }
+
+  addToUnfavourites = (orgDoc) => {
+    var data = orgDoc.data()
+    var body = {
+      type: "draggable",
+      id : orgDoc.id,
+      props: {
+        className: "card",
+        id: orgDoc.id
+      },
+      data: data.details.name,
+      date: data.lastInteraction
+    }
+
+    var currentOrgs = this.state.scene.children[1].children ? this.state.scene.children[1].children : []
+    currentOrgs.push(body)
+    var scene = this.state.scene
+    scene.children[1].children = currentOrgs
+    this.setState({scene: scene})
+  }
+
+  getSummaryAgg = () => {
+    var summaryAgg = functions.httpsCallable('elastic-summaryAggregation');
+    var today  = moment().format("DD/MM/YYYY")
+
+    var sixmonths = new Date()
+    console.log(sixmonths)
+    var sixMonths = new Date(sixmonths.setMonth(sixmonths.getMonth() - 6))
+    var sixmonthsformat = moment(sixMonths).format("DD/MM/YYYY")
+    summaryAgg({
+      view: Router.query.view,
+      fromDate: sixmonthsformat,
+      toDate: today,
+      aggs: {
+        "profit": {
+          "terms" : {
+              "field" : "Organisations.raw",
+              "size": 10000
+            },
+            "aggs": {
+              "score": {
+                "scripted_metric": {
+                  "init_script" : "state.ints = []",
+                  "map_script" : "if (doc.Type.value == \"Event\") {state.ints.add(10)} else if (doc.Type.value == \"PlaceholderEvent\") {state.ints.add(10)} else {state.ints.add(1)}",
+                  "combine_script" : "double profit = 0; for (t in state.ints) { profit += t } return profit",
+                  "reduce_script" : "double profit = 0; for (a in states) { profit += a } return profit"
+              }
+            }
+          }
+        }
+      }
+    }).then((result) => {
+      console.log(result)
+      var data = result.data.aggregations.profit.buckets.sort(function(a, b) {
+          a = (a.score.value);
+          b = (b.score.value);
+          return a>b ? -1 : a < b ? 1 : 0;
+      });
+      return data
+    }).then((data) => {
+      console.log(data)
+
+      var favourites = data.slice(0, 10)
+
+      favourites.forEach((orgObj) => {
+        db.collection("OrgData").doc(orgObj.key).get().then((orgDoc) => {
+          this.addToFavourites(orgDoc)
+        })
+      })
     })
   }
 
@@ -193,7 +244,7 @@ class Cards extends Component {
 
 
   render() {
-
+    console.log(this.state)
     return (
       <App>
         <Popover

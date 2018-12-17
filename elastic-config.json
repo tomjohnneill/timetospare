@@ -1,0 +1,39 @@
+{
+    "mappings" : {
+        "interaction" : {
+            "properties" : {
+                "managedBy" : {
+                    "type" : "keyword"
+                },
+                "Type" : {
+                    "type" : "keyword"
+                },
+                "Organisations" : {
+                    "type": "text",
+                    "fields": {
+                      "raw": {
+                        "type":  "keyword"
+                      }
+                    }
+                },
+                "tags" : {
+                    "type": "text",
+                    "fields": {
+                      "raw": {
+                        "type":  "keyword"
+                      }
+                    }
+                },
+                "Members" : {
+                    "type": "text",
+                    "fields": {
+                      "raw": {
+                        "type":  "keyword"
+                      }
+                    }
+                }
+            }
+        }
+    }
+
+}

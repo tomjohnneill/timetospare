@@ -249,7 +249,7 @@ class YourCalendar extends React.Component {
     var filteredEvents = []
     this.state.events && this.state.events.forEach((event) => {
       if (this.state.filterOrg) {
-        if (event.Organisations.includes(this.state.filterOrg)) {
+        if (event.Organisations && event.Organisations.includes(this.state.filterOrg)) {
           filteredEvents.push(event)
         }
       } else {

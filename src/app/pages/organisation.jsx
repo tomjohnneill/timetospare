@@ -16,7 +16,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
 import ArrowRight from 'material-ui/svg-icons/navigation/arrow-forward';
 import Divider from 'material-ui/Divider'
-import {buttonStyles, iconButtonStyles, chipStyles} from '../components/styles.jsx';
+import {buttonStyles, iconButtonStyles, chipStyles, textFieldStyles} from '../components/styles.jsx';
 import AddNote from '../components/addNote.jsx';
 import {ReviewIcon, NoteIcon, Tag, Pin} from '../components/icons.jsx';
 import AddTag from '../components/addTag.jsx';
@@ -32,9 +32,13 @@ import * as firebase from 'firebase';
 import Close from 'material-ui/svg-icons/navigation/close'
 import Interaction from '../components/interaction.jsx';
 import IconButton from 'material-ui/IconButton';
-import {classifyIntsByDate, runThroughInts} from './member.jsx'
+import {classifyIntsByDate, runThroughInts, insertNum} from './member.jsx'
 import Lock from 'material-ui/svg-icons/action/lock';
+import SearchIcon from 'material-ui/svg-icons/action/search';
+import TextField from 'material-ui/TextField';
+import lunr from 'lunr'
 import LockOpen from 'material-ui/svg-icons/action/lock-open';
+import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
 
 let db = fire.firestore()
 
@@ -106,6 +110,31 @@ export class Organisation extends React.Component {
     this.unsubscribe()
   }
 
+  getDateHistogram = () => {
+    var basicOrganisationAggregation = functions.httpsCallable('elastic-basicOrganisationAggregation');
+    basicOrganisationAggregation({
+      view: Router.query.view,
+      organisation: Router.query.targetorganisation,
+      aggs: {
+         "interactions": {
+            "date_histogram": {
+               "field": "Date",
+               "interval": "month",
+               "format": "MMM-y"
+            }
+         }
+      }
+    }).then((result) => {
+      console.log(result)
+      console.log(result.data)
+      if (result.data && result.data.aggregations && result.data.aggregations.interactions.buckets) {
+        console.log(result.data.aggregations.interactions.buckets)
+        var buckets = result.data.aggregations.interactions.buckets
+        this.setState({aggregation: buckets})
+      }
+    })
+  }
+
   updateData = () => {
     if (localStorage.getItem('sample') == 'true') {
       var data = []
@@ -156,48 +185,17 @@ export class Organisation extends React.Component {
       .orderBy("Date", 'desc').onSnapshot(
         (intSnapshot) => {
         var data = []
-        var promises = []
+
         intSnapshot.forEach((intDoc) => {
           var elem = intDoc.data()
           elem._id = intDoc.id
           data.push(elem)
-          if (elem.Private && elem.Creator == fire.auth().currentUser.uid) {
-            db.collection("Private").doc(elem._id).get().then((privateDoc) => {
-              var privateDocs = this.state.privateDocs ? this.state.privateDocs : {}
-              privateDocs[elem._id] = privateDoc.data()
-              this.setState({privateDocs: privateDocs})
-            })
-          }
-          if (elem.Creator && !this.state.adminMap[elem.Creator]) {
-            db.collection("PersonalData").where("managedBy", "==", Router.query.view)
-            .where("User", "==", elem.Creator).get()
-            .then((adminSnapshot) => {
-              adminSnapshot.forEach((adminDoc) => {
-                var adminData = adminDoc.data()
-                console.log(adminData)
-                var adminMap = this.state.adminMap ? this.state.adminMap : {}
-                adminMap[elem.Creator] = adminData['Full Name'] ? adminData['Full Name'] : adminData['Name']
-                this.setState({adminMap: adminMap})
-              })
-            })
-          }
-          if (elem.Members) {
-            elem.Members.forEach((member) => {
-              promises.push(db.collection("PersonalData").doc(member)
-                .get().then((dataDoc) => {
-                  let userData = dataDoc.data()
-                  userData.color = randomColor({luminosity: 'light'})
-                  let interactionUsers = this.state.interactionUsers
-                  interactionUsers[member] = userData
-                  this.setState({interactionUsers: interactionUsers})
-                })
-              )
-            })
-          }
+
 
         })
-        Promise.all(promises).then(() => this.setState({membersLoaded: true}))
+
         this.setState({interactions: data})
+        this.addInteractionsToIndex()
       })
     }
 
@@ -254,6 +252,7 @@ export class Organisation extends React.Component {
 
 
   componentDidMount(props) {
+    this.getDateHistogram()
     fire.auth().onAuthStateChanged((user) => {
       if (user === null) {
 
@@ -320,9 +319,9 @@ export class Organisation extends React.Component {
               var elem = doc.data()
 
               if (elem.MemberName) {
-                console.log(elem.MemberName)
+
                 Object.keys(elem.MemberName).forEach((key) => {
-                  console.log(key)
+
                   var user = {}
                   user._id = elem.Member
                   user.relId = doc.id
@@ -401,6 +400,31 @@ export class Organisation extends React.Component {
     db.collection("PersonalData").doc(memberId).update("organisations", firebase.firestore.FieldValue.arrayRemove(this.state.organisation.details.name))
   }
 
+  addInteractionsToIndex = () => {
+    var interactions = this.state.interactions
+    if (interactions && interactions.length > 0) {
+      this.idx = lunr(function () {
+        this.ref('_id')
+        this.field('Subject')
+        this.field('Body')
+        interactions.forEach((int) => {
+          if (int.Type === 'CalendarEvent') {
+            int.Body = int.Details.BodyText
+            int.Subject = int.Details.Subject
+            this.add(int)
+          } else if (int.Type === 'Email') {
+            int.Body = int.Details.BodyText
+            int.Subject = int.Details.Subject
+            this.add(int)
+          } else if (int.Type === 'Note') {
+            int.Body = int.Details.Note
+            this.add(int)
+          }
+        })
+      })
+    }
+  }
+
   handleTagAdded = (tag) => {
     var tags = this.state.organisation.tags
     var organisation = this.state.organisation
@@ -410,6 +434,13 @@ export class Organisation extends React.Component {
     organisation.tags = tags
     this.setState({organisation: organisation, tagOpen: false})
     this.updateData()
+  }
+
+  searchInteractions = (e, nv) => {
+    if (this.idx) {
+      console.log(this.idx.search(insertNum(nv)))
+      this.setState({searchResults: this.idx.search(insertNum(nv))})
+    }
   }
 
   render() {
@@ -422,7 +453,7 @@ export class Organisation extends React.Component {
       })
     }
 
-    console.log(this.state)
+
     return (
       <div>
         <App>
@@ -675,21 +706,44 @@ export class Organisation extends React.Component {
 
             <div style={{maxWidth: 700,textAlign: 'left',  width: '100%', boxSizing: 'border-box', padding: 20}}>
               <div style={{fontWeight: 200, fontSize: '20px', paddingBottom: 20}}>
-                  Last interaction:
+                  Your interaction history:
                 </div>
-              <div style={{display: 'flex', padding: 20, textAlign: 'center', width: '100%',
-                boxSizing: 'border-box', justifyContent: 'center',
-                display: 'flex', alignItems: 'center', color: '#000AB2',
-                fontSize: '24px', fontWeight: 700,
-              marginBottom: 20}}>
-                {this.state.interactions && this.state.interactions[0] ?
-                  capitalizeFirstLetter(
-                    convertToReadableTime(dateDiffInDays(new Date(this.state.interactions[0].Date), new Date()))
-                  ):
+                {
+                  this.state.aggregation ?
+                  <div style={{height: 250}}>
+                  <ResponsiveContainer height='100%' width='100%'>
+                  <LineChart data={this.state.aggregation}
+                    margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                    <Line type="monotone" dataKey="doc_count" stroke="#8884d8" />
+
+                    <XAxis stroke='black' dataKey="key_as_string" />
+                    <YAxis stroke='black' />
+                    <Tooltip />
+                  </LineChart>
+                  </ResponsiveContainer>
+                  </div>
+                  :
                   null
                 }
-              </div>
-              <div style={{textAlign: 'left'}}>
+
+                {
+                  /*
+                  <div style={{display: 'flex', padding: 20, textAlign: 'center', width: '100%',
+                    boxSizing: 'border-box', justifyContent: 'center',
+                    display: 'flex', alignItems: 'center', color: '#000AB2',
+                    fontSize: '24px', fontWeight: 700,
+                  marginBottom: 20}}>
+                    {this.state.interactions && this.state.interactions[0] ?
+                      capitalizeFirstLetter(
+                        convertToReadableTime(dateDiffInDays(new Date(this.state.interactions[0].Date), new Date()))
+                      ):
+                      null
+                    }
+                  </div>
+                  */
+                }
+
+              <div style={{textAlign: 'left', marginTop: 20}}>
 
                 <div style={{padding: '00px 0px'}}>
                   {pinned && pinned.length > 0 ?
@@ -712,6 +766,19 @@ export class Organisation extends React.Component {
                   <div style={{fontWeight: 200, fontSize: '20px', paddingBottom: 20}}>
                       Your interactions
                     </div>
+                    <div style={{display: 'flex', alignItems: 'center', paddingBottom: 20}}>
+
+                      <SearchIcon style={{width: 54, height: 24}}/>
+                      <TextField
+                        hintText={'Search all interactions...'}
+                        underlineShow={false}
+                        onChange={this.searchInteractions}
+                        fullWidth={true}
+                        style={textFieldStyles.style}
+                        inputStyle={textFieldStyles.input}
+                        hintStyle={textFieldStyles.hint}
+                        />
+                    </div>
                   {
                     this.state.takeNote ?
                     <AddNote
@@ -730,7 +797,7 @@ export class Organisation extends React.Component {
                   <div>
 
                     {this.state.interactions && this.state.interactions.length > 0 ?
-                      runThroughInts(this.state.interactions).map((int) => (
+                      runThroughInts(this.state.interactions, this.state.searchResults).map((int) => (
                       int.Pinned ? null :
                       <Interaction
                         interaction={int}

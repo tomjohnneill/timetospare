@@ -84,7 +84,7 @@ const getMessages = (link, access_token) => {
       {
         'Accept': 'application/json',
         'Authorization': `Bearer ${access_token}`,
-        'Prefer': 'outlook.body-content-type="text"'
+        'Prefer': 'outlook.body-content-type="html"'
      }
     })
 }

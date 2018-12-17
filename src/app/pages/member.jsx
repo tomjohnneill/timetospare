@@ -40,6 +40,7 @@ import lunr from 'lunr'
 import Lock from 'material-ui/svg-icons/action/lock';
 import Interaction from '../components/interaction.jsx';
 import LockOpen from 'material-ui/svg-icons/action/lock-open';
+import EditData from '../components/edit-data.jsx';
 
 let db = fire.firestore()
 var randomColor = require('randomcolor')
@@ -78,9 +79,9 @@ export var classifyIntsByDate = (date, includedSeparators) => {
   var nine = new Date()
   var yesterday = new Date(nine.setDate(nine.getDate()-1)).setHours(23,59);
   var ten = new Date()
-  var twoDaysAgo = new Date(ten.setDate(ten.getDate()-1)).setHours(23,59);
+  var twoDaysAgo = new Date(ten.setDate(ten.getDate()-2)).setHours(23,59);
   var eleven = new Date()
-  var thisWeek = new Date(eleven.setDate(eleven.getDate()-2)).setHours(23,59);
+  var thisWeek = new Date(eleven.setDate(eleven.getDate()-3)).setHours(23,59);
   var twelve = new Date()
   var lastWeek =  twelve.setDate(twelve.getDate()-7)
   var thirteen = new Date()
@@ -89,6 +90,8 @@ export var classifyIntsByDate = (date, includedSeparators) => {
   var thisMonth = fourteen.setMonth(fourteen.getMonth() - 1)
   var fifteen = new Date()
   var lastMonth = fifteen.setMonth(fifteen.getMonth() - 2)
+  var sixteen = new Date()
+  var twoMonthsAgo = sixteen.setMonth(sixteen.getMonth() - 3)
 
     if (date > twoMonthsTime) {
       if (includedSeparators.filter(e => e.text === 'Three months time').length === 0) {
@@ -132,7 +135,7 @@ export var classifyIntsByDate = (date, includedSeparators) => {
       }
     } else if (date > lastWeek) {
       if (includedSeparators.filter(e => e.text === 'Earlier this week').length === 0) {
-        includedSeparators.push({text: 'Earlier this week', Date: twoDaysAgo, Type : 'classifier'})
+        includedSeparators.push({text: 'Earlier this week', Date: thisWeek, Type : 'classifier'})
       }
     } else if (date > twoWeeksAgo) {
       if (includedSeparators.filter(e => e.text === 'Last week').length === 0) {
@@ -140,11 +143,19 @@ export var classifyIntsByDate = (date, includedSeparators) => {
       }
     } else if (date > thisMonth) {
       if (includedSeparators.filter(e => e.text === 'Two weeks ago').length === 0) {
-        includedSeparators.push({text: 'Two weeks ago', Date: lastWeek, Type : 'classifier'})
+        includedSeparators.push({text: 'Two weeks ago', Date: twoWeeksAgo, Type : 'classifier'})
       }
     } else if (date > lastMonth) {
       if (includedSeparators.filter(e => e.text === 'Earlier this month').length === 0) {
-        includedSeparators.push({text: 'Earlier this month', Date: lastWeek, Type : 'classifier'})
+        includedSeparators.push({text: 'Earlier this month', Date: thisMonth, Type : 'classifier'})
+      }
+    } else if (date > twoMonthsAgo) {
+      if (includedSeparators.filter(e => e.text === 'Last month').length === 0) {
+        includedSeparators.push({text: 'Last month', Date: lastMonth, Type : 'classifier'})
+      }
+    } else  {
+      if (includedSeparators.filter(e => e.text === 'Earlier').length === 0) {
+        includedSeparators.push({text: 'Earlier', Date: twoMonthsAgo, Type : 'classifier'})
       }
     }
 }
@@ -171,7 +182,7 @@ export var runThroughInts = (ints, searchResults) => {
   return filteredInts.sort((a,b) => (a.Date > b.Date) ? -1 : ((b.Date > a.Date) ? 1 : 0))
 }
 
-function insertNum(str) {
+export function insertNum(str) {
     var index = "~1";
     return str.replace(/\w\b/g, function(match) {
         return match + index;
@@ -271,7 +282,6 @@ export class Member extends React.Component {
       elem._id = doc.id
       console.log(elem)
       const rawData = Object.create(elem)
-
       delete rawData.managedBy
       delete rawData.User
       delete rawData.lastContacted
@@ -503,7 +513,7 @@ export class Member extends React.Component {
   handleAddField = (e) => {
     this.setState({
       addFieldOpen: true,
-      fieldAnchorEl: e.currentTarget,
+      fieldAnchorEl: null,
       fieldValue: null,
       fieldName: null
     })
@@ -531,7 +541,7 @@ export class Member extends React.Component {
       existing: true,
       addFieldOpen: true,
 
-      fieldValue: this.state.member[key],
+      fieldValue: this.state.memberData[key],
       fieldName: key
     })
   }
@@ -584,62 +594,21 @@ export class Member extends React.Component {
            transform: 'skewX(-10deg)', backgroundColor: '#FFCB00', left: -250,
             width: '20vw', height: '100vw'}}/>
         <App>
-          <Popover
-            open={this.state.addFieldOpen}
-            anchorEl={this.state.fieldAnchorEl}
-            anchorOrigin={{horizontal: 'left', vertical: 'top'}}
-            targetOrigin={{horizontal: 'left', vertical: 'top'}}
-            onRequestClose={() => this.setState({addFieldOpen: false, existing: false})}
-          >
-            <div style={{padding: 20}}>
-              <div style={{display: 'flex', textAlign: 'left'}}>
-                <div style={{padding: 10, flex: 1}}>
-                  <b style={{marginBottom: 5}}>Field</b>
-                  <div style={{height: 5}}/>
-                  <TextField
-                    underlineShow={false}
-                    value={this.state.fieldName}
-                    onChange={(e, nv) => this.setState({fieldName: nv})}
-                    fullWidth={true}
-                    disabled={this.state.existing}
-                    style={textFieldStyles.style}
-                    inputStyle={textFieldStyles.input}
-                    hintStyle={textFieldStyles.hint}
-                    />
-                </div>
-                <div style={{padding: 10, flex: 1}}>
-                  <b style={{marginBottom: 5}}>Value</b>
-                  <div style={{height: 5}}/>
-                  <TextField
-                    underlineShow={false}
-                    fullWidth={true}
-                    value={this.state.fieldValue}
-                    onChange={(e, nv) => this.setState({fieldValue: nv})}
-                    style={textFieldStyles.style}
-                    inputStyle={textFieldStyles.input}
-                    hintStyle={textFieldStyles.hint}
-                    />
-                </div>
-              </div>
-              <div style={{width: '100%', display: 'flex', textAlign: 'right'}}>
-                <div styles={{float: 'right', display: 'flex'}}>
-                  <FlatButton
-                    label='Cancel'
-                    primary={true}
-                    onClick={() => this.setState({addFieldOpen: false, existing: false})}
-                    labelStyle={buttonStyles.smallLabel}
-                    style={buttonStyles.smallSize}/>
-                  <RaisedButton
-                    label='Confirm'
-                    primary={true}
-                    onClick={this.handleAddFieldSave}
-                    labelStyle={buttonStyles.smallLabel}
-                    style={buttonStyles.smallSize}/>
-                </div>
-              </div>
-            </div>
+          <EditData
+            addFieldOpen={this.state.addFieldOpen}
+            onFinish={() => {
+              this.getMemberData()
+              this.handleAddField()
+              this.setState({addFieldOpen: false, existing: false})
+            }}
+            fieldName={this.state.fieldName}
+            fieldValue={this.state.fieldValue}
+            existing={this.state.existing}
+            fieldAnchorEl={this.state.fieldAnchorEl}
+            handleRequestClose={() => this.setState({addFieldOpen: false, existing: false})}
+            />
 
-          </Popover>
+
           <Dialog
             actions={
               <RaisedButton

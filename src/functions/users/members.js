@@ -49,7 +49,7 @@ const makeNewUserAdmin = functions.firestore
 const updateContactRecord = functions.firestore
     .document('Interactions/{intId}')
     .onWrite((change, context) => {
-      const newValue = change.after.data()
+      const newValue = change.after.data() ? change.after.data() : change.before.data()
       var updates = []
       if (newValue && newValue.Members) {
         console.log(newValue.Members)

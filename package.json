@@ -54,6 +54,7 @@
     "react-table": "^6.8.6",
     "react-tap-event-plugin": "^3.0.2",
     "react-typing-animation": "^1.4.0",
+    "recharts": "^1.4.1",
     "recompose": "^0.27.0",
     "replace-in-file": "^3.4.2",
     "twilio": "^3.18.0"
@@ -82,6 +83,7 @@
     "deploy-members": "yarn firebase deploy --only functions:users",
     "deploy-messaging": "yarn firebase deploy --only functions:users",
     "deploy-integrations": "yarn firebase deploy --only functions:integrations",
+    "deploy-search": "yarn firebase deploy --only functions:elastic",
     "deploy-all": "yarn firebase deploy",
     "clean": "rimraf \"dist/functions\" && rimraf \"dist/public\"",
     "build-public": "cpx \"src/public/**/*.*\" \"dist/public\" -C",
