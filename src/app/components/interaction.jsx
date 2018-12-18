@@ -45,7 +45,7 @@ export default class Interaction extends React.Component {
       .then((adminSnapshot) => {
         adminSnapshot.forEach((adminDoc) => {
           var adminData = adminDoc.data()
-          
+
           var adminMap = this.state.adminMap ? this.state.adminMap : {}
           adminMap[elem.Creator] = adminData['Full Name'] ? adminData['Full Name'] : adminData['Name']
           this.setState({adminMap: adminMap})
@@ -66,6 +66,10 @@ export default class Interaction extends React.Component {
       })
     }
     Promise.all(promises).then(() => this.setState({membersLoaded: true}))
+  }
+
+  noteMarkup(note) {
+    return {__html: note}
   }
 
   renderInteraction = (int) => {
@@ -314,9 +318,10 @@ export default class Interaction extends React.Component {
 
                 <div style={{height: 10}}/>
                 <div style={{borderBottom: '1px solid #DBDBDB', marginBottom: 10}}/>
-                <div>
-                  {int.Details.BodyText && int.Details.BodyText.split('----Original message----')[0].split('From:')[0].split('From :')[0].split('www.localtrust.org.uk<http://www.localtrust.org.uk/>Twitter<https://twitter.com/LocalTrust>')[0]}
-                </div>
+                <div
+                  dangerouslySetInnerHTML={this.noteMarkup(int.Details.BodyText && int.Details.BodyText.split('----Original message----')[0].split('From:')[0].split('From :')[0].split('www.localtrust.org.uk<http://www.localtrust.org.uk/>Twitter<https://twitter.com/LocalTrust>')[0])}
+
+                />
               </div>]}
               primaryTogglesNestedList={true}
               rightIcon={

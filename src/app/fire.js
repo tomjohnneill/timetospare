@@ -4,8 +4,8 @@ import "firebase/firestore";
 import "firebase/functions"
 
 //export const BUILD_LEVEL= "dev"
-export const BUILD_LEVEL = "staging"
-// export const BUILD_LEVEL = "production"
+// export const BUILD_LEVEL = "staging"
+export const BUILD_LEVEL = "production"
 
 var productionConfig = {
   apiKey: "AIzaSyA8FFWoOifdusbuoYB2ksneSlPl-GwoLJo",

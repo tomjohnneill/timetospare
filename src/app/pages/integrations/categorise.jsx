@@ -79,6 +79,10 @@ class ClassifiedInteraction extends React.Component {
     );
   }
 
+  noteMarkup(note) {
+    return {__html: note}
+  }
+
   handleDeleteOrg = (user, org) => {
     console.log(org)
     var userArray = this.props.data.details
@@ -290,6 +294,10 @@ class InteractionCard extends React.Component {
 
   }
 
+  noteMarkup(note) {
+    return {__html: note}
+  }
+
   handleDeleteTag = (user, tag) => {
     var userArray = this.props.data.details
     var userPosition = userArray.indexOf(user)
@@ -385,12 +393,7 @@ class InteractionCard extends React.Component {
                   leftAvatar={<Avatar
                     backgroundColor={'#DBDBDB'}
                     icon={<Email /> } />}
-                  children={<LinesEllipsis
-                    text={email.email.Body.Content}
-                    maxLine='3'
-                    ellipsis='...'
-                    trimRight
-                    basedOn='words'/>}
+                  children={<div dangerouslySetInnerHTML={this.noteMarkup(email.email.Body.Content)}/>}
                   />
                 :
                 null
