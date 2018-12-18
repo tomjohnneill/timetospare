@@ -24,7 +24,7 @@ import Breadcrumbs from '../components/onboarding/breadcrumbs.jsx';
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import 'react-day-picker/lib/style.css';
 import AddTag from '../components/addTag.jsx';
-import {buttonStyles, chipStyles} from '../components/styles.jsx';
+import {buttonStyles, chipStyles, headerStyles} from '../components/styles.jsx';
 import Link from 'next/link';
 import LinesEllipsis from 'react-lines-ellipsis';
 import ShortText from 'material-ui/svg-icons/editor/short-text';
@@ -32,6 +32,7 @@ import {formatDateHHcolonMM} from '../components/timepicker.jsx';
 import Delete from 'material-ui/svg-icons/action/delete'
 import Close from 'material-ui/svg-icons/navigation/close'
 import {CirclePicker} from 'react-color';
+import FlatButton from 'material-ui/FlatButton'
 import Chip from 'material-ui/Chip';
 import ColorLens from 'material-ui/svg-icons/image/color-lens'
 import OrganisationAutocomplete from '../components/organisation-autocomplete.jsx';
@@ -227,7 +228,7 @@ class YourCalendar extends React.Component {
     this.setState({viewOpen: false})
     db.collection("Events").doc(this.state.targetedEvent._id).delete()
     .then(() => {
-      this.setState({viewOpen: false})
+      this.setState({viewOpen: false, deleteOpen: false})
     })
   }
 
@@ -260,6 +261,32 @@ class YourCalendar extends React.Component {
     return (
       <div>
         <App>
+          <Dialog
+            open={this.state.deleteOpen}
+            actions={[
+
+              <FlatButton
+                label='Cancel'
+                style={buttonStyles.smallSize}
+                labelStyle={buttonStyles.smallLabel}
+                onClick={() => this.setState({deleteOpen: false, optionsOpen: false})}
+                />,
+                <RaisedButton
+                  style={buttonStyles.smallSize}
+                  labelStyle={buttonStyles.smallLabel}
+                  icon={<Delete/>}
+                  label='Delete interaction'
+                  onClick={() => this.handleDeleteEvent(this.state.targetedInt)}
+                  primary={true}/>
+            ]}
+            onRequestClose={() => this.setState({deleteOpen:false})}>
+            <h2 style={headerStyles.desktop}>Are you sure you want to delete this?</h2>
+            <div style={{textAlign: 'left'}}>
+              {this.state.targetedInt ? <Interaction
+                handleOptionsClick={this.handleOptionsClick}
+                interaction={this.state.targetedInt}/> : null}
+            </div>
+          </Dialog>
           {
             this.state.targetedEvent ?
             <AddTag
@@ -288,7 +315,7 @@ class YourCalendar extends React.Component {
           <div style={{textAlign: 'left'}}>
             <div style={{float: 'right', display: 'flex'}}>
               <IconButton
-                onClick={this.handleDeleteEvent}
+                onClick={() => this.setState({deleteOpen: true, viewOpen: false})}
                 tooltip='Delete'
                 iconStyle={{color: 'white'}}>
                 <Delete/>

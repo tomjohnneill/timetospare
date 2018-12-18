@@ -27,6 +27,7 @@ import Chip from 'material-ui/Chip';
 import AddTag from '../components/addTag.jsx';
 import TextField from 'material-ui/TextField';
 import OrganisationAutocomplete from '../components/organisation-autocomplete.jsx';
+import moment from 'moment'
 
 let db = fire.firestore()
 
@@ -275,9 +276,86 @@ export class People extends React.Component {
 
   }
 
+  getSummaryAgg = () => {
+    var summaryAgg = functions.httpsCallable('elastic-summaryAggregation');
+    var today  = moment().format("DD/MM/YYYY")
+
+    var sixmonths = new Date()
+    console.log(sixmonths)
+    var sixMonths = new Date(sixmonths.setMonth(sixmonths.getMonth() - 6))
+    var sixmonthsformat = moment(sixMonths).format("DD/MM/YYYY")
+    summaryAgg({
+      view: Router.query.view,
+      fromDate: sixmonthsformat,
+      toDate: today,
+      aggs: {
+        "profit": {
+          "terms" : {
+              "field" : "Members.raw",
+              "size": 10000
+            },
+            "aggs": {
+              "score": {
+                "scripted_metric": {
+                  "init_script" : "state.ints = []",
+                  "map_script" : "if (doc.Type.value == \"Event\") {state.ints.add(5)} else if (doc.Type.value == \"PlaceholderEvent\") {state.ints.add(5)} else {state.ints.add(1)}",
+                  "combine_script" : "double profit = 0; for (t in state.ints) { profit += t } return profit",
+                  "reduce_script" : "double profit = 0; for (a in states) { profit += a } return profit"
+              }
+            }
+          }
+        }
+      }
+    }).then((result) => {
+      console.log(result)
+      var data = result.data.aggregations.profit.buckets.sort(function(a, b) {
+          a = (a.score.value);
+          b = (b.score.value);
+          return a>b ? -1 : a < b ? 1 : 0;
+      });
+      return data
+    }).then((data) => {
+      var top50 = data.slice(0,50)
+      console.log(top50)
+      var memberPromises = []
+      top50.forEach((memberObj) => {
+        memberPromises.push(
+          db.collection("PersonalData").doc(memberObj.key).get()
+          .then((memberDoc) => {
+            var elem = memberDoc.data()
+            elem._id = memberDoc.id
+            delete elem.managedBy
+            delete elem.User
+            delete elem.roleOrgMap
+            delete elem.Admin
+            delete elem.lastLoggedIn
+            if (elem.lastContacted) {
+              elem['Last Contacted'] = elem.lastContacted.toLocaleString('en-gb',
+                {weekday: 'long', month: 'long', day: 'numeric'})
+              delete elem.lastContacted
+
+            }
+            delete elem.Organisations
+            var data = this.state.data ? this.state.data : []
+            data.push(elem)
+            elem.organisations && elem.organisations.forEach((org) => {
+              orgColorMap[org.toLowerCase()] = randomColor({luminosity: 'light'})
+            })
+            return elem
+          })
+        )
+      })
+
+      Promise.all(memberPromises).then((resultArray) => {
+        console.log(resultArray)
+        this.setState({data: resultArray, columns: getColumnsFromMembers(resultArray)})
+      })
+    })
+  }
+
   componentDidMount (props) {
     Router.prefetch('/member')
-
+    this.getSummaryAgg()
     this.setState({organisation: Router.query.view, tagType: 'existing'})
     if (Router.query.view) {
       if (typeof window !== 'undefined' && localStorage.getItem('sample') == "true") {
@@ -301,38 +379,7 @@ export class People extends React.Component {
           })
           this.setState({data: data, columns: getColumnsFromMembers(data)})
         })
-      } else {
-        db.collection("PersonalData").where("managedBy", "==", Router.query.view)
-        .get().then((querySnapshot) => {
-          var data = []
-          querySnapshot.forEach((member) => {
-            var elem = member.data()
-            elem._id = member.id
-            delete elem.managedBy
-            delete elem.User
-            delete elem.roleOrgMap
-            delete elem.Admin
-            delete elem.lastLoggedIn
-            if (elem.lastContacted) {
-              elem['Last Contacted'] = elem.lastContacted.toLocaleString('en-gb',
-                {weekday: 'long', month: 'long', day: 'numeric'})
-              delete elem.lastContacted
-
-            }
-            delete elem.Organisations
-            data.push(elem)
-            elem.organisations && elem.organisations.forEach((org) => {
-              orgColorMap[org.toLowerCase()] = randomColor({luminosity: 'light'})
-            })
-          })
-
-
-          this.setState({data: data, columns: getColumnsFromMembers(data)})
-        })
-      }
-
-
-
+      } 
     }
   }
 
@@ -437,7 +484,7 @@ export class People extends React.Component {
             <div style={{width: '100%', paddingBottom: 20,
               display: 'flex', justifyContent: 'space-between'}}>
               <div style={{fontWeight: 200, fontSize: '30px'}}>
-                People
+                Most engaged contacts
               </div>
               <div style={{display: 'flex'}}>
                 {

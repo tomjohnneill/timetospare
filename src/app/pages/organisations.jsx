@@ -318,7 +318,7 @@ class Cards extends Component {
         <div style={{display: 'flex', justifyContent: 'center', minHeight: '100vh'}}>
           <div style={{maxWidth: 1200, width: '100%'}}>
             <div style={headerStyles.desktop}>
-              Key organisations
+              Organisations summary
             </div>
             <div style ={{width: 100, height: 4, backgroundColor: '#000AB2', marginBottom: 30}}/>
             <div className="card-scene" style={{display: 'flex', textAlign: 'left'}}>
@@ -374,7 +374,7 @@ class Cards extends Component {
               </Container>
           </div>
           <div style={headerStyles.desktop}>
-            All linked organisations
+            Search for one organisation
           </div>
           <div style ={{width: 100, height: 4, backgroundColor: '#000AB2', marginBottom: 30}}/>
             <OrganisationAutocomplete
