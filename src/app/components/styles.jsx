@@ -50,7 +50,7 @@ export const chipStyles = {
       margin: 2,
       height: 25,
       lineHeight: '25px',
-      width: '-moz-fit-content'
+      width: 'fit-content',
     },
     chipLabel: {
       lineHeight: '25px'

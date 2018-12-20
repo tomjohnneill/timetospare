@@ -385,23 +385,25 @@ export default class Header extends React.Component {
                                      </div>
 
                                      :
-                                     null
+                                     <div>
+                                     <div style={{width: 25, color:'#DBDBDB'}}>
+                                       |
+                                     </div>
+
+                                     <Link prefetch href='/pricing'>
+                                       <div style={
+                                         this.props.router.pathname.includes('pricing') ?
+                                         style.selectedCategory :
+                                         style.category}
+                                         className='header-category'
+                                         >
+                                         Pricing
+                                       </div>
+                                     </Link>
+                                     </div>
                                    }
 
-                                   <div style={{width: 25, color:'#DBDBDB'}}>
-                                     |
-                                   </div>
 
-                                   <Link prefetch href='/pricing'>
-                                     <div style={
-                                       this.props.router.pathname.includes('pricing') ?
-                                       style.selectedCategory :
-                                       style.category}
-                                       className='header-category'
-                                       >
-                                       Pricing
-                                     </div>
-                                   </Link>
 
                                   {
                                     this.state.organisation ?
@@ -490,7 +492,7 @@ export default class Header extends React.Component {
                             </div>}
           title={
             <div className='flexthis' style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-            <Link prefetch href={'/'}>
+            <Link prefetch href={fire.auth().currentUser ? '/dashboard' : '/'}>
             <div style={{display: 'flex'}}>
 
               <span  className = 'whosin' style={style.title}>

@@ -17,21 +17,29 @@ const addDocument = functions.firestore
     .document('Interactions/{intId}')
     .onWrite((change, context) => {
         const newValue = change.after.data()
-        var body = newValue
-        if (body.Date) {
-          var date = new Date(body.Date)
-          var timestring = date.toISOString()
-          body.Date = timestring
+        if (newValue) {
+          var body = newValue
+          if (body.Date) {
+            var date = new Date(body.Date)
+            var timestring = date.toISOString()
+            body.Date = timestring
+          }
+          console.log(body)
+          return client.index({
+            index: process.env.GCLOUD_PROJECT === 'timetospare-123' ? 'interactions' : 'staging-interactions',
+            type: 'interaction',
+            id: context.params.intId,
+            body: body
+
+          });
+        } else {
+          const oldValue = change.before.data()
+          return client.delete({
+            index: process.env.GCLOUD_PROJECT === 'timetospare-123' ? 'interactions' : 'staging-interactions',
+            type: 'interaction',
+            id: context.params.intId
+          });
         }
-        console.log(body)
-        return client.index({
-          index: process.env.GCLOUD_PROJECT === 'timetospare-123' ? 'interactions' : 'staging-interactions',
-          type: 'interaction',
-          id: context.params.intId,
-          body: body
-
-        });
-
 })
 
 const addMember = functions.firestore

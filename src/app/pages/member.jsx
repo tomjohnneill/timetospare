@@ -261,6 +261,8 @@ export class Member extends React.Component {
         delete rawData.managedBy
         delete rawData.User
         delete rawData.lastContacted
+        delete elem.managedBy
+        delete elem.Organisations
         this.setState({memberData: rawData, member: elem})
       })
     }

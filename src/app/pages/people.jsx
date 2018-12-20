@@ -181,6 +181,29 @@ export class AddOnePerson extends React.Component {
     })
   }
 
+  runSearch = () => {
+    var q = this.state.search ? this.state.search : decodeURIComponent(Router.query.q)
+    var basicSearch = functions.httpsCallable('elastic-basicSearch')
+    basicSearch({
+      index: BUILD_LEVEL === 'production' ? 'members' : 'staging-members',
+      query: { "multi_match" : {
+      "query" : q
+    } }
+    }).then((result) => {
+      console.log(result)
+      if (result.data && result.data.hits && result.data.hits.hits) {
+        var editedHits = []
+        result.data.hits.hits.forEach((hit) => {
+          var newHit = hit
+          newHit._source.Date = new Date(hit._source.Date)
+          editedHits.push(newHit)
+        })
+        this.setState({hits: editedHits})
+        Router.push(`/explore?q=${q}`)
+      }
+    })
+  }
+
   render() {
     return (
       <Dialog
@@ -379,7 +402,7 @@ export class People extends React.Component {
           })
           this.setState({data: data, columns: getColumnsFromMembers(data)})
         })
-      } 
+      }
     }
   }
 
@@ -561,6 +584,11 @@ export class People extends React.Component {
           <div style={{height: '100vh'}}/>
         }
           </div>
+          <div style={headerStyles.desktop}>
+            Search for one person
+          </div>
+          <div style ={{width: 100, height: 4, backgroundColor: '#000AB2', marginBottom: 30}}/>
+
         </App>
       </div>
     )

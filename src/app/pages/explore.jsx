@@ -27,6 +27,7 @@ export class Explore extends React.Component {
 
         this.runSearch()
         this.runOrgSearch()
+        this.runMemberSearch()
     }
   }
 
@@ -95,11 +96,29 @@ export class Explore extends React.Component {
     })
   }
 
+  runMemberSearch = () => {
+    var q = this.state.search ? this.state.search : decodeURIComponent(Router.query.q)
+    var basicSearch = functions.httpsCallable('elastic-basicSearch')
+    basicSearch({
+      index: BUILD_LEVEL === 'production' ? 'members' : 'staging-members',
+      query: { "multi_match" : {
+      "query" : q
+    } }
+    }).then((result) => {
+      console.log(result)
+      if (result.data && result.data.hits && result.data.hits.hits) {
+        this.setState({memberhits: result.data.hits.hits})
+        Router.push(`/explore?q=${q}`)
+      }
+    })
+  }
+
   handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       //this.getTopics()
       this.runSearch()
       this.runOrgSearch()
+      this.runMemberSearch()
     }
   }
 
@@ -168,6 +187,30 @@ export class Explore extends React.Component {
                             style={chipStyles.chip}
                             labelStyle={chipStyles.chipLabel}>
                             {hit._source.details.name}
+                          </Chip>
+                        </div>
+                      </Link>
+                    ))
+                  }
+                  </div>
+                </div>
+
+                :
+                null
+              }
+              {
+                this.state.memberhits && this.state.memberhits.length > 0?
+                <div>
+                  <div style={{fontWeight: 200, fontSize: '20px', paddingBottom: 20}}>Members</div>
+                  <div style={{display: 'flex', flexWrap: 'wrap', marginBottom: 20}}>
+                  {
+                    this.state.memberhits.map((hit) => (
+                      <Link href={`/member?view=${localStorage.getItem('ttsOrg')}&member=${hit._id}`}>
+                        <div style={{cursor: 'pointer', margin: 2}}>
+                          <Chip
+                            style={chipStyles.chip}
+                            labelStyle={chipStyles.chipLabel}>
+                            {hit._source['Full Name'] && hit._source['Full Name'][0]}
                           </Chip>
                         </div>
                       </Link>

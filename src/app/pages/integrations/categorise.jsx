@@ -483,7 +483,7 @@ export class Categorise extends React.Component {
           })
 
           var matchedOrgs = []
-          attachedOrgs.forEach((org) => {
+          attachedOrgs && attachedOrgs.forEach((org) => {
             var searchResults = idx.search(org.name)
             console.log(searchResults)
             if (searchResults.length > 0 && searchResults[0].score > 0.15) {
@@ -496,7 +496,7 @@ export class Categorise extends React.Component {
             matchedOrgs.forEach((obj) => {
               orgNameObject[obj._id] = obj.name
             })
-            email.details.forEach((person) => {
+            email.details && email.details.forEach((person) => {
               delete person.RELATIONSHIPS
             })
             email.details[0].RELATIONSHIPS = [{OrgNames: orgNameObject}]
@@ -512,7 +512,7 @@ export class Categorise extends React.Component {
           })
 
           var matchedOrgs = []
-          attachedOrgs.forEach((org) => {
+          attachedOrgs && attachedOrgs.forEach((org) => {
             var searchResults = idx.search(org.name)
             console.log(searchResults)
             if (searchResults.length > 0 && searchResults[0].score > 0.15) {
@@ -525,7 +525,7 @@ export class Categorise extends React.Component {
             matchedOrgs.forEach((obj) => {
               orgNameObject[obj._id] = obj.name
             })
-            email.details.forEach((person) => {
+            email.details && email.details.forEach((person) => {
               delete person.RELATIONSHIPS
             })
             email.details[0].RELATIONSHIPS = [{OrgNames: orgNameObject}]
@@ -696,7 +696,7 @@ export class Categorise extends React.Component {
 
     var newEmails = result.data && result.data.data
     var currentEmails = this.state.emails ? this.state.emails : []
-    newEmails.forEach((email) => {
+    newEmails && newEmails.forEach((email) => {
       if (email.email) {
         if (email.email.ConversationId) {
           var thisConversation = conversations[email.email.ConversationId]
